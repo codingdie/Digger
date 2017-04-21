@@ -1,0 +1,39 @@
+group 'com.codingdie'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+}
+
+dependencies {
+    //akka
+    compile 'com.typesafe.akka:akka-actor_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-agent_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-camel_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-metrics_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-sharding_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-tools_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-distributed-data_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-multi-node-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-osgi_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence-query_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence-tck_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-remote_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-slf4j_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-stream_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-stream-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-typed_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-contrib_2.11:2.5.0'
+
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.9.2'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
+}
