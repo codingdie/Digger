@@ -1,0 +1,9 @@
+[DEFAULT]
+BASEURL=http://www.zeroturnaround.com/
+[{000214A0-0000-0000-C000-000000000046}]
+Prop3=19,2
+[InternetShortcut]
+URL=http://www.zeroturnaround.com/
+IDList=
+IconFile=http://files.zeroturnaround.com/favicon.ico
+IconIndex=1

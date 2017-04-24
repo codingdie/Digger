@@ -1,0 +1,406 @@
+License Agreement for ZeroTurnaround Software
+Applicable to all JRebel, XRebel and JRebel for Android licenses purchased on or after 1 September 2015.
+
+(revision of 2016-10-03; version 3.6)
+
+NOTICE TO ALL USERS: PLEASE READ THIS AGREEMENT CAREFULLY. THIS AGREEMENT HAS BEEN MADE AVAILABLE TO YOU ON ZEROTURNAROUND'S WEBSITE (http://www.zeroturnaround.com) PRIOR TO YOUR PURCHASE OF LICENSE CERTIFICATE OR PRIOR TO INSTALLATION OF LICENSED SOFTWARE FOR EVALUATION. BY PURCHASING THE LICENSE CERTIFICATE OR BY INSTALLING THE LICENSED SOFTWARE INTO YOUR COMPUTER FOR EVALUATION OR OTHER USAGE, YOU HAVE AGREED THAT THIS AGREEMENT IS ENFORCEABLE LIKE ANY WRITTEN CONTRACT SIGNED BY YOU.
+
+
+I. DEFINITIONS
+
+1. "JRebel Software", "XRebel Software", "JRebel for Android Software" - The software program distributed by the Licensor or its distributors, resellers or other authorized business partners, under the name JRebel (or XRebel, or JRebel for Android, respectively) (or under a replacement product name, should the product be renamed in the future), as produced by the Licensor, including its documentation, related explanatory materials in printed, electronic, or online form, and upgrades, updates and modified or subsequent versions of the software.
+
+
+2. "Licensed Software" - the JRebel Software, the XRebel Software, or the JRebel for Android Software, depending on what the Licensor has licensed to the Licensee.
+
+
+3. "to Use the Licensed Software" - To store, load, install, execute, evaluate and/or display (to "Use") the Licensed Software.
+
+
+4. "Licensor" - ZeroTurnaround AS, company established under the laws of Estonia, with registration number 11655017 and with its address at Ülikooli 2, Tartu 51006, Estonia. The legal identity of the Licensor may change due to a merger, acquisition or other types of succession. This Agreement can be assigned along with the IP Rights for the Licensed Software.
+
+
+5. "Licensee" - You, the end user of the Licensed Software; a natural or a legal person or entity. The legal identity of the Licensee may change due to a merger, acquisition or other types of succession.
+
+
+6. "License" - The license to Use the Licensed Software, as granted to the Licensee in section III ("Grant of License").
+
+
+7. "IP Rights" - Intellectual property rights, such as (i) patents, pending patent applications, designs, trademarks and trade names (whether registered or unregistered), copyright and related rights, database rights, knowhow and confidential information; (ii) all other intellectual property rights and similar or equivalent rights anywhere in the world which currently exist or are recognized in the future; and (iii) applications, extensions and renewals in relation to any such rights.
+
+
+8. "myJRebel Website" - The public website run by the Licensor serving online licenses for JRebel Software. Refer to the general website of the Licensor for address and specific details.
+
+
+9. "License Key" - A unique key-code that enables an Authorized User to use Licensed Software by unlocking the copy protection mechanism. Only Licensor and/or its representatives are permitted to produce License Keys for the Licensed Software.
+
+
+10. "License Certificate" - Evidence of a license provided by Licensor to Licensee in electronic or printed form. 
+(i) Any e-mail from the Licensor including a License Key and intending to grant or extend the license to Use the Licensed Software is construed as a License Certificate.
+(ii) Active product subscription on myJRebel Website is construed as a License Certificate.
+
+
+11. "Unpaid Licensee" - A Licensee who is holding an Evaluation License, a Donated License, a Social License or any other type of License that he has not paid the Licensor for.
+
+
+12. "Evaluating Licensee" - A natural person who does not hold and has never been holding a License Certificate and who wants to try Licensed Software for evaluation purposes and who has not been using Licensed Software before the current evaluation period.
+
+
+13. "Commercial Licensee" - A Licensee who is holding or who has been holding a valid non-free License Certificate.
+
+
+14. "Agreement" - This end-user license agreement, the current document.
+
+
+15. "Authorized User(s)" - A natural person or persons that are granted the License to Use Licensed Software according to section III ("Grant of License").
+
+
+16. "Employee of Licensee" - A natural person who is an employee, independent contractor or other temporary worker, or a member of the Licensee or its affiliates.
+
+
+17. "Seat" - A license and right to unlock and use Licensed Software via ZeroTurnaround License Server licensing for a single user on terms and conditions set forth by the corresponding License uploaded to the License Server.
+
+
+18. "Third Party Software" - Software and other materials prepared and owned by software vendors other than Licensor.
+
+
+19. "Business Day" - Business days of Licensor are all days from Monday to Friday, excluding the following dates of the year: 1st of January, 24th of February, 1st of May, 23rd-24th of June, 20th of August, 24th -26th of December.
+
+
+20. "Business Hours" - The regular business hours for Licensor are 08:00-17:00 GMT (09:00-18:00 CET) on all Business Days.
+
+
+21. "E-mail Support" - A form of customer support provided by the Licensor. At the time of writing, the corresponding e-mail address is support@zeroturnaround.com; should the address be changed, the new address will be referred to on the Licensor's web site.
+
+
+22. "Forum Support" - A form of customer support provided by the Licensor. At the time of writing, the corresponding web address is http://zeroturnaround.com/forums ; should the address be changed, the new address will be referred to on the Licensor's web site.
+
+
+23. "Affiliate" - Any entity belonging to the same group as the Licensor.
+
+
+24. "Personal Data" - Any personal data which the Licensee has forwarded or may forward (at any time in the future) to the Licensor and/or any Affiliate.
+
+
+
+II. INTELLECTUAL PROPERTY RIGHTS
+
+25. Ownership
+
+(i) Licensed Software is the property of Licensor. Title and copyrights to Licensed Software, in whole or in part, and all copies thereof, and all modifications, enhancements, derivatives and other alterations of Licensed Software, regardless of who made them, if any, are, and will remain, the sole and exclusive property of Licensor.
+(ii) Licensed Software is intellectual property protected by copyright laws and international treaty provisions.
+(iii) The structure, organization, and code embodied in Licensed Software are the valuable and confidential trade secrets of Licensor and its suppliers and are protected by intellectual property laws and treaties.
+(iv) Licensed Software contains methods and techniques that Licensor holds patents for. The patented methods and techniques are protected by the patent law and relevant international treaties.
+
+
+26. Third Party Software
+
+(i) Some Third Party Software included in the Licensed Software may be subject to other terms and conditions. These terms and conditions are available in the separate file "3rd-party-licenses.txt" included in the distributions of Licensed Software, and directly from the web sites of the corresponding vendors.
+(ii) Licensor will update the list of all Third Party Software in the latest version of the Licensed Software as it is publicly made available for download. The Third Party Software included in the Licensed Software is utilized in a manner such that the Licensed Software is not, in whole or in part, governed by an Excluded License. An Excluded License is any non-reciprocal arrangement that requires, as a condition to such arrangement, that derivatives or modifications of such open source software be released either (a) under such open source license terms, or (b) to others at no fee.
+
+
+27. No Removal of Notices
+
+The Licensee agrees that he will not remove, obscure, make illegible or alter any notices or indications of the IP Rights and/or Licensor's rights and ownership thereof, whether such notice or indications are affixed on, contained in or otherwise connected to any materials.
+
+
+28. No Hacking
+
+The Licensee is not allowed to undertake, cause, permit or authorize the modification, creation of derivative works, translation, reverse engineering, decompiling, disassembling or hacking of the Licensed Software or any part thereof except to the extent permitted by law.
+
+
+29. No Redistribution
+
+The Licensee is not allowed to sell, assign, rent, lease, distribute, export, import, act as an intermediary or provider, or otherwise grant rights to third parties with regard to the Licensed Software.
+
+
+30. Backup Copies
+
+The Authorized User is allowed to make one back-up copy of Licensed Software solely for archival purposes.
+
+
+
+III. GRANT OF LICENSE
+
+III-A. GENERAL LICENSING TERMS
+
+31. Unauthorized Usage
+
+The usage of Licensed Software is allowed only pursuant to a License of any type granted to the Authorized Users hereinafter. If under any circumstances, an Authorized User or any third person discovers or creates a way to Use the Licensed Software, with or without a License Key, beyond the scope of the License granted to him, this by no means indicates that this Use of Licensed Software is allowed.
+
+
+32. Licensee and Authorized Users
+
+Each of the following License grants are valid for the specified Authorized User(s). If the Licensee is a legal person, the Licensee itself is just a party of this Agreement. The natural person(s) authorized to Use Licensed Software is/are the particular natural person(s) who is/are defined below as the Authorized User(s).
+
+
+33. Upgrades
+
+All types of Licenses are independent of the product version of the Licensed Software. 
+(i) The Licensee can upgrade to a newer version at any time, if not stated otherwise in the Agreement attached to the new version of the Licensed Software. Licensor reserves the right to decide that a new version of the Licensed Software has sufficiently increased or different functionality such that it is no longer available as a free upgrade.
+(ii) By upgrading to a newer version, the Licensee accepts the terms and conditions of the Agreement attached to the newer version if the Agreement has changed between the two versions of the Licensed Software.
+
+
+Based on the type of Licensed Software the Licensee is using (JRebel or XRebel, or both), the applicable portions of subchapter III-B or subchapter III-C will apply.
+
+
+III-B. GRANT OF LICENSE FOR JREBEL
+
+
+34. General Terms for JRebel Licenses
+
+For all JRebel Licenses, Licensed Software is the JRebel Software.
+
+
+35. JRebel Evaluation License
+
+Licensor hereby grants the Evaluating Licensee a non-exclusive, non-sublicensable, non-assignable, time-limited license to Use the Licensed Software according to the terms and conditions of this section and this Agreement (the "JRebel Evaluation License") and the Evaluating Licensee accepts this Evaluation License by downloading and installing the Licensed Software and acquiring a License Key for evaluation. The terms and conditions of JRebel Evaluation License are as follows:
+(i) The Authorized User is solely the Evaluating Licensee, a single natural person.
+(ii) The evaluation period starts as soon as the evaluation License Key is sent to the Licensee, and lasts for 14 days after receipt of the License Key unless clearly specified otherwise by the Licensor while sending the License Key ("Evaluation Period").
+(iii) The Evaluation License is granted only for the Evaluation Period.
+(iv) Each Evaluating Licensee is only allowed to evaluate the Licensed Software during a total of one Evaluation Period. The Evaluation Period can be extended by the Licensor on special circumstances by sending the Licensee an additional License Key for evaluation extension. This will extend the Evaluation Period as specified in the evaluation extension e-mail.
+(v) Upon expiration of Evaluation Period, Evaluating Licensee must obtain a License Certificate to continue using Licensed Software or cease using Licensed Software immediately. Licensed Software contains a feature that will automatically disable itself upon expiration of Evaluation Period. Licensee may not disable, destroy, or remove this feature of Licensed Software, and any attempt to do so is deemed a breach of this Agreement and will terminate Licensee's rights to Use Licensed Software.
+
+
+36. JRebel Commercial License
+
+Licensor hereby grants the Authorized Users of a Commercial Licensee who is holding a valid License Certificate of type "JRebel Commercial", a non-exclusive, non-sublicensable, non-assignable, time-limited license ("JRebel Commercial License") to Use the Licensed Software according to the terms and conditions of this Agreement and the Licensee accepts this License by purchasing the License Certificate. The JRebel Commercial License is subject to the following terms:
+(i) JRebel Commercial License has the subtypes of JRebel Dedicated License, JRebel Managed License, and JRebel Floating License.
+(ii) In the case of a JRebel Dedicated License, the Authorized Users are fixed Employees of Licensee and can only be changed by submitting a change request to sales-operations@zeroturnaround.com. Usage of the Licensed Software by other Employees of Licensee is prohibited.
+(iii) In the case of a JRebel Managed License, the Authorized Users are Employees of the Licensee to whom the Seats have been assigned via the ZeroTurnaround License Server, with the restriction that the number of Authorized Users using Seats cannot exceed the number of Seats specified by the License Certificate held by the Licensee.
+(iv) The Authorized User of a JRebel Managed License is required to provide his email address in order to acquire the Seat.
+(v) The Seat of a JRebel Managed License is intended to be used by a single Authorized User during the term of the Authorized User's employment with the Licensee or the duration of Authorized User's assignment to a development project. Seats can be reassigned at a frequency of once per month.
+(vi) The number of devices on which a JRebel Managed License's Seat can be used by the Authorized User will be limited by the number of devices that the Licensed Software will allow to be associated with the Authorized User's email address.
+(vii) In the case of a JRebel Floating License, the Authorized Users are any Employees of the Licensee, with the restriction that the number of concurrent ("floating") users can not exceed the number of allowed concurrent users as specified by the License Certificate held by the Licensee.
+(viii) Licensee acknowledges that for a JRebel Floating License, the License Key cannot be used directly to unlock the Licensed Software. Instead, a ZeroTurnaround License Server must be used to serve tokens that will unlock the Licensed Software for the Authorized Users.
+(ix) The License is granted only for the time period specified in the License Certificate.
+
+
+37. JRebel Social License
+
+Licensor hereby grants a Licensee who has subscribed to the Licensed Software via the myJRebel Website (the "Social Subscription"), a non-exclusive, non-sublicensable, non-assignable, time-limited license (the "JRebel Social License") to Use the Licensed Software according to the terms and conditions of this Agreement and the Licensee accepts this License by subscribing to that product. The JRebel Social License is subject to the same terms and conditions as is the JRebel Commercial License, with the following exceptions:
+(i) The Authorized User can only be a natural person.
+(ii) The JRebel Social License is valid only while the Licensee's Social Subscription is valid on the myJRebel Website.
+(iii) Licensee grants myJRebel Website access to his/her social network account (Facebook, Twitter, etc) ("Access"). Licensee agrees that Licensed Software will be making the Licensee's usage statistics of the Licensed Software publicly available by posting it to the social network using the provided Access. Access will only be used for posting the usage statistics and will not be used after the Licensee has ended his/her Social Subscription.
+(iv) Licensee cannot Use Licensed Software for any commercial purposes, including but not limited to development of commercial software or other work within a commercial project or institution.
+
+
+III-C. GRANT OF LICENSE FOR XREBEL
+
+
+38. General Terms for XRebel Licenses
+
+For all XRebel Licenses, the Licensed Software is the XRebel Software.
+
+
+39. XRebel Evaluation License
+
+Licensor hereby grants the Evaluating Licensee a non-exclusive, non-sublicensable, non-assignable, time-limited license to Use the Licensed Software according to the same terms as specified by the JRebel Evaluation License section and according to general terms of this Agreement (the "XRebel Evaluation License") and the Evaluating Licensee accepts this Evaluation License by downloading and installing the Licensed Software and acquiring a License Key for evaluation.
+
+
+40. XRebel Commercial License
+
+Licensor hereby grants the Authorized Users of a Commercial Licensee who is holding a valid License Certificate of type "XRebel Commercial", a non-exclusive, non-sublicensable, non-assignable, time-limited license ("XRebel Commercial License") to Use the Licensed Software according to the terms and conditions of this Agreement and the Licensee accepts this License by purchasing the License Certificate. The XRebel Commercial License is subject to the following terms:
+(i) XRebel Commercial License has the subtypes of XRebel Dedicated License and XRebel Managed License.
+(ii) In the case of XRebel Dedicated License, the Authorized Users are fixed Employees of Licensee and can only be changed by submitting a change request to sales-operations@zeroturnaround.com. Usage of the Licensed Software by anyone other than Authorized Users is prohibited.
+(iii) In the case of a XRebel Managed License, the Authorized Users are Employees of the Licensee to whom the Seats have been assigned via the ZeroTurnaround License Server, with the restriction that the number of Authorized Users using Seats cannot exceed the number of Seats specified by the License Certificate held by the Licensee.
+(iv) The Authorized User of a XRebel Managed License is required to provide his email address in order to acquire the Seat.
+(v) The Seat of a Managed License is intended to be used by a single Authorized User during the term of the Authorized User's employment with the Licensee or the duration of Authorized User's assignment to a development project. Seats cannot be reassigned on a daily basis and the Licensed Software may include measures to prevent it. Seats can be reassigned under special circumstances (e.g., Employee leaving the company or finishing a project, etc.) and at a frequency of once per month.
+(vi) The number of devices on which a XRebel Managed License's Seat can be used by the Authorized User will be limited by the number of devices that the Licensed Software will allow to be associated with the Authorized User's email address.
+(vii) The License is granted only for the time period specified in the License Certificate.
+
+
+III-D. GRANT OF LICENSE FOR JREBEL FOR ANDROID LICENSES
+
+
+41. General Terms for JRebel for Android Licenses
+
+For all JRebel for Android Licenses, Licensed Software is the JRebel for Android Software.
+
+
+42. JRebel for Android Evaluation License
+
+Licensor hereby grants the Evaluating Licensee a non-exclusive, non-sublicensable, non-assignable, time-limited license to Use the Licensed Software according to the terms and conditions of this section and this Agreement (the "JRebel for Android Evaluation License") and the Evaluating Licensee accepts this Evaluation License by downloading and installing the Licensed Software and acquiring a License Key for evaluation. The terms and conditions of JRebel for Android Evaluation License are as follows:
+(i) The Authorized User is solely the Evaluating Licensee, a single natural person.
+(ii) The evaluation period starts as soon as the evaluation License Key is sent to the Licensee, and lasts for 21 days after receipt of the License Key unless clearly specified otherwise by the Licensor while sending the License Key ("Evaluation Period").
+(iii) The Evaluation License is granted only for the Evaluation Period.
+(iv) Each Evaluating Licensee is only allowed to evaluate the Licensed Software during a total of one Evaluation Period. The Evaluation Period can be extended by the Licensor on special circumstances by sending the Licensee an additional License Key for evaluation extension. This will extend the Evaluation Period as specified in the evaluation extension e-mail.
+(v) Upon expiration of Evaluation Period, Evaluating Licensee must obtain a License Certificate to continue using Licensed Software or cease using Licensed Software immediately. Licensed Software contains a feature that will automatically disable itself upon expiration of Evaluation Period. Licensee may not disable, destroy, or remove this feature of Licensed Software, and any attempt to do so is deemed a breach of this Agreement and will terminate Licensee's rights to Use Licensed Software.
+
+
+43. JRebel for Android Individual License
+
+Licensor hereby grants a Licensee who is holding a valid License Certificate of type "JRebel for Android Individual", a non-exclusive, non-sublicensable, non-assignable, time-limited license ("JRebel for Android Individual License") to Use the Licensed Software according to the terms and conditions of this Agreement and the Licensee accepts this License by purchasing the License Certificate. The JRebel for Android Individual License is subject to the following terms:
+(i) JRebel for Android Individual License can be purchased by independent individuals or by organizations with no more than 1 employee at the time of initial purchase. 
+(ii) The Authorized User is solely the Licensee (or the single Employee of the Licensee), a single natural person.
+(iii) The Licensee recognizes that the feature set of the Licensed Software might be different as compared to the JRebel for Android Business License. 
+(iv) The License is granted only for the time period specified in the License Certificate.
+
+
+44. JRebel for Android Business License
+
+Licensor hereby grants the Authorized Users of a Commercial Licensee who is holding a valid License Certificate of type "JRebel for Android Business", a non-exclusive, non-sublicensable, non-assignable, time-limited license ("JRebel for Android Business License") to Use the Licensed Software according to the terms and conditions of this Agreement and the Licensee accepts this License by purchasing the License Certificate. The JRebel for Android Business License is subject to the following terms:
+(i) The Authorized Users are fixed Employees of Licensee and can only be changed by submitting a change request to sales-operations@zeroturnaround.com. Usage of the Licensed Software by anyone other than Authorized Users is prohibited.
+(ii) The License is granted only for the time period specified in the License Certificate.
+
+
+
+IV. DISCLAIMER OF WARRANTY AND LIMITATION OF LIABILITY
+
+
+45. Disclaimer of Warranty
+
+SUBJECT TO ANY STATUTORY WARRANTIES WHICH CANNOT BE EXCLUDED, LICENSOR MAKES NO WARRANTIES OR CONDITIONS EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OR CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT, REGARDING LICENSED SOFTWARE. Although Licensor will make reasonable efforts to fix errors in Licensed Software, the Licensee acknowledges and accepts that the Licensed Software is provided "as is".
+
+
+46. Limitation of Liability
+
+TO THE EXTENT NOT PROHIBITED BY LAW, IN NO EVENT WILL LICENSOR BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR SPECIAL, INDIRECT, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF OR RELATED TO THE USE OF OR INABILITY TO USE LICENSED SOFTWARE, EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+47. Liquidated Damages
+
+In no event will Licensor's liability to the Licensee, whether in contract, tort (including negligence), or otherwise, exceed the amount paid by the Licensee for the Licensed Software. The foregoing limitations will apply to any liability under this agreement or otherwise, even if the above stated warranty fails of its essential purpose. 
+
+
+48. Indemnification of Patent and/or Copyright Infringement Claims
+
+(i) Licensor will defend and indemnify Licensee for all costs (including reasonable attorney's fees) arising from a claim that Licensed Software furnished and used within the scope of this Agreement infringes any copyright or patent provided that: (i) Licensee notifies Licensor in writing within 30 days of the claim; (ii) Licensor has sole control of the defense and all related settlement negotiations, and (iii) Licensee provides Licensor with the assistance, information, and authority necessary to perform the above.
+(ii) Licensor will have no liability for any claim of infringement based on (i) code contained within Licensed Software which was not created by Licensor; (ii) use of a superseded or altered release of Licensed Software, except for such alteration(s) or modification(s) which have been made by Licensor or under Licensor's direction, if such infringement would have been avoided by the use of a current, unaltered release of Licensed Software that Licensor provides to Licensee, or (iii) the combination, operation, or use of any software furnished under this Agreement with programs or data not furnished by Licensor if such infringement would have been avoided by the use of Licensed Software without such programs or data.
+(iii) In the event Licensed Software is found to infringe or believed by Licensor to infringe, or Licensee's use of Licensed Software is enjoined, Licensor will have the option, at its expense, to (i) modify Licensed Software to cause it to become non-infringing; (ii) obtain for Licensee a license to continue using Licensed Software; (iii) substitute Licensed Software with other software reasonably suitable to Licensee, or (iv) if none of the foregoing remedies are commercially feasible, terminate the License for the Licensed Software and refund the proportionate part of the License fees that is calculated in the following way: [refunded sum] = [whole fees paid] * [length of canceled license period] / [length of originally negotiated license period].
+(iv) This section states Licensor's entire liability for intellectual property rights infringement.
+
+
+
+V. CUSTOMER SUPPORT
+
+
+49. Customer Support for an Unpaid Licensees
+
+For an Unpaid Licensee, the Licensor will have no obligation to provide support, updates, patches, bug fixes or other enhancements.
+
+
+50. Customer Support for Commercial Licensees
+
+For a Commercial Licensee holding a valid License Certificate, support will be available during the period of validity of Licensee's License Certificate as follows:
+i. For holders of a paid License Certificate of any type, Forum Support and E-mail Support are guaranteed to be available at least during a period of one year from the purchase of the License Certificate. The response time will be reasonable, but no specific response time guarantees are given.
+ii. For holders of License Certificate with Premium Support Add-on for the same type of Licensed Software (JRebel or XRebel) that the support request is related to, E-mail Support will have a response time of 1 hour during the Business Hours. The Authorized User is eligible for this time-guarantee only if he sends his support request via his/her personal secret e-mail address that was provided to him/her on the purchase of License Certificate with Premium Support Add-on.
+
+
+51. Supported Versions
+
+Any guarantees of support availability only apply to the latest version of Licensed Software. The Licensee is allowed to upgrade to the latest version as specified by this Agreement.
+
+
+
+VI. PERSONAL DATA
+
+
+52. Consent for the Processing of Personal Data
+
+The Licensee hereby grants the Licensor and any Affiliate its consent to process the Personal Data in accordance with the purposes stipulated in Section 53 and forward the Personal Data to any areas and/or entities referred to in Section 54.
+
+
+53. Purposes for Processing Personal Data
+
+The Licensor and/or any Affiliate may process the Personal Data for the following purposes:
+(i) performing or securing the performance of any agreement between the Licensee and the Licensor and/or any Affiliate;
+(ii) improving any of the products and/or services provided by the Licensor and/or any Affiliate;
+(iii) analysing the use of any of the products and/or services provided by the Licensor and/or any Affiliate;
+(iv) complying with any relevant laws or responding to any requests from any public authorities;
+(v) making direct promotional offers, including sending information about the products and/or services provided by Licensor and/or any Affiliate and/or information regarding Licensor and/or any Affiliate in general;
+(vi) preparing for any merger, financing, acquisition or dissolution, transaction or proceeding involving sale, transfer, divestiture, or disclosure of all or a portion of the business or assets of the Licensor and/or any Affiliate.
+
+
+54. Transferring Personal Data
+
+The Licensor may transfer the Personal Data to the following entities, whereas this may include transferring the Personal Data to countries which lack the level of data protection in force in the member states of the European Union and the European Economic Area:
+(i) any Affiliate;
+(ii) any third parties which the Licensor or any Affiliate uses to develop, improve, market, advertise, sell or otherwise assist with providing any of the products and/or services provided by the Licensor and/or any Affiliate;
+(iii) any public authorities with legitimate interest to the Personal Data.
+
+
+55. Data Subjects Rights and Chief Processor
+
+The Licensee acknowledges that it has all the rights of a data subject and that the chief processor of the Personal Data shall be the Licensor, unless the Licensor notifies the Licensee otherwise.
+
+
+
+VII. GENERAL TERMS
+
+
+56. Applicable Law and Competent Court
+
+(i) The Licensee can choose the venue for disputes arising from this Agreement from among the following possibilities: a) courts of state of Delaware, US; b) courts of state of Massachusetts, US; c) courts of Germany; d) courts of England; e) courts of Estonia.
+(ii) If the Licensee is claimant in the dispute, Licensee will notify Licensor in written form or by e-mail about his choice of venue together with first notification of his claim or within 30 days after it. If the Licensee is defendant in the dispute, Licensee will notify Licensor in written form or by e-mail about his choice of venue within 30 days of Licensor's notification of the claim. If the Licensee does not use his right for venue selection, the default venue with exclusive jurisdiction for dispute resolution will be the courts of Estonia.
+(iii) After the venue has been selected by the Licensee, the courts of selected venue will have the exclusive jurisdiction over hearing and determining any suit, action or proceedings and/or to settle any disputes arising out of or in any way relating to this Agreement or its formation or validity and for the purpose of enforcement of any judgment against defendant's property or assets.
+
+
+57. Use of Name and Logo
+
+Licensee agrees to be identified as a customer of Licensor and that Licensor may refer to Licensee by name, trade name and trademark, if applicable, and may briefly describe Licensee's business in Licensor's marketing materials, on Licensor's web site and in public or legal documents. Licensee hereby grants Licensor a license to use Licensee's name and any of Licensee's trade names and trademarks solely pursuant to this marketing section.
+
+For an opt-out of this term, please contact sales-operations@zeroturnaround.com.
+
+
+58. Gathering of Usage Statistics
+
+Licensee acknowledges and agrees that the Licensed Software may contain a feature that reports the usage statistics, diagnostics information and usage meta-information of the Licensed Software back to the Licensor. Licensee may opt out of the gathering of usage statistics by turning off this feature in the Licensed Software settings.
+
+
+59. Confidentiality
+
+(i) If any information on the working principles of the Licensed Software that has not previously been publicly revealed by the Licensor, has become known to the Licensee while receiving customer support or by other means of communication with the Licensor, the Licensee is obliged to keep this information confidential.
+(ii) The Licensor will keep confidential any information that the Licensee has sent to E-mail Support. If a piece of information is such as the Licensee's interest for its confidentiality is not generally understandable or is surprising, confidentiality will be guaranteed only if the Licensee explicitly requests it in the same e-mail containing this information.
+(iii) Any information Licensee posts to Forum Support is public by its nature. The Licensor can and will do nothing to stop this information from spreading. It is Licensee's own responsibility to send any confidential, revealing or otherwise sensitive information to E-mail Support only.
+
+
+60. Late Payment Interest
+
+Licensee will pay to Licensor the license fee and other charges and expenses as set forth in an appropriate invoice or other purchase documentation ("Invoice") within thirty (30) days of the date of the Invoice. Licensor may charge interest for any payment that is past the payment date as specified by the Invoice, or if left unspecified on the Invoice, that is more than thirty (30) days since the date of the Invoice.
+(i) The interest rate is one and one-half percent (1.5%) per month. If this interest rate exceeds the maximal rate allowed by the law, the applied rate will be the maximal rate allowed by the law.
+
+
+61. Entire Agreement
+
+This Agreement contains the entire agreement of the Parties with respect to the subject matter of this Agreement, and supersedes all prior negotiations, agreements and understandings with respect thereto. This Agreement may only be amended by a written document duly executed by the Parties.
+
+
+62. Severability
+
+If any provision or provisions of this Agreement shall be held to be invalid, illegal, unenforceable or in conflict with the law of any jurisdiction, the validity, legality and enforceability of the remaining provisions shall not in any way be affected or impaired thereby.
+
+
+63. No Waiver
+
+No waiver of any provision or condition herein shall be valid unless in writing and signed by you and an authorized representative of Licensor provided that no waiver of any breach of any provisions of this Agreement will constitute a waiver of any prior, concurrent or subsequent breach. Licensor's failure to insist upon or enforce strict performance of any provision of this Agreement or any right shall not be construed as a waiver of any such provision or right.
+
+
+64. Alteration of Services
+
+Licensor can at any time alter prices, features, specifications, capabilities, functions, release dates, general availability or other characteristics of the Licensed Software. This will not affect the Commercial Licensee in his usage of the version of the Licensed Software the Licensee is using at the moment of these alterations, during the validity of the License Certificate he is currently holding.
+
+
+65. Alteration of Terms
+
+Licensor will reserve itself a right to change the terms of the current Agreement at any moment by making the new revision of this Agreement available on Licensor's website and including it in the future releases of the Licensed Software.
+(i) By updating the Licensed Software to a newer version that includes the new revision of this Agreement, the Licensee agrees to the new revision of this Agreement.
+(ii) By purchasing or otherwise receiving and accepting a new License Certificate, or otherwise extending the period of Use of the Licensed Software, the Licensee agrees to the latest revision of this Agreement available at that moment on Licensor's web site.
+(iii) If the Licensees are informed of an update of the terms via e-mail, the Licensee who does not agree to the new terms must inform the Licensor about his disagreement by sending an e-mail to E-mail Support within 30 days since Licensor's original e-mail. If a Commercial Licensee does not inform Licensor about his disagreement within 30 days, it is taken that he agrees to the new terms.
+
+
+66. Termination of the Agreement
+
+(i) This Agreement is effective until terminated.
+(ii) Expiration or nonexistence of the License does not terminate the Agreement. The termination of the Agreement also terminates any License given in this Agreement. Should the Licensee fail to comply with any provision of this Agreement, the Agreement will terminate without a refund. If the breach of Agreement is curable, Licensee will have a cure period of 30 days to cure the breach after receiving a notice from Licensor. If the nature of the breach is such that it cannot reasonably be cured, the Agreement will terminate without a cure period.
+(iii) The Evaluating Licensee may terminate this Agreement at any time by destroying all copies of the Licensed Software. The Commercial Licensee may terminate this Agreement at any time by destroying all copies of the Licensed Software and notifying Licensor by e-mail.
+(iv) Upon termination of the Agreement, the Licensee must destroy all copies of the Licensed Software.
+(v) Upon termination of this Agreement, all terms in sections "Intellectual Property Rights" (section II), "Disclaimer of Warranty and Limitation of Liability" (section IV), "General terms" (section VI) and other terms that should survive due to their nature will continue to be effective.
+(vi) Licensee agrees that upon termination of this agreement for any reason, Licensor may take actions so that Licensed Software no longer operates.
+
+
+
+For exceptions or modifications to this Agreement, please contact Licensor at:
+Address: Ülikooli 2, Tartu 51003, Estonia
+E-mail: support@zeroturnaround.com (JRebel; general)
+        xrebel@zeroturnaround.com (XRebel)
