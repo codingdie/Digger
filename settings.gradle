@@ -1,2 +1,2 @@
-include ':childnode', ':servernode',':build-tools'
+include ':slavenode', ':servernode',':build-tools'
 
