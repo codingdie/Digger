@@ -64,5 +64,5 @@ task activateJrebel(type: Exec) {
 
 task jrebelStart(type: Exec,dependsOn:"build") {
 
-    commandLine "java", JREBEL_JVM, "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.ChildStarter"
+    commandLine "java", JREBEL_JVM, "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.SlaveStarter"
 }

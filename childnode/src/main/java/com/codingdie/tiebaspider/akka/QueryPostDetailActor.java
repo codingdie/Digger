@@ -26,8 +26,7 @@ public class QueryPostDetailActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPostDetailMessage.class, m -> {
-            Thread.sleep(2000L);
-            getContext().stop(getSelf());
+            System.out.println(m.postId);
         }).build();
     }
 

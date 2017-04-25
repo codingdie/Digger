@@ -2,6 +2,7 @@ package com.codingdie.tiebaspider.akka;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.Props;
 import com.codingdie.tiebaspider.akka.message.QueryPageMessage;
 import com.codingdie.tiebaspider.akka.message.QueryPostDetailMessage;
@@ -31,7 +32,6 @@ public class QueryPageActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        getContext().actorSelection(getContext().getSystem().$div("RecordTimeActor")).tell(RecordTimeActor.SIGN.END,getSelf());
 
     }
     @Override
@@ -39,7 +39,6 @@ public class QueryPageActor extends AbstractActor {
         return receiveBuilder().match(QueryPageMessage.class, m -> {
             Request request = new Request.Builder()
                     .url("http://tieba.baidu.com/f?kw=justice_eternal&ie=utf-8&pn="+m.pn)
-
                     .build();
             Response response = client.newCall(request).execute();
             if (!response.isSuccessful()) {
@@ -49,14 +48,10 @@ public class QueryPageActor extends AbstractActor {
                 List<PostSimpleInfo> postSimpleInfos = parseResponse(string);
                 System.out.println(postSimpleInfos.size());
                 postSimpleInfos.iterator().forEachRemaining(t->{
-                    ActorRef actorRef= getContext().actorOf(Props.create(QueryPostDetailActor.class));
-                    actorRef.tell(new QueryPostDetailMessage(t.postId),getSelf());
+                    ActorSelection selection= getContext().actorSelection("/user/QueryDetailTaskControlActor");
+                    selection.tell(new QueryPostDetailMessage(t.postId),getSelf());
                 });
-
             }
-
-        }).match(QueryPostDetailResult.class,queryPostDetailResult -> {
-
         }).matchEquals(SIGN.SHOW_CHILDCOUNT,r->{
             System.out.println("childSize:"+getContext().children().size());
         }).build();
