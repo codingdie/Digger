@@ -1,0 +1,85 @@
+group 'com.codingdie'
+version '1.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    //akka
+    compile 'com.typesafe.akka:akka-actor_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-agent_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-camel_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-metrics_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-sharding_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-cluster-tools_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-distributed-data_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-multi-node-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-osgi_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence-query_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-persistence-tck_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-remote_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-slf4j_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-stream_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-stream-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-testkit_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-typed_2.11:2.5.0'
+    compile 'com.typesafe.akka:akka-contrib_2.11:2.5.0'
+
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.9.2'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
+}
+
+
+
+task slaveJar(type: Jar,dependsOn: [classes]){
+    from('build/classes/main','build/resources/main')
+
+    baseName "slavenode"
+    manifest{
+        attributes 'Main-Class': 'com.codingdie.tiebaspider.SlaveStarter'
+        String someString = ''
+        configurations.runtime.each {someString = someString + " libs/"+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        attributes 'Class-Path': someString
+    }
+}
+
+task serverJar(type: Jar,dependsOn: [classes]){
+    from('build/classes/main','build/resources/main')
+    baseName "servernode"
+    manifest{
+        attributes 'Main-Class': 'com.codingdie.tiebaspider.ServerStarter'
+        String someString = ''
+        configurations.runtime.each {someString = someString + " libs/"+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        attributes 'Class-Path': someString
+    }
+}
+
+task copylibs(type: Copy){
+    from configurations.runtime
+    into ('build/release/libs')
+}
+task copyconf(type: Copy){
+    print(project.rootDir.toString()+"/conf")
+    from(project.rootDir.toString()+"/conf") {
+        include '*.conf'
+    }
+    into ('build/release/conf')
+}
+task release(type: Copy,dependsOn:[copylibs,copyconf,serverJar,slaveJar] ){
+    from("build/libs") {
+        include '*node*.jar'
+    }
+    into ('build/release')
+}

@@ -1,2 +1,2 @@
-include ':slavenode', ':servernode',':build-tools'
+rootProject.name = 'tieba-spider'
 
