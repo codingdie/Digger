@@ -3,7 +3,6 @@ package com.codingdie.tiebaspider.akka;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.codingdie.tiebaspider.akka.message.QueryPageMessage;
 import com.codingdie.tiebaspider.akka.message.QueryPostDetailMessage;
 
 import java.util.ArrayList;
@@ -25,6 +24,14 @@ public class QueryDetailTaskControlActor extends AbstractActor {
             actorRefList.add(queryPostDetailActor);
         }
         pos=0;
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        super.postStop();
+        getContext().getChildren().forEach(item->{
+            getContext().stop(item);
+        });
     }
 
     @Override

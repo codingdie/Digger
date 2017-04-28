@@ -20,13 +20,12 @@ public class QueryPostDetailActor extends AbstractActor {
 
     @Override
     public void postStop() throws Exception {
-
         super.postStop();
     }
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPostDetailMessage.class, m -> {
-            System.out.println(m.postId);
+//            System.out.println(m.postId);
         }).build();
     }
 

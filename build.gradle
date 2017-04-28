@@ -44,9 +44,10 @@ dependencies {
 
 
 task slaveJar(type: Jar,dependsOn: [classes]){
-    from('build/classes/main','build/resources/main')
-
     baseName "slavenode"
+    from('build/classes/main','build/resources/main')
+    destinationDir new File('build/release/libs')
+
     manifest{
         attributes 'Main-Class': 'com.codingdie.tiebaspider.SlaveStarter'
         String someString = ''
@@ -56,12 +57,13 @@ task slaveJar(type: Jar,dependsOn: [classes]){
 }
 
 task serverJar(type: Jar,dependsOn: [classes]){
-    from('build/classes/main','build/resources/main')
     baseName "servernode"
+    from('build/classes/main','build/resources/main')
+    destinationDir new File('build/release/libs')
     manifest{
         attributes 'Main-Class': 'com.codingdie.tiebaspider.ServerStarter'
         String someString = ''
-        configurations.runtime.each {someString = someString + " libs/"+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
         attributes 'Class-Path': someString
     }
 }
@@ -71,13 +73,18 @@ task copylibs(type: Copy){
     into ('build/release/libs')
 }
 task copyconf(type: Copy){
-    print(project.rootDir.toString()+"/conf")
     from(project.rootDir.toString()+"/conf") {
         include '*.conf'
     }
     into ('build/release/conf')
 }
-task release(type: Copy,dependsOn:[copylibs,copyconf,serverJar,slaveJar] ){
+task copyscript(type: Copy){
+    from(project.rootDir.toString()+"/script") {
+        include '*.sh'
+    }
+    into ('build/release')
+}
+task release(type: Copy,dependsOn:[clean,serverJar,slaveJar,copyconf,copyscript,copylibs] ){
     from("build/libs") {
         include '*node*.jar'
     }

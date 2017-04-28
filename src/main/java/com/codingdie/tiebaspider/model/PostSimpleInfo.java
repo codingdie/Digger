@@ -1,9 +1,11 @@
 package com.codingdie.tiebaspider.model;
 
+import java.io.Serializable;
+
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class PostSimpleInfo {
+public class PostSimpleInfo implements Serializable {
 
     public static  final String TYPE_NORMAL="normal";
     public static  final String TYPE_UNKONWN="unkonwn";

@@ -1,12 +1,11 @@
 package com.codingdie.tiebaspider.akka;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.Props;
-import com.codingdie.tiebaspider.akka.message.QueryPageMessage;
+import com.codingdie.tiebaspider.akka.message.QueryPageTask;
 import com.codingdie.tiebaspider.akka.message.QueryPostDetailMessage;
-import com.codingdie.tiebaspider.akka.result.QueryPostDetailResult;
+import com.codingdie.tiebaspider.akka.result.QueryPageResult;
+import com.codingdie.tiebaspider.config.SpiderConfigFactory;
 import com.codingdie.tiebaspider.model.PostSimpleInfo;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,20 +24,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class QueryPageActor extends AbstractActor {
 
-    public static final Integer DONE = 9;
     private final OkHttpClient client = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
     public static  enum SIGN {SHOW_CHILDCOUNT}
 
-    @Override
-    public void postStop() throws Exception {
-        super.postStop();
 
-    }
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(QueryPageMessage.class, m -> {
+        return receiveBuilder().match(QueryPageTask.class, m -> {
+            String url = "http://tieba.baidu.com/f?kw=" + SpiderConfigFactory.getInstance().targetConfig.tiebaName + "&ie=utf-8&pn=" + m.pn;
+            System.out.println(url);
             Request request = new Request.Builder()
-                    .url("http://tieba.baidu.com/f?kw=justice_eternal&ie=utf-8&pn="+m.pn)
+                    .url(url)
                     .build();
             Response response = client.newCall(request).execute();
             if (!response.isSuccessful()) {
@@ -46,11 +42,15 @@ public class QueryPageActor extends AbstractActor {
             } else {
                 String string = response.body().string();
                 List<PostSimpleInfo> postSimpleInfos = parseResponse(string);
-                System.out.println(postSimpleInfos.size());
                 postSimpleInfos.iterator().forEachRemaining(t->{
                     ActorSelection selection= getContext().actorSelection("/user/QueryDetailTaskControlActor");
                     selection.tell(new QueryPostDetailMessage(t.postId),getSelf());
                 });
+                System.out.println(postSimpleInfos.size());
+                QueryPageResult queryPageResult=new QueryPageResult();
+                queryPageResult.postSimpleInfos=postSimpleInfos;
+                queryPageResult.pn=m.pn;
+                getSender().tell(queryPageResult,getSelf());
             }
         }).matchEquals(SIGN.SHOW_CHILDCOUNT,r->{
             System.out.println("childSize:"+getContext().children().size());

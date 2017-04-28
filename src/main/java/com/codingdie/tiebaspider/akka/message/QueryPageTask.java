@@ -5,9 +5,11 @@ import java.io.Serializable;
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class QueryPageMessage implements Serializable{
-    public  QueryPageMessage(int pn){
+public class QueryPageTask implements Serializable{
+    public QueryPageTask(int pn){
         this.pn=pn;
     }
     public int pn=50;
+    public boolean finish=false;
+
 }
