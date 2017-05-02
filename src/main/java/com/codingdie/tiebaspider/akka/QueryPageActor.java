@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 public class QueryPageActor extends AbstractActor {
 
     private final OkHttpClient client = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
-    public static  enum SIGN {SHOW_CHILDCOUNT}
-
-
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPageTask.class, m -> {
@@ -52,8 +49,6 @@ public class QueryPageActor extends AbstractActor {
                 queryPageResult.pn=m.pn;
                 getSender().tell(queryPageResult,getSelf());
             }
-        }).matchEquals(SIGN.SHOW_CHILDCOUNT,r->{
-            System.out.println("childSize:"+getContext().children().size());
         }).build();
     }
 
@@ -76,11 +71,8 @@ public class QueryPageActor extends AbstractActor {
                 postSimpleInfo.type=PostSimpleInfo.TYPE_UNKONWN;
             }finally {
                 postSimpleInfos.add(postSimpleInfo);
-
             }
-
         });
-
         return postSimpleInfos;
     }
 

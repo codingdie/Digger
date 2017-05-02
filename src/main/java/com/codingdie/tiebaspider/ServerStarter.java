@@ -4,6 +4,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.codingdie.tiebaspider.akka.MasterActor;
+import com.codingdie.tiebaspider.akka.result.TestActor;
+import com.codingdie.tiebaspider.akka.result.TestActor1;
 import com.codingdie.tiebaspider.config.*;
 import com.google.gson.Gson;
 import com.typesafe.config.ConfigFactory;
@@ -23,7 +25,6 @@ public class ServerStarter {
         }
         ActorSystem system = ActorSystem.create("master", ConfigFactory.load("server-application.conf"));
         ActorRef resultCollectActorRef =system.actorOf(Props.create(MasterActor.class),"MasterActor");
-        System.out.println(resultCollectActorRef.path().toString());
 
 
     }

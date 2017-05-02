@@ -1,6 +1,7 @@
 package com.codingdie.tiebaspider.akka;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.typed.javadsl.Actor;
 import com.codingdie.tiebaspider.akka.message.QueryPageTask;
@@ -21,6 +22,11 @@ public class MasterActor extends AbstractActor {
     private List<ActorSelection> slaveActorSelections = new ArrayList<>();
 
 
+    @Override
+    public void postStop() throws Exception {
+        super.postStop();
+        System.out.println("stop MasterActor");
+    }
 
     @Override
     public void preStart() throws Exception {
@@ -29,6 +35,7 @@ public class MasterActor extends AbstractActor {
             System.out.println("akka.tcp://slave@" + item + ":2552/user/QueryPageTaskControlActor");
             ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection("akka.tcp://slave@" + item + ":2552/user/QueryPageTaskControlActor");
             slaveActorSelections.add(queryPageTaskControlActor);
+
         });
 
         Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().targetConfig.totalCount);
@@ -47,23 +54,28 @@ public class MasterActor extends AbstractActor {
                 return  queryPageTask.pn==r.pn;
             }).findFirst().get();
             pageTask.finish=true;
-            System.out.println("finish task "+pageTask.pn+"  "+queryPageTasks.stream().filter(i->{
-                return  i.finish;
-            }).count()*1.0/queryPageTasks.size()*100);
+            printProcess(pageTask);
+
             if(queryPageTasks.stream().allMatch(queryPageTask -> {
                 return queryPageTask.finish;
             })){
-                System.out.println("finish all task ");
                 slaveActorSelections.iterator().forEachRemaining(item->{
-                    item.tell(QueryPageTaskControlActor.SIGN.STOP,getSelf());
+                    item.tell(QueryPageTaskControlActor.SIGN.STOP, ActorRef.noSender());
                 });
-                getContext().getSystem().stop(getSelf());
+               getContext().getSystem().terminate();
+               System.out.println("finish all task");
             }
         }).match(QueryPageTask.class,t->{
             ActorSelection queryPageTaskControlActor = getSlaveToRun();
             queryPageTaskControlActor.tell(t, getSelf());
             queryPageTasks.add(t);
         }).build();
+    }
+
+    private void printProcess(QueryPageTask pageTask) {
+        System.out.println("finish task "+pageTask.pn+"  "+queryPageTasks.stream().filter(i->{
+            return  i.finish;
+        }).count()*1.0/queryPageTasks.size()*100);
     }
 
     private ActorSelection getSlaveToRun() {

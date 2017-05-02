@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.codingdie.tiebaspider.akka.message.QueryPostDetailMessage;
+import com.codingdie.tiebaspider.config.SpiderConfigFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +16,13 @@ public class QueryDetailTaskControlActor extends AbstractActor {
 
     private  List<ActorRef> actorRefList=new ArrayList<>();
     private int pos=0;
-    private  int totalChildCount=30;
+    private  int detail_actor_count =30;
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        for(;pos<totalChildCount;pos++){
+        detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
+
+        for(; pos< detail_actor_count; pos++){
             ActorRef queryPostDetailActor = context().actorOf(Props.create(QueryPostDetailActor.class), "QueryPostDetailActor"+pos);
             actorRefList.add(queryPostDetailActor);
         }
@@ -27,17 +30,9 @@ public class QueryDetailTaskControlActor extends AbstractActor {
     }
 
     @Override
-    public void postStop() throws Exception {
-        super.postStop();
-        getContext().getChildren().forEach(item->{
-            getContext().stop(item);
-        });
-    }
-
-    @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPostDetailMessage.class, m -> {
-            ActorRef actorRef= actorRefList.get(pos%totalChildCount);
+            ActorRef actorRef= actorRefList.get(pos% detail_actor_count);
             actorRef.tell(m,getSelf());
             pos++;
         }).build();

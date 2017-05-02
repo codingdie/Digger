@@ -49,13 +49,7 @@ public class QueryPageTaskControlActor extends AbstractActor {
         }).match(QueryPageResult.class,m->{
             resultCollectActorSelection.tell(m,getSelf());
         }).matchEquals(SIGN.STOP,r->{
-            getContext().getChildren().forEach(item->{
-                getContext().stop(item);
-            });
-            ActorSelection selection= getContext().actorSelection("/user/QueryDetailTaskControlActor");
-            getContext().stop(selection.anchor());
-
-            getContext().stop(getSelf());
+            getContext().getSystem().terminate();
 
         }).build();
     }
