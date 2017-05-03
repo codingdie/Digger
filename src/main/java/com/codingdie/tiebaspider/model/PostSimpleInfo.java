@@ -18,4 +18,6 @@ public class PostSimpleInfo implements Serializable {
     public String postId ;
     public String type=TYPE_NORMAL ;
 
+
+
 }

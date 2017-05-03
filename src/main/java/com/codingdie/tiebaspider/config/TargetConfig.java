@@ -9,5 +9,6 @@ public class TargetConfig {
     public   String tiebaName;
     public   String totalCount;
     public LocalDateTime time;
+    public   String path;
 
 }

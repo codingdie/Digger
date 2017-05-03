@@ -12,4 +12,5 @@ public class QueryPageResult implements Serializable {
     public List<PostSimpleInfo> postSimpleInfos;
     public int  pn;
 
+
 }

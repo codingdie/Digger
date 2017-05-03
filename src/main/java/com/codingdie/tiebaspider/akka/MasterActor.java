@@ -7,6 +7,7 @@ import akka.typed.javadsl.Actor;
 import com.codingdie.tiebaspider.akka.message.QueryPageTask;
 import com.codingdie.tiebaspider.akka.result.QueryPageResult;
 import com.codingdie.tiebaspider.config.SpiderConfigFactory;
+import com.codingdie.tiebaspider.storage.SpiderWriter;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class MasterActor extends AbstractActor {
     private  int totalPage=0;
     private List<QueryPageTask> queryPageTasks=new ArrayList<>();
     private List<ActorSelection> slaveActorSelections = new ArrayList<>();
-
+    private SpiderWriter spiderWriter;
 
     @Override
     public void postStop() throws Exception {
@@ -44,12 +45,14 @@ public class MasterActor extends AbstractActor {
         for (int page = 0; page < totalPage; page++) {
             getSelf().tell(new QueryPageTask(page*50), getSelf());
         }
+        spiderWriter=new SpiderWriter(SpiderConfigFactory.getInstance().targetConfig.path);
         System.out.println("totalPage:"+totalPage);
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPageResult.class,r->{
+            spiderWriter.write(new Gson().toJson(r));
             QueryPageTask pageTask=  queryPageTasks.stream().filter(queryPageTask -> {
                 return  queryPageTask.pn==r.pn;
             }).findFirst().get();
@@ -59,6 +62,7 @@ public class MasterActor extends AbstractActor {
             if(queryPageTasks.stream().allMatch(queryPageTask -> {
                 return queryPageTask.finish;
             })){
+                spiderWriter.flush();
                 slaveActorSelections.iterator().forEachRemaining(item->{
                     item.tell(QueryPageTaskControlActor.SIGN.STOP, ActorRef.noSender());
                 });

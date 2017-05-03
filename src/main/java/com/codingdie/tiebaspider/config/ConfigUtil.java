@@ -133,8 +133,16 @@ public class ConfigUtil {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     if(line.contains("tieba_name=")){
-                        targetConfig=new TargetConfig();
+                        if(targetConfig==null){
+                            targetConfig=new TargetConfig();
+                        }
                         targetConfig.tiebaName=line.replace("tieba_name=","").trim();
+                    }
+                    if(line.contains("path=")){
+                        if(targetConfig==null){
+                            targetConfig=new TargetConfig();
+                        }
+                        targetConfig.path=line.replace("path=","").trim();
                     }
                 }
                 bufferedReader.close();
