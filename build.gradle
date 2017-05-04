@@ -51,17 +51,17 @@ task slaveJar(type: Jar,dependsOn: [classes]){
     manifest{
         attributes 'Main-Class': 'com.codingdie.tiebaspider.SlaveStarter'
         String someString = ''
-        configurations.runtime.each {someString = someString + " libs/"+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
         attributes 'Class-Path': someString
     }
 }
 
 task serverJar(type: Jar,dependsOn: [classes]){
-    baseName "servernode"
+    baseName "masternode"
     from('build/classes/main','build/resources/main')
     destinationDir new File('build/release/libs')
     manifest{
-        attributes 'Main-Class': 'com.codingdie.tiebaspider.ServerStarter'
+        attributes 'Main-Class': 'com.codingdie.tiebaspider.MasterStarter'
         String someString = ''
         configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
         attributes 'Class-Path': someString
@@ -84,9 +84,28 @@ task copyscript(type: Copy){
     }
     into ('build/release')
 }
-task release(type: Copy,dependsOn:[clean,serverJar,slaveJar,copyconf,copyscript,copylibs] ){
+
+jar{
+    new File("build/release/logs").mkdirs()
+}
+task copyRunJar(type: Copy ){
+
     from("build/libs") {
         include '*node*.jar'
     }
     into ('build/release')
+}
+
+task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,copyRunJar]){
+
+}
+
+
+task startMaster(type: Exec,dependsOn:"build") {
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.MasterStarter" , project.rootDir.toString() ,"127.0.0.1",2550
+}
+
+
+task startSlave(type: Exec,dependsOn:"build") {
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.SlaveStarter" , project.rootDir.toString() ,"127.0.0.1",2552
 }

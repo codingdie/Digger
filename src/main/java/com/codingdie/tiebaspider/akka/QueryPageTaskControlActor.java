@@ -19,8 +19,9 @@ public class QueryPageTaskControlActor extends AbstractActor {
 
     private  List<ActorRef> actorRefList=new ArrayList<>();
     private  ActorSelection resultCollectActorSelection=null;
-    private int pos=0;
+    private int taskCount =0;
     int detail_actor_count=10;
+    private int resultCount=0;
 
     public static  enum SIGN {SHOW_CHILDCOUNT,STOP}
 
@@ -28,14 +29,14 @@ public class QueryPageTaskControlActor extends AbstractActor {
     public void preStart() throws Exception {
         super.preStart();
         detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
-        for(; pos< detail_actor_count; pos++){
-            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+pos);
+        for(; taskCount < detail_actor_count; taskCount++){
+            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ taskCount);
             actorRefList.add(queryPageActor);
         }
         String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/MasterActor";
         System.out.println(path);
         resultCollectActorSelection = getContext().getSystem().actorSelection(path);
-        pos=0;
+        taskCount =0;
     }
 
     @Override
@@ -43,10 +44,14 @@ public class QueryPageTaskControlActor extends AbstractActor {
         return receiveBuilder().match(QueryPageTask.class, m -> {
             System.out.println(new Gson().toJson(m));
 
-            ActorRef actorRef= actorRefList.get(pos%detail_actor_count);
+            ActorRef actorRef= actorRefList.get(taskCount %detail_actor_count);
             actorRef.tell(m,getSelf());
-            pos++;
+            taskCount++;
+            System.out.println("taskcount:"+ taskCount);
+
         }).match(QueryPageResult.class,m->{
+            resultCount++;
+            System.out.println("resultCount:"+resultCount);
             resultCollectActorSelection.tell(m,getSelf());
         }).matchEquals(SIGN.STOP,r->{
             getContext().getSystem().terminate();

@@ -2,6 +2,6 @@
 /.idea/
 /childnode/build/
 /childnode/.gradle/
-/servernode/build/
+/masternode/build/
 /slavenode/build/
 /build/

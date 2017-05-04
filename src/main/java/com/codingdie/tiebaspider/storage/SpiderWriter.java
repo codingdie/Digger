@@ -16,9 +16,13 @@ public class SpiderWriter {
     public SpiderWriter(String path) {
         file = new File(path);
         try {
-            if (!file.exists()) {
-                file.createNewFile();
+            System.out.println(file.getAbsolutePath());
+
+            if (file.exists()) {
+                file.delete();
             }
+            file.createNewFile();
+
             fileWriter = new FileWriter(file);
             bufferedWriter = new BufferedWriter(fileWriter);
         } catch (IOException e) {

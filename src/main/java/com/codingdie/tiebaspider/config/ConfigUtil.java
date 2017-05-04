@@ -17,55 +17,60 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigUtil {
-    public static void initConfig(String[] args) throws IOException {
-        SpiderConfigFactory.getInstance().masterConfig= ConfigUtil.initMasterConfig(args);
-        SpiderConfigFactory.getInstance().targetConfig=ConfigUtil.initTargetConfig(args);
-        SpiderConfigFactory.getInstance().slavesConfig=ConfigUtil.initSlavesConfig(args);
+
+    public static final String SPILLTER = ",";
+
+    public static void initConfig(String configFolder) throws IOException {
+        SpiderConfigFactory.getInstance().masterConfig= ConfigUtil.initMasterConfig(configFolder);
+        SpiderConfigFactory.getInstance().targetConfig=ConfigUtil.initTargetConfig(configFolder);
+        SpiderConfigFactory.getInstance().slavesConfig=ConfigUtil.initSlavesConfig(configFolder);
     }
-    public static SlavesConfig initSlavesConfig(String[] args) {
-        List<String> configPaths = new ArrayList<String>();
-        if (args.length > 0) {
-            configPaths.add(args[0]);
-        }
-        configPaths.add("conf/slaves.conf");
-        configPaths.add("slaves.conf");
+    public static SlavesConfig initSlavesConfig(String configFolder) {
+        List<String> configPaths = getConfigPaths(configFolder,"slaves.conf");
 
         return parseSlavesConfig(configPaths);
     }
-    public static TargetConfig initTargetConfig(String[] args) throws IOException {
+
+    private static List<String> getConfigPaths(String configFolder,String filename) {
         List<String> configPaths = new ArrayList<String>();
-        if (args.length > 1) {
-            configPaths.add(args[1]);
+        if (configFolder!=null&&configFolder.length()>0) {
+            configPaths.add(configFolder+"/"+filename);
         }
-        configPaths.add("conf/spider.conf");
-        configPaths.add("spider.conf");
+        configPaths.add("../conf/"+filename);
+        configPaths.add(filename);
+        configPaths.add("conf/"+filename);
+        return configPaths;
+    }
+
+    public static TargetConfig initTargetConfig(String configFolder) throws IOException {
+        List<String> configPaths = getConfigPaths(configFolder,"spider.conf");
 
         TargetConfig targetConfig= parseTargetConfig(configPaths);
 
-        OkHttpClient client = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
+        OkHttpClient client = new OkHttpClient.Builder().followRedirects(false).readTimeout(60, TimeUnit.SECONDS).build();
         Request request = new Request.Builder()
                 .url("http://tieba.baidu.com/f?kw=justice_eternal&ie=utf-8")
+//                .header("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36")
                 .build();
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
             System.out.println(("Unexpected code " + response));
         } else {
+            if(response.isSuccessful()){
             String string = response.body().string();
+                System.out.println(string);
             Document document = Jsoup.parse(string);
             targetConfig.totalCount =document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
             targetConfig.time= LocalDateTime.now();
+            }
         }
         client=null;
         return  targetConfig;
     }
 
-    public static MasterConfig initMasterConfig(String[] args) throws IOException {
-        List<String> configPaths = new ArrayList<String>();
-        if (args.length > 1) {
-            configPaths.add(args[1]);
-        }
-        configPaths.add("conf/master.conf");
-        configPaths.add("master.conf");
+    public static MasterConfig initMasterConfig(String configFolder) throws IOException {
+        List<String> configPaths = getConfigPaths(configFolder,"master.conf");
+
         return  parseMasterConfig(configPaths);
     }
 
@@ -89,7 +94,7 @@ public class ConfigUtil {
                 while ((line = bufferedReader.readLine()) != null) {
                     if(line.contains("hosts=")){
                         String hostsstr=line.replace("hosts=","").trim();
-                        Arrays.stream(hostsstr.split(";")).iterator().forEachRemaining(item->{
+                        Arrays.stream(hostsstr.split(SPILLTER)).iterator().forEachRemaining(item->{
                             slavesConfig.hosts.add(item);
                         });
                     }
