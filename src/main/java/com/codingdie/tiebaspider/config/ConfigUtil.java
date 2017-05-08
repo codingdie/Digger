@@ -1,5 +1,6 @@
 package com.codingdie.tiebaspider.config;
 
+import com.codingdie.tiebaspider.HttpUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -46,11 +48,12 @@ public class ConfigUtil {
         List<String> configPaths = getConfigPaths(configFolder,"spider.conf");
 
         TargetConfig targetConfig= parseTargetConfig(configPaths);
-
-        OkHttpClient client = new OkHttpClient.Builder().followRedirects(false).readTimeout(60, TimeUnit.SECONDS).build();
+        SpiderConfigFactory.getInstance().targetConfig=targetConfig;
+         OkHttpClient client = HttpUtil.buildClient();
         Request request = new Request.Builder()
-                .url("http://tieba.baidu.com/f?kw=justice_eternal&ie=utf-8")
-//                .header("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36")
+                .url("http://tieba.baidu.com/f?kw="+targetConfig.tiebaName+"&ie=utf-8")
+                .header("Cookie",targetConfig.cookie)
+                .header("Proxy-Authorization","Basic "+ Base64.getEncoder().encodeToString(SpiderConfigFactory.getInstance().masterConfig.key.getBytes()))
                 .build();
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
@@ -58,7 +61,6 @@ public class ConfigUtil {
         } else {
             if(response.isSuccessful()){
             String string = response.body().string();
-                System.out.println(string);
             Document document = Jsoup.parse(string);
             targetConfig.totalCount =document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
             targetConfig.time= LocalDateTime.now();
@@ -148,6 +150,12 @@ public class ConfigUtil {
                             targetConfig=new TargetConfig();
                         }
                         targetConfig.path=line.replace("path=","").trim();
+                    }
+                    if(line.contains("cookie=")){
+                        if(targetConfig==null){
+                            targetConfig=new TargetConfig();
+                        }
+                        targetConfig.cookie=line.replace("cookie=","").trim();
                     }
                 }
                 bufferedReader.close();

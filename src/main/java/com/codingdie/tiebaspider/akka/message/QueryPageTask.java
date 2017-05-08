@@ -10,6 +10,8 @@ public class QueryPageTask implements Serializable{
         this.pn=pn;
     }
     public int pn=50;
-    public boolean finish=false;
+    public boolean finish_flag =false;
+    public boolean assigned_flag=false;
+    public String path;
 
 }

@@ -42,23 +42,27 @@ public class QueryPageTaskControlActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPageTask.class, m -> {
-            System.out.println(new Gson().toJson(m));
 
             ActorRef actorRef= actorRefList.get(taskCount %detail_actor_count);
             actorRef.tell(m,getSelf());
             taskCount++;
-            System.out.println("taskcount:"+ taskCount);
+            printProcess();
 
         }).match(QueryPageResult.class,m->{
+
             resultCount++;
-            System.out.println("resultCount:"+resultCount);
             resultCollectActorSelection.tell(m,getSelf());
+            printProcess();
+
         }).matchEquals(SIGN.STOP,r->{
             getContext().getSystem().terminate();
 
         }).build();
     }
 
+    private void printProcess() {
+        System.out.println("resultCount:"+resultCount+" "+"taskcount:" + taskCount);
+    }
 
 
 }

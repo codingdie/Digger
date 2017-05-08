@@ -11,6 +11,7 @@ import java.util.List;
 public class QueryPageResult implements Serializable {
     public List<PostSimpleInfo> postSimpleInfos;
     public int  pn;
+    public boolean  success=false;
 
 
 }

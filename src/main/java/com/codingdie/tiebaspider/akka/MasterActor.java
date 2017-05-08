@@ -3,6 +3,7 @@ package com.codingdie.tiebaspider.akka;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.Cancellable;
 import akka.util.Timeout;
 import com.codingdie.tiebaspider.akka.message.QueryPageTask;
 import com.codingdie.tiebaspider.akka.result.QueryPageResult;
@@ -12,20 +13,33 @@ import com.google.gson.Gson;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by xupeng on 2017/4/26.
  */
 public class MasterActor extends AbstractActor {
 
-    private  int totalPage=0;
-    private List<QueryPageTask> queryPageTasks=new ArrayList<>();
+    private int totalPage = 0;
+
+    private List<QueryPageTask> unAssignPagetask = new ArrayList<>();
+    private List<QueryPageTask> progressTasks = new ArrayList<>();
+    private List<QueryPageTask> finishedtasks = new ArrayList<>();
+    private List<QueryPageTask> failedTasks = new ArrayList<>();
+
     private List<ActorRef> slaves = new ArrayList<>();
     private SpiderWriter spiderWriter;
+    private long beginTime = 0;
+    private Cancellable callable;
+    private ConcurrentHashMap<String, Integer> slavesRunningTaskMapData = new ConcurrentHashMap<>();
+    private ReentrantLock reentrantLock = new ReentrantLock();
 
     @Override
     public void postStop() throws Exception {
@@ -39,73 +53,137 @@ public class MasterActor extends AbstractActor {
         SpiderConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
             String path = "akka.tcp://slave@" + item + ":2552/user/QueryPageTaskControlActor";
             ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection(path);
-            Future<ActorRef>future= queryPageTaskControlActor.resolveOne(Timeout.apply(1, TimeUnit.SECONDS));
+            Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
             try {
-                ActorRef actorRef=   Await.result(future, Duration.apply(1, TimeUnit.SECONDS));
-                    slaves.add(actorRef);
-                    System.out.println(actorRef.path().toString()+"connect succuss");
-
-            }catch (Exception ex){
-                System.out.println(path+"connect failed");
+                ActorRef actorRef = Await.result(future, Duration.apply(3, TimeUnit.SECONDS));
+                slaves.add(actorRef);
+                System.out.println(actorRef.path().toString() + "connect succuss");
+            } catch (Exception ex) {
+                System.out.println(path + "connect failed");
             }
-
-
         });
-        System.out.println("finish connect slaves,total:"+ slaves.size());
-
+        System.out.println("finish connect slaves,total:" + slaves.size());
+        slaves.iterator().forEachRemaining(i -> {
+            slavesRunningTaskMapData.put(i.path().toString(), 0);
+        });
+        beginTime = System.currentTimeMillis();
+        spiderWriter = new SpiderWriter(SpiderConfigFactory.getInstance().targetConfig.path);
         Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().targetConfig.totalCount);
-        int totalPage = (totalCount-1) / 50+1;
-        totalPage=30;
-        for (int page = 0; page < totalPage; page++) {
-            getSelf().tell(new QueryPageTask(page*50), getSelf());
+        totalPage = (totalCount - 1) / 50 + 1;
+        for (int i = 0; i < totalPage; i++) {
+            unAssignPagetask.add(new QueryPageTask(i * 50));
         }
-        spiderWriter=new SpiderWriter(SpiderConfigFactory.getInstance().targetConfig.path);
-        System.out.println("totalPage:"+totalPage);
+        System.out.println("totalPageTaskSize:" + unAssignPagetask.size());
+        callable = getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
+            @Override
+            public void run() {
+
+                int maxRunningTask = 250;
+
+                if (progressTasks.size() > maxRunningTask) {
+                    return;
+                }
+                reentrantLock.lock();
+
+                int taskCount = maxRunningTask - progressTasks.size();
+
+                for (int i = 0; i < taskCount; i++) {
+                    getSelf().tell(unAssignPagetask.get(i), getSelf());
+                }
+                for (int i = 0; i < taskCount; i++) {
+                    unAssignPagetask.remove(0);
+                }
+                reentrantLock.unlock();
+            }
+        }, getContext().getSystem().dispatcher());
+        getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
+            @Override
+            public void run() {
+
+                printProcess();
+            }
+        }, getContext().getSystem().dispatcher());
+
+
     }
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(QueryPageResult.class,r->{
-            spiderWriter.write(new Gson().toJson(r));
-            QueryPageTask pageTask=  queryPageTasks.stream().filter(queryPageTask -> {
-                return  queryPageTask.pn==r.pn;
-            }).findFirst().get();
-            pageTask.finish=true;
-            printProcess(pageTask);
-
-            if(queryPageTasks.stream().allMatch(queryPageTask -> {
-                return queryPageTask.finish;
-            })){
+        return receiveBuilder().match(QueryPageResult.class, r -> {
+            if (r.success && r.postSimpleInfos != null) {
+                r.postSimpleInfos.iterator().forEachRemaining(i -> {
+                    spiderWriter.write(new Gson().toJson(i));
+                });
                 spiderWriter.flush();
-                slaves.iterator().forEachRemaining(item->{
+
+            }
+            QueryPageTask pageTask = progressTasks.stream().filter(queryPageTask -> {
+                return queryPageTask.pn == r.pn;
+            }).findFirst().get();
+
+            progressTasks.remove(pageTask);
+            if (r.success) {
+                finishedtasks.add(pageTask);
+            } else {
+                failedTasks.add(pageTask);
+            }
+            String senderPath = getSender().path().toString();
+            slavesRunningTaskMapData.put(senderPath, slavesRunningTaskMapData.get(senderPath) - 1);
+
+            if (unAssignPagetask.size() == 0 && progressTasks.size() == 0) {
+                spiderWriter.flush();
+                slaves.iterator().forEachRemaining(item -> {
                     item.tell(QueryPageTaskControlActor.SIGN.STOP, ActorRef.noSender());
                 });
-               getContext().getSystem().terminate();
-               System.out.println("finish all task");
+                getContext().getSystem().terminate();
+                System.out.println("finish all task,total time:" + (System.currentTimeMillis() - beginTime));
             }
-        }).match(QueryPageTask.class,t->{
-            ActorRef queryPageTaskControlActor=null;
-            while ((queryPageTaskControlActor=getSlaveToRun())==null){
+        }).match(QueryPageTask.class, t -> {
+
+            ActorRef queryPageTaskControlActor = null;
+            while ((queryPageTaskControlActor = getSlaveToRun()) == null) {
                 Thread.sleep(3000L);
                 System.out.println("no avtive slave,wait 3 seconds to try");
             }
             queryPageTaskControlActor.tell(t, getSelf());
-            queryPageTasks.add(t);
-            System.out.println(queryPageTasks.size());
+            t.path = queryPageTaskControlActor.path().toString();
+            progressTasks.add(t);
+            if (unAssignPagetask.size() == 0) {
+                callable.cancel();
+            }
 
         }).build();
     }
 
-    private void printProcess(QueryPageTask pageTask) {
-        System.out.println("finish task "+pageTask.pn+"  "+queryPageTasks.stream().filter(i->{
-            return  i.finish;
-        }).count()*1.0/queryPageTasks.size()*100);
+    private void printProcess() {
+        DecimalFormat df = new DecimalFormat("######0.00");
+
+        double speed = finishedtasks.size() * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
+        double time = Double.MAX_VALUE;
+        if (speed != 0) {
+            time = (totalPage - finishedtasks.size() - failedTasks.size()) / speed;
+        }
+        System.out.println("totalTask:" + totalPage + "  unassignedTask:" + unAssignPagetask.size() + " progressTask:" + progressTasks.size() + "  finishedTask " + finishedtasks.size() + " failedTask:" + failedTasks.size() + " speed:" + df.format(speed) + "  pass:" + (System.currentTimeMillis() - beginTime) / 1000 + " resttime:" + df.format(time) + " progress:" + df.format(finishedtasks.size() * 1.0 / totalPage * 100) + "%");
+        final StringBuilder out = new StringBuilder();
+        slavesRunningTaskMapData.entrySet().iterator().forEachRemaining(item -> {
+            out.append(item.getKey().split("@")[1].split(":")[0] + ":" + item.getValue() + "\n");
+        });
+        System.out.println(out.toString());
     }
 
+
     private ActorRef getSlaveToRun() {
-        if(slaves.size()>0){
-            return slaves.get(queryPageTasks.size() % slaves.size());
+        if (slaves.size() > 0) {
+            String path = slavesRunningTaskMapData.entrySet().stream().min((o1, o2) -> {
+                return o1.getValue() - o2.getValue();
+            }).get().getKey();
+
+            ActorRef actorRef = slaves.stream().filter(t -> {
+                return t.path().toString().equals(path);
+            }).findAny().get();
+            slavesRunningTaskMapData.put(path, slavesRunningTaskMapData.get(path) + 1);
+            return actorRef;
         }
-        return  null;
+        return null;
     }
 }

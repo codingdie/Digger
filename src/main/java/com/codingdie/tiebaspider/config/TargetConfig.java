@@ -10,5 +10,6 @@ public class TargetConfig {
     public   String totalCount;
     public LocalDateTime time;
     public   String path;
+    public   String cookie;
 
 }
