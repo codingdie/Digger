@@ -11,5 +11,6 @@ public class TargetConfig {
     public LocalDateTime time;
     public   String path;
     public   String cookie;
+    public  int max_http_request_per_second=3;
 
 }

@@ -1,9 +1,7 @@
 package com.codingdie.tiebaspider.config;
 
-import com.codingdie.tiebaspider.HttpUtil;
-import okhttp3.OkHttpClient;
+import com.codingdie.tiebaspider.network.HttpService;
 import okhttp3.Request;
-import okhttp3.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -14,70 +12,59 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class ConfigUtil {
 
     public static final String SPILLTER = ",";
 
     public static void initConfig(String configFolder) throws IOException {
-        SpiderConfigFactory.getInstance().masterConfig= ConfigUtil.initMasterConfig(configFolder);
-        SpiderConfigFactory.getInstance().targetConfig=ConfigUtil.initTargetConfig(configFolder);
-        SpiderConfigFactory.getInstance().slavesConfig=ConfigUtil.initSlavesConfig(configFolder);
+        SpiderConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
+        SpiderConfigFactory.getInstance().targetConfig = ConfigUtil.initTargetConfig(configFolder);
+        SpiderConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
     }
+
     public static SlavesConfig initSlavesConfig(String configFolder) {
-        List<String> configPaths = getConfigPaths(configFolder,"slaves.conf");
+        List<String> configPaths = getConfigPaths(configFolder, "slaves.conf");
 
         return parseSlavesConfig(configPaths);
     }
 
-    private static List<String> getConfigPaths(String configFolder,String filename) {
+    private static List<String> getConfigPaths(String configFolder, String filename) {
         List<String> configPaths = new ArrayList<String>();
-        if (configFolder!=null&&configFolder.length()>0) {
-            configPaths.add(configFolder+"/"+filename);
+        if (configFolder != null && configFolder.length() > 0) {
+            configPaths.add(configFolder + "/" + filename);
         }
-        configPaths.add("../conf/"+filename);
+        configPaths.add("../conf/" + filename);
         configPaths.add(filename);
-        configPaths.add("conf/"+filename);
+        configPaths.add("conf/" + filename);
         return configPaths;
     }
 
     public static TargetConfig initTargetConfig(String configFolder) throws IOException {
-        List<String> configPaths = getConfigPaths(configFolder,"spider.conf");
+        List<String> configPaths = getConfigPaths(configFolder, "spider.conf");
 
-        TargetConfig targetConfig= parseTargetConfig(configPaths);
-        SpiderConfigFactory.getInstance().targetConfig=targetConfig;
-         OkHttpClient client = HttpUtil.buildClient();
-        Request request = new Request.Builder()
-                .url("http://tieba.baidu.com/f?kw="+targetConfig.tiebaName+"&ie=utf-8")
-                .header("Cookie",targetConfig.cookie)
-                .header("Proxy-Authorization","Basic "+ Base64.getEncoder().encodeToString(SpiderConfigFactory.getInstance().masterConfig.key.getBytes()))
-                .build();
-        Response response = client.newCall(request).execute();
-        if (!response.isSuccessful()) {
-            System.out.println(("Unexpected code " + response));
-        } else {
-            if(response.isSuccessful()){
-            String string = response.body().string();
-            Document document = Jsoup.parse(string);
-            targetConfig.totalCount =document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
-            targetConfig.time= LocalDateTime.now();
-            }
-        }
-        client=null;
-        return  targetConfig;
+        TargetConfig targetConfig = parseTargetConfig(configPaths);
+        SpiderConfigFactory.getInstance().targetConfig = targetConfig;
+
+        String string = HttpService.getInstance().excute(new Request.Builder()
+                .url("http://tieba.baidu.com/f?kw=" + targetConfig.tiebaName + "&ie=utf-8").build());
+        Document document = Jsoup.parse(string);
+        targetConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
+        targetConfig.time = LocalDateTime.now();
+
+
+        return targetConfig;
     }
 
     public static MasterConfig initMasterConfig(String configFolder) throws IOException {
-        List<String> configPaths = getConfigPaths(configFolder,"master.conf");
+        List<String> configPaths = getConfigPaths(configFolder, "master.conf");
 
-        return  parseMasterConfig(configPaths);
+        return parseMasterConfig(configPaths);
     }
 
     private static SlavesConfig parseSlavesConfig(List<String> confPaths) {
-        SlavesConfig slavesConfig=new SlavesConfig();
+        SlavesConfig slavesConfig = new SlavesConfig();
 
         try {
             String confPath = confPaths.stream().filter(s -> {
@@ -94,18 +81,20 @@ public class ConfigUtil {
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
                 String line = null;
                 while ((line = bufferedReader.readLine()) != null) {
-                    if(line.contains("hosts=")){
-                        String hostsstr=line.replace("hosts=","").trim();
-                        Arrays.stream(hostsstr.split(SPILLTER)).iterator().forEachRemaining(item->{
+                    if (line.contains("hosts=")) {
+                        String hostsstr = line.replace("hosts=", "").trim();
+                        Arrays.stream(hostsstr.split(SPILLTER)).iterator().forEachRemaining(item -> {
                             slavesConfig.hosts.add(item);
                         });
                     }
-                    if(line.contains("detail_actor_count=")){
-                        slavesConfig.detail_actor_count=Integer.valueOf(line.replace("detail_actor_count=","").trim());
+                    if (line.contains("detail_actor_count=")) {
+                        slavesConfig.detail_actor_count = Integer.valueOf(line.replace("detail_actor_count=", "").trim());
                     }
-                    if(line.contains("page_actor_count=")){
-                        slavesConfig.page_actor_count=Integer.valueOf(line.replace("page_actor_count=","").trim());
+                    if (line.contains("page_actor_count=")) {
+                        slavesConfig.page_actor_count = Integer.valueOf(line.replace("page_actor_count=", "").trim());
                     }
+
+
                 }
                 bufferedReader.close();
                 fileReader.close();
@@ -120,7 +109,7 @@ public class ConfigUtil {
     }
 
     private static TargetConfig parseTargetConfig(List<String> confPaths) {
-        TargetConfig targetConfig=null;
+        TargetConfig targetConfig = null;
         try {
             String confPath = confPaths.stream().filter(s -> {
                 if (new File(s).exists()) {
@@ -139,23 +128,26 @@ public class ConfigUtil {
                 String total = "";
 
                 while ((line = bufferedReader.readLine()) != null) {
-                    if(line.contains("tieba_name=")){
-                        if(targetConfig==null){
-                            targetConfig=new TargetConfig();
+                    if (line.contains("tieba_name=")) {
+                        if (targetConfig == null) {
+                            targetConfig = new TargetConfig();
                         }
-                        targetConfig.tiebaName=line.replace("tieba_name=","").trim();
+                        targetConfig.tiebaName = line.replace("tieba_name=", "").trim();
                     }
-                    if(line.contains("path=")){
-                        if(targetConfig==null){
-                            targetConfig=new TargetConfig();
+                    if (line.contains("path=")) {
+                        if (targetConfig == null) {
+                            targetConfig = new TargetConfig();
                         }
-                        targetConfig.path=line.replace("path=","").trim();
+                        targetConfig.path = line.replace("path=", "").trim();
                     }
-                    if(line.contains("cookie=")){
-                        if(targetConfig==null){
-                            targetConfig=new TargetConfig();
+                    if (line.contains("cookie=")) {
+                        if (targetConfig == null) {
+                            targetConfig = new TargetConfig();
                         }
-                        targetConfig.cookie=line.replace("cookie=","").trim();
+                        targetConfig.cookie = line.replace("cookie=", "").trim();
+                    }
+                    if (line.contains("max_http_request_per_second=")) {
+                        targetConfig.max_http_request_per_second = Integer.valueOf(line.replace("max_http_request_per_second=", "").trim());
                     }
                 }
                 bufferedReader.close();
@@ -172,7 +164,7 @@ public class ConfigUtil {
     }
 
     private static MasterConfig parseMasterConfig(List<String> confPaths) {
-        MasterConfig masterConfig=null;
+        MasterConfig masterConfig = null;
         try {
             String confPath = confPaths.stream().filter(s -> {
                 if (new File(s).exists()) {
@@ -191,9 +183,12 @@ public class ConfigUtil {
                 String total = "";
 
                 while ((line = bufferedReader.readLine()) != null) {
-                    if(line.contains("host=")){
-                        masterConfig=new MasterConfig();
-                        masterConfig.host=line.replace("host=","").trim();
+                    if (line.contains("host=")) {
+                        masterConfig = new MasterConfig();
+                        masterConfig.host = line.replace("host=", "").trim();
+                    }
+                    if (line.contains("max_running_task=")) {
+                        masterConfig.max_running_task = Integer.valueOf(line.replace("max_running_task=", "").trim());
                     }
                 }
                 bufferedReader.close();

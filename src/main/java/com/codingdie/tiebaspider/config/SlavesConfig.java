@@ -8,6 +8,6 @@ import java.util.List;
  */
 public class SlavesConfig {
     public List<String> hosts=new ArrayList<>();
-    public  int page_actor_count=5;
+    public  int page_actor_count=1;
     public  int detail_actor_count=5;
 }

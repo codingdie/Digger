@@ -78,7 +78,7 @@ public class MasterActor extends AbstractActor {
             @Override
             public void run() {
 
-                int maxRunningTask = 250;
+                int maxRunningTask = SpiderConfigFactory.getInstance().masterConfig.max_running_task;
 
                 if (progressTasks.size() > maxRunningTask) {
                     return;
