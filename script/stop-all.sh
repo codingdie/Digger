@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 USER_NAME='root';
 SLAVES_CONF='conf/slaves.conf'
-SPIDER_CONF='conf/spider.conf'
+SPIDER_CONF='conf/work.conf'
 MASTER_CONF='conf/master.conf'
 
 

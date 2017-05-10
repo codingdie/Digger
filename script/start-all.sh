@@ -2,7 +2,7 @@
 USER_NAME='root';
 SLAVES_CONF='conf/slaves.conf'
 MASTER_CONF='conf/master.conf'
-SPIDER_CONF='conf/spider.conf'
+SPIDER_CONF='conf/work.conf'
 
 
 for line in `cat $SPIDER_CONF`

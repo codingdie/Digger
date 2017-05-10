@@ -50,7 +50,7 @@ task slaveJar(type: Jar,dependsOn: [classes]){
     destinationDir new File('build/release/libs')
 
     manifest{
-        attributes 'Main-Class': 'com.codingdie.tiebaspider.SlaveStarter'
+        attributes 'Main-Class': 'com.codingdie.analyzer.SlaveStarter'
         String someString = ''
         configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
         attributes 'Class-Path': someString
@@ -62,7 +62,7 @@ task serverJar(type: Jar,dependsOn: [classes]){
     from('build/classes/main','build/resources/main')
     destinationDir new File('build/release/libs')
     manifest{
-        attributes 'Main-Class': 'com.codingdie.tiebaspider.MasterStarter'
+        attributes 'Main-Class': 'com.codingdie.analyzer.MasterStarter'
         String someString = ''
         configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
         attributes 'Class-Path': someString
@@ -103,10 +103,10 @@ task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,
 
 
 task startMaster(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.MasterStarter" , project.rootDir.toString() ,"127.0.0.1",2550
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , project.rootDir.toString() ,"127.0.0.1",2550
 }
 
 
 task startSlave(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.tiebaspider.SlaveStarter" , project.rootDir.toString() ,"127.0.0.1",2552
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , project.rootDir.toString() ,"127.0.0.1",2552
 }
