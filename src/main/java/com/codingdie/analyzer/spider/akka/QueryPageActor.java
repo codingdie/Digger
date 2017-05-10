@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorSelection;
 import com.codingdie.analyzer.spider.akka.result.QueryPageResult;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.spider.akka.message.QueryPageTask;
+import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.akka.message.QueryPostDetailMessage;
 import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
@@ -26,7 +26,7 @@ public class QueryPageActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(QueryPageTask.class, m -> {
+        return receiveBuilder().match(PageTask.class, m -> {
             String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build());
             QueryPageResult queryPageResult = new QueryPageResult();
             queryPageResult.pn = m.pn;

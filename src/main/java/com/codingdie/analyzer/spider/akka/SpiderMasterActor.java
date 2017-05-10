@@ -5,10 +5,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.util.Timeout;
-import com.codingdie.analyzer.spider.akka.message.QueryPageTask;
+import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.akka.result.QueryPageResult;
 import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.config.WorkConfig;
+import com.codingdie.analyzer.storage.SpiderTaskStorage;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
@@ -30,11 +31,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SpiderMasterActor extends AbstractActor {
 
     private int totalPage = 0;
+    private int initFinishedCount = 0;
 
-    private List<QueryPageTask> todoTasks = new ArrayList<>();
-    private List<QueryPageTask> excutingTasks = new ArrayList<>();
-    private List<QueryPageTask> finishedTasks = new ArrayList<>();
-    private List<QueryPageTask> failedTasks = new ArrayList<>();
+    private List<PageTask> todoTasks = new ArrayList<>();
+    private List<PageTask> excutingTasks = new ArrayList<>();
+    private List<PageTask> finishedTasks = new ArrayList<>();
+    private List<PageTask> failedTasks = new ArrayList<>();
 
     private List<ActorRef> slaves = new ArrayList<>();
     private long beginTime = 0;
@@ -56,31 +58,35 @@ public class SpiderMasterActor extends AbstractActor {
     public void preStart() throws Exception {
         super.preStart();
         initStorage();
-        SpiderConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
-            String path = "akka.tcp://slave@" + item + ":2552/user/QueryPageTaskControlActor";
-            ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection(path);
-            Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
-            try {
-                ActorRef actorRef = Await.result(future, Duration.apply(3, TimeUnit.SECONDS));
-                slaves.add(actorRef);
-                System.out.println(actorRef.path().toString() + "connect succuss");
-            } catch (Exception ex) {
-                System.out.println(path + "connect failed");
+        connectSlaves();
+        initStatistical();
+        startAllocateTask();
+
+
+    }
+
+    private void startAllocateTask() {
+        SpiderTaskStorage spiderTaskStorage=tieBaFileSystem.getSpiderTaskStorage();
+        List<PageTask> pageTasks= spiderTaskStorage.parseAndRebuild();
+        
+        if(pageTasks.size()==0){
+            Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().workConfig.totalCount).intValue();
+            totalPage = (totalCount - 1) / 50 + 1;
+            for (int i = 0; i < totalPage; i++) {
+                todoTasks.add(new PageTask(i * 50));
             }
-        });
-        System.out.println("finish connect slaves,total:" + slaves.size());
-        slaves.iterator().forEachRemaining(i -> {
-            slavesRunningTaskMapData.put(i.path().toString(), 0);
-            slavesFinishedTaskMapData.put(i.path().toString(), 0);
-            slavesFailedTaskMapData.put(i.path().toString(), 0);
-        });
-        beginTime = System.currentTimeMillis();
-        Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().workConfig.totalCount);
-        totalPage = (totalCount - 1) / 50 + 1;
-        for (int i = 0; i < totalPage; i++) {
-            todoTasks.add(new QueryPageTask(i * 50));
+        }else{
+            totalPage=pageTasks.size();
+            pageTasks.iterator().forEachRemaining(i->{
+                if(i.status!=PageTask.STATUS_FINISHED){
+                    todoTasks.add(i);
+                }else {
+                    finishedTasks.add(i);
+                }
+            });
+            initFinishedCount=finishedTasks.size();
         }
-        System.out.println("totalPageTaskSize:" + todoTasks.size());
+
         callable = getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
@@ -110,7 +116,32 @@ public class SpiderMasterActor extends AbstractActor {
                 printProcess();
             }
         }, getContext().getSystem().dispatcher());
+    }
 
+    private void initStatistical() {
+        beginTime = System.currentTimeMillis();
+
+        slaves.iterator().forEachRemaining(i -> {
+            slavesRunningTaskMapData.put(i.path().toString(), 0);
+            slavesFinishedTaskMapData.put(i.path().toString(), 0);
+            slavesFailedTaskMapData.put(i.path().toString(), 0);
+        });
+    }
+
+    private void connectSlaves() {
+        SpiderConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
+            String path = "akka.tcp://slave@" + item + ":2552/user/QueryPageTaskControlActor";
+            ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection(path);
+            Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
+            try {
+                ActorRef actorRef = Await.result(future, Duration.apply(3, TimeUnit.SECONDS));
+                slaves.add(actorRef);
+                System.out.println(actorRef.path().toString() + "connect succuss");
+            } catch (Exception ex) {
+                System.out.println(path + "connect failed");
+            }
+        });
+        System.out.println("finish connect slaves,total:" + slaves.size());
 
     }
 
@@ -138,7 +169,7 @@ public class SpiderMasterActor extends AbstractActor {
 //                spiderWriter.flush();
 
             }
-            QueryPageTask pageTask = excutingTasks.stream().filter(queryPageTask -> {
+            PageTask pageTask = excutingTasks.stream().filter(queryPageTask -> {
                 return queryPageTask.pn == r.pn;
             }).findFirst().get();
             String senderPath = getSender().path().toString();
@@ -159,7 +190,7 @@ public class SpiderMasterActor extends AbstractActor {
                 getContext().getSystem().terminate();
                 System.out.println("finish all task,total time:" + (System.currentTimeMillis() - beginTime));
             }
-        }).match(QueryPageTask.class, t -> {
+        }).match(PageTask.class, t -> {
 
             ActorRef queryPageTaskControlActor = null;
             while ((queryPageTaskControlActor = getSlaveToRun()) == null) {
@@ -167,7 +198,6 @@ public class SpiderMasterActor extends AbstractActor {
                 System.out.println("no avtive slave,wait 3 seconds to try");
             }
             queryPageTaskControlActor.tell(t, getSelf());
-            t.path = queryPageTaskControlActor.path().toString();
             excutingTasks.add(t);
             if (todoTasks.size() == 0) {
                 callable.cancel();
@@ -203,7 +233,7 @@ public class SpiderMasterActor extends AbstractActor {
     private String buildTotalProcessLogStr() {
         DecimalFormat df = new DecimalFormat("######0.00");
 
-        double speed = finishedTasks.size() * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
+        double speed = (finishedTasks.size()-initFinishedCount) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
         double time = Double.MAX_VALUE;
         if (speed != 0) {
             time = (totalPage - finishedTasks.size() - failedTasks.size()) / speed;

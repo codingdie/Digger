@@ -1,60 +1,114 @@
 package com.codingdie.analyzer.storage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.codingdie.analyzer.spider.model.PageTask;
+import com.google.gson.Gson;
+import org.jsoup.helper.StringUtil;
+import sun.jvm.hotspot.debugger.Page;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by xupeng on 2017/5/10.
  */
 public class SpiderTaskStorage {
 
-    private File todoTaskFile;
-    private File executingTaskFile;
-    private File finishedTaskFile;
-    private File failedTaskFile;
+    private File taskFile;
 
-    private FileWriter fileWriter;
-    private BufferedWriter bufferedWriter;
+
     private File root;
 
-    public SpiderTaskStorage(File rootPath){
-        this.root=rootPath;
-        this.todoTaskFile =new File(root.getAbsolutePath()+File.separator+"todo.task");
-        this.executingTaskFile =new File(root.getAbsolutePath()+File.separator+"executing.task");
-        this.finishedTaskFile =new File(root.getAbsolutePath()+File.separator+"finished.task");
-        this.failedTaskFile =new File(root.getAbsolutePath()+File.separator+"failed.task");
+    public SpiderTaskStorage(File rootPath) {
+        this.root = rootPath;
+        this.taskFile = new File(root.getAbsolutePath() + File.separator + "task.task");
 
-        if(!this.todoTaskFile.exists()){
+        if (!this.taskFile.exists()) {
             try {
-                this.todoTaskFile.createNewFile();
+                this.taskFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        if(!this.executingTaskFile.exists()){
-            try {
-                this.executingTaskFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if(!this.finishedTaskFile.exists()){
-            try {
-                this.finishedTaskFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if(!this.failedTaskFile.exists()){
-            try {
-                this.failedTaskFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
     }
 
+    public List<PageTask> parseAndRebuild(){
+        List<PageTask> pageTasks=parse();
 
+        try {
+            this.taskFile.delete();
+            this.taskFile.createNewFile();
+
+            if(pageTasks.stream().anyMatch(i->{
+                return i.status!=PageTask.STATUS_FINISHED;
+            })){
+                pageTasks.iterator().forEachRemaining(i->{
+                    if(i.status!=PageTask.STATUS_FINISHED){
+                        i.status=PageTask.STATUS_TODO;
+                    }
+                });
+
+                saveTasks(pageTasks);
+            }else{
+                pageTasks.clear();
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return  pageTasks;
+
+    }
+
+   private List<PageTask> parse(){
+       Map<Integer,PageTask> pageTaskMap=new HashMap<>();
+        try {
+            BufferedReader bufferedReader=new BufferedReader(new FileReader(taskFile));
+            String line=null;
+            while ((line=bufferedReader.readLine())!=null){
+                if(!StringUtil.isBlank(line)){
+                    PageTask pageTask=new Gson().fromJson(line,PageTask.class);
+                    pageTaskMap.put(pageTask.pn,pageTask);
+                }
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+       return  pageTaskMap.entrySet().stream().map(i->{
+         return i.getValue();
+       }).collect(Collectors.toList());
+   }
+
+
+    public void saveTasks(List<PageTask> pageTasks) {
+        try {
+            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile));
+            pageTasks.iterator().forEachRemaining(pageTask -> {
+                try {
+                    todoWriter.write(new Gson().toJson(pageTask));
+                    todoWriter.write("\n");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            todoWriter.flush();
+            todoWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void saveTask(PageTask pageTask) {
+        try {
+            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile));
+            todoWriter.write(new Gson().toJson(pageTask));
+            todoWriter.write("\n");
+            todoWriter.flush();
+            todoWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import com.codingdie.analyzer.spider.akka.message.QueryPageTask;
+import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.akka.result.QueryPageResult;
 import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
 import org.apache.log4j.Logger;
@@ -41,7 +41,7 @@ public class QueryPageTaskControlActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(QueryPageTask.class, m -> {
+        return receiveBuilder().match(PageTask.class, m -> {
 
             ActorRef actorRef= actorRefList.get(totalTaskCount %detail_actor_count);
             actorRef.tell(m,getSelf());
