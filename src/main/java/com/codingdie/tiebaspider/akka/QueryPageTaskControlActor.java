@@ -7,7 +7,7 @@ import akka.actor.Props;
 import com.codingdie.tiebaspider.akka.message.QueryPageTask;
 import com.codingdie.tiebaspider.akka.result.QueryPageResult;
 import com.codingdie.tiebaspider.config.SpiderConfigFactory;
-import com.google.gson.Gson;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,38 +19,38 @@ public class QueryPageTaskControlActor extends AbstractActor {
 
     private  List<ActorRef> actorRefList=new ArrayList<>();
     private  ActorSelection resultCollectActorSelection=null;
-    private int taskCount =0;
+    private int totalTaskCount =0;
     int detail_actor_count=10;
-    private int resultCount=0;
-
+    private int finishedTaskCount =0;
+    Logger logger=Logger.getLogger("slave-task");
     public static  enum SIGN {SHOW_CHILDCOUNT,STOP}
 
     @Override
     public void preStart() throws Exception {
         super.preStart();
         detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
-        for(; taskCount < detail_actor_count; taskCount++){
-            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ taskCount);
+        for(; totalTaskCount < detail_actor_count; totalTaskCount++){
+            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
             actorRefList.add(queryPageActor);
         }
         String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/MasterActor";
         System.out.println(path);
         resultCollectActorSelection = getContext().getSystem().actorSelection(path);
-        taskCount =0;
+        totalTaskCount =0;
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPageTask.class, m -> {
 
-            ActorRef actorRef= actorRefList.get(taskCount %detail_actor_count);
+            ActorRef actorRef= actorRefList.get(totalTaskCount %detail_actor_count);
             actorRef.tell(m,getSelf());
-            taskCount++;
+            totalTaskCount++;
             printProcess();
 
         }).match(QueryPageResult.class,m->{
 
-            resultCount++;
+            finishedTaskCount++;
             resultCollectActorSelection.tell(m,getSelf());
             printProcess();
 
@@ -61,7 +61,7 @@ public class QueryPageTaskControlActor extends AbstractActor {
     }
 
     private void printProcess() {
-        System.out.println("resultCount:"+resultCount+" "+"taskcount:" + taskCount);
+        logger.info("finishedTask:"+ finishedTaskCount +" "+"totalTask:" + totalTaskCount +" restTaskCount:"+(totalTaskCount- finishedTaskCount));
     }
 
 

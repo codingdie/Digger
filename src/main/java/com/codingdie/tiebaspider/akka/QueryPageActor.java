@@ -10,6 +10,7 @@ import com.codingdie.tiebaspider.config.SpiderConfigFactory;
 import com.codingdie.tiebaspider.model.PostSimpleInfo;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
 
 import java.time.LocalDate;
@@ -29,13 +30,18 @@ public class QueryPageActor extends AbstractActor {
             String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build());
             QueryPageResult queryPageResult = new QueryPageResult();
             queryPageResult.pn = m.pn;
-            List<PostSimpleInfo> postSimpleInfos = parseResponse(html);
-            postSimpleInfos.iterator().forEachRemaining(t -> {
-                ActorSelection selection = getContext().actorSelection("/user/QueryDetailTaskControlActor");
-                selection.tell(new QueryPostDetailMessage(t.postId), getSelf());
-            });
-            queryPageResult.postSimpleInfos = postSimpleInfos;
-            queryPageResult.success = true;
+            if(StringUtil.isBlank(html)){
+                queryPageResult.success = false;
+            }else{
+                List<PostSimpleInfo> postSimpleInfos = parseResponse(html);
+                postSimpleInfos.iterator().forEachRemaining(t -> {
+                    ActorSelection selection = getContext().actorSelection("/user/QueryDetailTaskControlActor");
+                    selection.tell(new QueryPostDetailMessage(t.postId), getSelf());
+                });
+                queryPageResult.postSimpleInfos = postSimpleInfos;
+                queryPageResult.success = true;
+            }
+
             getSender().tell(queryPageResult, getSelf());
 
         }).build();

@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 public class TargetConfig {
     public   String tiebaName;
     public   String totalCount;
-    public LocalDateTime time;
+    public   LocalDateTime time;
     public   String path;
     public   String cookie;
-    public  int max_http_request_per_second=3;
+    public   int max_http_request_per_second=3;
 
 }

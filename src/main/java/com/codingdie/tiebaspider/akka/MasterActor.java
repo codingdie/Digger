@@ -10,6 +10,7 @@ import com.codingdie.tiebaspider.akka.result.QueryPageResult;
 import com.codingdie.tiebaspider.config.SpiderConfigFactory;
 import com.codingdie.tiebaspider.storage.SpiderWriter;
 import com.google.gson.Gson;
+import org.apache.log4j.Logger;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -39,7 +40,11 @@ public class MasterActor extends AbstractActor {
     private long beginTime = 0;
     private Cancellable callable;
     private ConcurrentHashMap<String, Integer> slavesRunningTaskMapData = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Integer> slavesFinishedTaskMapData = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Integer> slavesFailedTaskMapData = new ConcurrentHashMap<>();
+
     private ReentrantLock reentrantLock = new ReentrantLock();
+    private Logger logger=Logger.getLogger("master-task");
 
     @Override
     public void postStop() throws Exception {
@@ -65,6 +70,8 @@ public class MasterActor extends AbstractActor {
         System.out.println("finish connect slaves,total:" + slaves.size());
         slaves.iterator().forEachRemaining(i -> {
             slavesRunningTaskMapData.put(i.path().toString(), 0);
+            slavesFinishedTaskMapData.put(i.path().toString(), 0);
+            slavesFailedTaskMapData.put(i.path().toString(), 0);
         });
         beginTime = System.currentTimeMillis();
         spiderWriter = new SpiderWriter(SpiderConfigFactory.getInstance().targetConfig.path);
@@ -120,16 +127,16 @@ public class MasterActor extends AbstractActor {
             QueryPageTask pageTask = progressTasks.stream().filter(queryPageTask -> {
                 return queryPageTask.pn == r.pn;
             }).findFirst().get();
-
+            String senderPath = getSender().path().toString();
             progressTasks.remove(pageTask);
             if (r.success) {
+                slavesFinishedTaskMapData.put(senderPath,slavesFinishedTaskMapData.get(senderPath) +1);
                 finishedtasks.add(pageTask);
             } else {
+                slavesFailedTaskMapData.put(senderPath,slavesFailedTaskMapData.get(senderPath) +1);
                 failedTasks.add(pageTask);
             }
-            String senderPath = getSender().path().toString();
             slavesRunningTaskMapData.put(senderPath, slavesRunningTaskMapData.get(senderPath) - 1);
-
             if (unAssignPagetask.size() == 0 && progressTasks.size() == 0) {
                 spiderWriter.flush();
                 slaves.iterator().forEachRemaining(item -> {
@@ -156,6 +163,30 @@ public class MasterActor extends AbstractActor {
     }
 
     private void printProcess() {
+        logger.info(buildTotalProcessLogStr()+"\n"+ buildSlaveProcessLogStr());
+    }
+
+    private String buildSlaveProcessLogStr() {
+        StringBuilder stringBuilder=new StringBuilder();
+
+        slaves.iterator().forEachRemaining(slave -> {
+            DecimalFormat df = new DecimalFormat("######0.00");
+
+            String key = slave.path().toString();
+            String host=key.split("@")[1].split(":")[0];
+            int totalTask=slavesFinishedTaskMapData.get(key)+slavesFailedTaskMapData.get(key)+slavesRunningTaskMapData.get(key);
+            double speed = slavesFinishedTaskMapData.get(key) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
+            double time = Double.MAX_VALUE;
+            if (speed != 0) {
+                time = (totalPage - finishedtasks.size() - failedTasks.size()) / speed;
+            }
+            stringBuilder.append(host+": totalTask:" + totalTask  + " progressTask:" + slavesRunningTaskMapData.get(key) + "  finishedTask " + slavesFinishedTaskMapData.get(key) + " failedTask:" + slavesFailedTaskMapData.get(key) + " speed:" + df.format(speed) );
+            stringBuilder.append("\n");
+        });
+        return stringBuilder.toString();
+    }
+
+    private String buildTotalProcessLogStr() {
         DecimalFormat df = new DecimalFormat("######0.00");
 
         double speed = finishedtasks.size() * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
@@ -163,13 +194,11 @@ public class MasterActor extends AbstractActor {
         if (speed != 0) {
             time = (totalPage - finishedtasks.size() - failedTasks.size()) / speed;
         }
-        System.out.println("totalTask:" + totalPage + "  unassignedTask:" + unAssignPagetask.size() + " progressTask:" + progressTasks.size() + "  finishedTask " + finishedtasks.size() + " failedTask:" + failedTasks.size() + " speed:" + df.format(speed) + "  pass:" + (System.currentTimeMillis() - beginTime) / 1000 + " resttime:" + df.format(time) + " progress:" + df.format(finishedtasks.size() * 1.0 / totalPage * 100) + "%");
-        final StringBuilder out = new StringBuilder();
-        slavesRunningTaskMapData.entrySet().iterator().forEachRemaining(item -> {
-            out.append(item.getKey().split("@")[1].split(":")[0] + ":" + item.getValue() + "\n");
-        });
-        System.out.println(out.toString());
+
+        return "totalTask:" + totalPage + "  unassignedTask:" + unAssignPagetask.size() + " progressTask:" + progressTasks.size() + "  finishedTask " + finishedtasks.size() + " failedTask:" + failedTasks.size() + " speed:" + df.format(speed)+ "  pass:" + (System.currentTimeMillis() - beginTime) / 1000 + " resttime:" + df.format(time) + " progress:" + df.format(finishedtasks.size() * 1.0 / totalPage * 100) + "%" ;
     }
+
+
 
 
     private ActorRef getSlaveToRun() {

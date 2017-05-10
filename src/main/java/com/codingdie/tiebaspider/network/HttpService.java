@@ -47,9 +47,9 @@ public class HttpService {
             public void run() {
                 try {
                     if(linkedBlockingQueue.size()==0){
-                        linkedBlockingQueue.put(new Integer(count++));
-                        linkedBlockingQueue.put(new Integer(count++));
-
+                        for(int i=0;i<SpiderConfigFactory.getInstance().targetConfig.max_http_request_per_second;i++){
+                            linkedBlockingQueue.put(new Integer(count++));
+                        }
                     }
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -70,14 +70,20 @@ public class HttpService {
         long begin = System.currentTimeMillis();
         while (html == null || html.length() == 0) {
             try {
-
+                if (n > 5) {
+                    netlogger.info("尝试" + n + "次失败,耗时" + (System.currentTimeMillis() - begin));
+                    return  null;
+                }
                 n++;
                 Response response = getResponse(request);
 
                 if (response.code() != 200) {
+                    netlogger.info(request.url()+":failed:"+n);
+
                     String location = response.header("Location");
-                    newCookie(response.headers("Set-Cookie"));
                     netlogger.info("Location:" + location + " code" + response.code() + " url:" + request.url());
+                    newCookie(response.headers("Set-Cookie"));
+
                     response.close();
 
                     if (location != null && !location.equals(request.url())) {
@@ -85,11 +91,11 @@ public class HttpService {
                     }
                 } else {
                     html = response.body().string();
+                    netlogger.info(request.url()+":success");
+
                     newCookie(response.headers("Set-Cookie"));
                 }
-                if (n > 3) {
-                    netlogger.info("尝试" + n + "次失败,耗时" + (System.currentTimeMillis() - begin));
-                }
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -103,8 +109,6 @@ public class HttpService {
         try {
             Integer integer= linkedBlockingQueue.take();
             result = okHttpClient.newCall(request).execute();
-
-            netlogger.info(System.currentTimeMillis()+":"+integer);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -114,9 +118,9 @@ public class HttpService {
 
     private void newCookie(List<String> setCookies) {
         setCookies.iterator().forEachRemaining(str -> {
-            cookielogger.info("Set-Cookie:"+str);
+            cookielogger.info(str);
 
-            String[] strs = str.split(";")[0].split(";");
+            String[] strs = str.split(";")[0].split("=");
             String newCokkie = Arrays.stream(SpiderConfigFactory.getInstance().targetConfig.cookie.split(";")).filter(s -> {
                 return !s.contains(strs[0]);
             }).reduce(new BinaryOperator<String>() {
@@ -128,6 +132,8 @@ public class HttpService {
             }).get() + ";" + strs[0] + "=" + strs[1];
 
             SpiderConfigFactory.getInstance().targetConfig.cookie = newCokkie;
+            cookielogger.info(newCokkie);
+
         });
     }
 
