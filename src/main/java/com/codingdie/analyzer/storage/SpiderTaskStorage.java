@@ -3,7 +3,7 @@ package com.codingdie.analyzer.storage;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.google.gson.Gson;
 import org.jsoup.helper.StringUtil;
-import sun.jvm.hotspot.debugger.Page;
+
 
 import java.io.*;
 import java.util.ArrayList;
@@ -51,7 +51,10 @@ public class SpiderTaskStorage {
                         i.status=PageTask.STATUS_TODO;
                     }
                 });
-
+                pageTasks.sort((o1, o2) ->
+                {
+                    return  (o1.pn-o2.pn)*10+(o1.status-o2.status);
+                });
                 saveTasks(pageTasks);
             }else{
                 pageTasks.clear();
@@ -85,15 +88,21 @@ public class SpiderTaskStorage {
 
     public void saveTasks(List<PageTask> pageTasks) {
         try {
-            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile));
-            pageTasks.iterator().forEachRemaining(pageTask -> {
+            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile,true));
+
+            for(int i=0;i<pageTasks.size();i++){
+                PageTask pageTask=pageTasks.get(i);
                 try {
                     todoWriter.write(new Gson().toJson(pageTask));
                     todoWriter.write("\n");
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            });
+                if(i%50==49){
+                    todoWriter.flush();
+                }
+            }
+
             todoWriter.flush();
             todoWriter.close();
         } catch (IOException e) {
@@ -102,7 +111,7 @@ public class SpiderTaskStorage {
     }
     public void saveTask(PageTask pageTask) {
         try {
-            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile));
+            BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile,true));
             todoWriter.write(new Gson().toJson(pageTask));
             todoWriter.write("\n");
             todoWriter.flush();

@@ -15,7 +15,7 @@ public class PostSimpleInfo implements Serializable {
     public String createUser;
     public String title;
     public int remarkNum ;
-    public String postId ;
+    public long postId ;
     public String type=TYPE_NORMAL ;
 
 

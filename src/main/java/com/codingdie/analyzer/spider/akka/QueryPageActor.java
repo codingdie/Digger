@@ -9,6 +9,7 @@ import com.codingdie.analyzer.spider.akka.message.QueryPostDetailMessage;
 import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import okhttp3.Request;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
@@ -22,7 +23,7 @@ import java.util.*;
  */
 public class QueryPageActor extends AbstractActor {
 
-
+    Logger logger=Logger.getLogger("parse-error");
 
     @Override
     public Receive createReceive() {
@@ -65,9 +66,14 @@ public class QueryPageActor extends AbstractActor {
                 postSimpleInfo.lastUpdateUser = el.select(".frs-author-name").get(0).text();
                 String text = el.select(".threadlist_reply_date").get(0).text();
                 postSimpleInfo.lastUpdateTime = text.contains(":") ? LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) : text;
-                postSimpleInfo.postId = el.select(".threadlist_title a").attr("href").split("/")[2];
+            }catch (Exception ex){
+                logger.info(el.html());
+            }
+            try {
+                postSimpleInfo.postId = Long.valueOf(el.select(".threadlist_title a").attr("href").split("/")[2].split("//?")[0]) ;
                 postSimpleInfo.title = el.select(".threadlist_title a").text();
             } catch (Exception ex) {
+                logger.info(el.html());
                 postSimpleInfo.type = PostSimpleInfo.TYPE_UNKONWN;
             } finally {
                 postSimpleInfos.add(postSimpleInfo);

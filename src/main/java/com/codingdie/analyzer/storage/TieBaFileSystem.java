@@ -14,8 +14,11 @@ public class TieBaFileSystem {
     private  PostContentStorage postContentStorage;
 
     private File root;
-    public TieBaFileSystem(File rootFile,int role){
-        this.root=rootFile;
+    public TieBaFileSystem(String name,int role){
+        this.root=new File("storage/"+name);
+        if(!this.root.exists()){
+            this.root.mkdirs();
+        }
         if(role==ROLE_MASTER){
             File spiderTaskRootPath = new File(root.getAbsolutePath() + File.separatorChar + "spidertask");
             if(!spiderTaskRootPath.exists()){
@@ -49,5 +52,8 @@ public class TieBaFileSystem {
         return postContentStorage;
     }
 
+    public void clear(){
+        this.root.delete();
+    }
 
 }

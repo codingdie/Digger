@@ -70,7 +70,7 @@ public class HttpService {
         long begin = System.currentTimeMillis();
         while (html == null || html.length() == 0) {
             try {
-                if (n > 5) {
+                if (n > 4) {
                     netlogger.info("尝试" + n + "次失败,耗时" + (System.currentTimeMillis() - begin));
                     return  null;
                 }
@@ -89,6 +89,7 @@ public class HttpService {
                     if (location != null && !location.equals(request.url())) {
                         request = request.newBuilder().url(location).build();
                     }
+                    Thread.sleep(1000L);
                 } else {
                     html = response.body().string();
                     netlogger.info(request.url()+":success");

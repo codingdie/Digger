@@ -42,7 +42,7 @@ public class ConfigUtil {
     }
 
     public static WorkConfig initTargetConfig(String configFolder) throws IOException {
-        List<String> configPaths = getConfigPaths(configFolder, "spider.conf");
+        List<String> configPaths = getConfigPaths(configFolder, "work.conf");
 
         WorkConfig workConfig = parseTargetConfig(configPaths);
         SpiderConfigFactory.getInstance().workConfig = workConfig;

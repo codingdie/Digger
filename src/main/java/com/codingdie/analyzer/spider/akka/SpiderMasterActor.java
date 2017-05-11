@@ -9,8 +9,11 @@ import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.akka.result.QueryPageResult;
 import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.config.WorkConfig;
+import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.storage.SpiderTaskStorage;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
+import com.codingdie.analyzer.storage.domain.PostIndex;
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -68,13 +71,14 @@ public class SpiderMasterActor extends AbstractActor {
     private void startAllocateTask() {
         SpiderTaskStorage spiderTaskStorage=tieBaFileSystem.getSpiderTaskStorage();
         List<PageTask> pageTasks= spiderTaskStorage.parseAndRebuild();
-        
+
         if(pageTasks.size()==0){
             Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().workConfig.totalCount).intValue();
             totalPage = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalPage; i++) {
                 todoTasks.add(new PageTask(i * 50));
             }
+            spiderTaskStorage.saveTasks(todoTasks);
         }else{
             totalPage=pageTasks.size();
             pageTasks.iterator().forEachRemaining(i->{
@@ -146,17 +150,11 @@ public class SpiderMasterActor extends AbstractActor {
     }
 
     private void initStorage() {
+        System.out.println("开始初始化存储");
         WorkConfig workConfig = SpiderConfigFactory.getInstance().workConfig;
-        File root = new File(workConfig.tiebaName);
-        if(root.exists()){
-            if(!root.isDirectory()){
-                root.delete();
-                root.mkdirs();
-            }
-        }else{
-           root.mkdirs();
-        }
-        tieBaFileSystem=new TieBaFileSystem(root,TieBaFileSystem.ROLE_MASTER);
+        tieBaFileSystem=new TieBaFileSystem(workConfig.tiebaName,TieBaFileSystem.ROLE_MASTER);
+        System.out.println("初始化存储完毕");
+
     }
 
     @Override
@@ -164,9 +162,17 @@ public class SpiderMasterActor extends AbstractActor {
         return receiveBuilder().match(QueryPageResult.class, r -> {
             if (r.success && r.postSimpleInfos != null) {
                 r.postSimpleInfos.iterator().forEachRemaining(i -> {
-//                    spiderWriter.write(new Gson().toJson(i));
+                    new Gson().toJson(i);
+                    if(i.type.equals(PostSimpleInfo.TYPE_NORMAL)){
+                        PostIndex postIndex=new PostIndex();
+                        postIndex.setHost(getHostFromActorPath(getSender().path().toString()));
+                        postIndex.setPostId(i.postId);
+                        postIndex.setModifyTime(System.currentTimeMillis());
+                        postIndex.setComment(i.title+":"+i.type);
+                        tieBaFileSystem.getPostIndexStorage().putIndex(postIndex);
+                    }
+
                 });
-//                spiderWriter.flush();
 
             }
             PageTask pageTask = excutingTasks.stream().filter(queryPageTask -> {
@@ -175,20 +181,22 @@ public class SpiderMasterActor extends AbstractActor {
             String senderPath = getSender().path().toString();
             excutingTasks.remove(pageTask);
             if (r.success) {
+                pageTask.status=PageTask.STATUS_FINISHED;
                 slavesFinishedTaskMapData.put(senderPath,slavesFinishedTaskMapData.get(senderPath) +1);
                 finishedTasks.add(pageTask);
             } else {
+                pageTask.status=PageTask.STATUS_FAILED;
                 slavesFailedTaskMapData.put(senderPath,slavesFailedTaskMapData.get(senderPath) +1);
                 failedTasks.add(pageTask);
             }
+            tieBaFileSystem.getSpiderTaskStorage().saveTask(pageTask);
             slavesRunningTaskMapData.put(senderPath, slavesRunningTaskMapData.get(senderPath) - 1);
-            if (todoTasks.size() == 0 && excutingTasks.size() == 0) {
-//                spiderWriter.flush();
+            if ((todoTasks.size() == 0 && excutingTasks.size() == 0)||failedTasks.size()>20) {
                 slaves.iterator().forEachRemaining(item -> {
                     item.tell(QueryPageTaskControlActor.SIGN.STOP, ActorRef.noSender());
                 });
                 getContext().getSystem().terminate();
-                System.out.println("finish all task,total time:" + (System.currentTimeMillis() - beginTime));
+                System.out.println("stop system,total  excuting time:" + (System.currentTimeMillis() - beginTime));
             }
         }).match(PageTask.class, t -> {
 
@@ -198,7 +206,9 @@ public class SpiderMasterActor extends AbstractActor {
                 System.out.println("no avtive slave,wait 3 seconds to try");
             }
             queryPageTaskControlActor.tell(t, getSelf());
+            t.status=PageTask.STATUS_EXCUTING;
             excutingTasks.add(t);
+            tieBaFileSystem.getSpiderTaskStorage().saveTask(t);
             if (todoTasks.size() == 0) {
                 callable.cancel();
             }
@@ -207,7 +217,7 @@ public class SpiderMasterActor extends AbstractActor {
     }
 
     private void printProcess() {
-        logger.info(buildTotalProcessLogStr()+"\n"+ buildSlaveProcessLogStr());
+        logger.info(buildTotalProcessLogStr()+"\n"+ buildSlaveProcessLogStr()+"running info:\n"+"excuting_time:"+(System.currentTimeMillis()-beginTime)/1000+" total_post_index:"+tieBaFileSystem.getPostIndexStorage().countAllIndex());
     }
 
     private String buildSlaveProcessLogStr() {
@@ -217,29 +227,29 @@ public class SpiderMasterActor extends AbstractActor {
             DecimalFormat df = new DecimalFormat("######0.00");
 
             String key = slave.path().toString();
-            String host=key.split("@")[1].split(":")[0];
+            String host= getHostFromActorPath(key);
             int totalTask=slavesFinishedTaskMapData.get(key)+slavesFailedTaskMapData.get(key)+slavesRunningTaskMapData.get(key);
             double speed = slavesFinishedTaskMapData.get(key) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
-            double time = Double.MAX_VALUE;
-            if (speed != 0) {
-                time = (totalPage - finishedTasks.size() - failedTasks.size()) / speed;
-            }
-            stringBuilder.append(host+": totalTask:" + totalTask  + " progressTask:" + slavesRunningTaskMapData.get(key) + "  finishedTask " + slavesFinishedTaskMapData.get(key) + " failedTask:" + slavesFailedTaskMapData.get(key) + " speed:" + df.format(speed) );
+
+            stringBuilder.append(host+": totalTask:" + totalTask  + " progressTask:" + slavesRunningTaskMapData.get(key) + "  finishedTask " + slavesFinishedTaskMapData.get(key) + " failedTask:" + slavesFailedTaskMapData.get(key) + "\nspeed:" + df.format(speed) );
             stringBuilder.append("\n");
         });
         return stringBuilder.toString();
+    }
+
+    private String getHostFromActorPath(String key) {
+        return key.split("@")[1].split(":")[0];
     }
 
     private String buildTotalProcessLogStr() {
         DecimalFormat df = new DecimalFormat("######0.00");
 
         double speed = (finishedTasks.size()-initFinishedCount) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
-        double time = Double.MAX_VALUE;
+        double time = 1000*10000;
         if (speed != 0) {
             time = (totalPage - finishedTasks.size() - failedTasks.size()) / speed;
         }
-
-        return "totalTask:" + totalPage + "  unassignedTask:" + todoTasks.size() + " progressTask:" + excutingTasks.size() + "  finishedTask " + finishedTasks.size() + " failedTask:" + failedTasks.size() + " speed:" + df.format(speed)+ "  pass:" + (System.currentTimeMillis() - beginTime) / 1000 + " resttime:" + df.format(time) + " progress:" + df.format(finishedTasks.size() * 1.0 / totalPage * 100) + "%" ;
+        return "master info :\ntotalTask:" + totalPage + " lastRunFinished:" + initFinishedCount +  "  unassignedTask:" + todoTasks.size() + " progressTask:" + excutingTasks.size() + "  finishedTask " + finishedTasks.size() + " failedTask:" + failedTasks.size() + " speed:" + df.format(speed)+ " resttime:" + df.format(time) + " progress:" + df.format(finishedTasks.size() * 1.0 / totalPage * 100) + "%" ;
     }
 
 
