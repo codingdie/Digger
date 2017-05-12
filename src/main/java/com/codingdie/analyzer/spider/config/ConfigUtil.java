@@ -20,7 +20,7 @@ public class ConfigUtil {
 
     public static void initConfig(String configFolder) throws IOException {
         SpiderConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
-        SpiderConfigFactory.getInstance().workConfig = ConfigUtil.initTargetConfig(configFolder);
+        SpiderConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
         SpiderConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
     }
 
@@ -41,14 +41,17 @@ public class ConfigUtil {
         return configPaths;
     }
 
-    public static WorkConfig initTargetConfig(String configFolder) throws IOException {
+    public static WorkConfig initWorkConfig(String configFolder) throws IOException {
         List<String> configPaths = getConfigPaths(configFolder, "work.conf");
 
         WorkConfig workConfig = parseTargetConfig(configPaths);
         SpiderConfigFactory.getInstance().workConfig = workConfig;
 
+
+        System.out.println(workConfig.tiebaName);
         String string = HttpService.getInstance().excute(new Request.Builder()
-                .url("http://tieba.baidu.com/f?kw=" + workConfig.tiebaName + "&ie=utf-8").build());
+                .url("https://tieba.baidu.com/f?kw=" + workConfig.tiebaName + "&ie=utf-8").build());
+        System.out.println(string);
         Document document = Jsoup.parse(string);
         workConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
         workConfig.time = LocalDateTime.now();

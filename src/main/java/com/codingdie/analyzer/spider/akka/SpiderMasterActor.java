@@ -20,7 +20,6 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,7 +167,8 @@ public class SpiderMasterActor extends AbstractActor {
                         postIndex.setHost(getHostFromActorPath(getSender().path().toString()));
                         postIndex.setPostId(i.postId);
                         postIndex.setModifyTime(System.currentTimeMillis());
-                        postIndex.setComment(i.title+":"+i.type);
+                        postIndex.setTitle(i.title);
+                        postIndex.setCreateUser(i.createUser);
                         tieBaFileSystem.getPostIndexStorage().putIndex(postIndex);
                     }
 

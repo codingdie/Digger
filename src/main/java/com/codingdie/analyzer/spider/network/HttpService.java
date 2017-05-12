@@ -86,8 +86,16 @@ public class HttpService {
 
                     response.close();
 
-                    if (location != null && !location.equals(request.url())) {
-                        request = request.newBuilder().url(location).build();
+                    if (location != null) {
+                        if(location.contains("commit/commonapi/vcode")){
+                            netlogger.info("需要重新设置cookie");
+                            return  null;
+                        }else{
+                            request.newBuilder().url(location);
+                        }
+
+
+
                     }
                     Thread.sleep(1000L);
                 } else {

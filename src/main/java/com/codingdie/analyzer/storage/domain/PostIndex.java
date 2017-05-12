@@ -14,7 +14,8 @@ public class PostIndex implements Serializable {
     private String host;
     private int  status=STATUS_NO_CONTENT;
     private long modifyTime=System.currentTimeMillis();
-    private String  comment;
+    private String title;
+    private String createUser;
 
     public long getPostId() {
         return postId;
@@ -48,11 +49,19 @@ public class PostIndex implements Serializable {
         this.modifyTime = modifyTime;
     }
 
-    public String getComment() {
-        return comment;
+    public String getTitle() {
+        return title;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
     }
 }

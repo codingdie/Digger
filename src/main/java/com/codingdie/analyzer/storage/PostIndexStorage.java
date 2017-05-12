@@ -65,6 +65,7 @@ public class PostIndexStorage {
                 while ((line=bufferedReader.readLine())!=null){
                     if(!StringUtil.isBlank(line)){
                         PostIndex postIndex=new Gson().fromJson(line,PostIndex.class);
+
                         longPostIndexHashMap.put(postIndex.getPostId(),postIndex);
                         tmpMap.put(postIndex.getPostId(),postIndex);
 

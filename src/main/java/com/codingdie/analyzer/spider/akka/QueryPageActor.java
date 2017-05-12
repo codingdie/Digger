@@ -41,6 +41,13 @@ public class QueryPageActor extends AbstractActor {
                 });
                 queryPageResult.postSimpleInfos = postSimpleInfos;
                 queryPageResult.success = true;
+                long normalCount = queryPageResult.postSimpleInfos.stream().filter(i -> {
+                    return i.type.equals(PostSimpleInfo.TYPE_NORMAL);
+                }).count();
+                System.out.println(normalCount);
+                if(normalCount<30){
+                    queryPageResult.success=false;
+                }
             }
 
             getSender().tell(queryPageResult, getSelf());
@@ -50,7 +57,7 @@ public class QueryPageActor extends AbstractActor {
 
 
     private String buildUrl(int pn) {
-        return "http://tieba.baidu.com/f?kw=" + SpiderConfigFactory.getInstance().workConfig.tiebaName + "&ie=utf-8&pn=" + pn;
+        return "https://tieba.baidu.com/f?kw=" + SpiderConfigFactory.getInstance().workConfig.tiebaName + "&ie=utf-8&pn=" + pn;
     }
 
     private List<PostSimpleInfo> parseResponse(String string) {
@@ -61,10 +68,10 @@ public class QueryPageActor extends AbstractActor {
             PostSimpleInfo postSimpleInfo = new PostSimpleInfo();
 
             try {
-                postSimpleInfo.remarkNum = Integer.valueOf(el.select(".threadlist_rep_num").get(0).text());
-                postSimpleInfo.createUser = el.select(".tb_icon_author a").get(0).text();
+                postSimpleInfo.remarkNum = Integer.valueOf(el.select(".threadlist_rep_num").text());
+                postSimpleInfo.createUser = el.select(".tb_icon_author").text();
                 postSimpleInfo.lastUpdateUser = el.select(".frs-author-name").get(0).text();
-                String text = el.select(".threadlist_reply_date").get(0).text();
+                String text = el.select(".threadlist_reply_date").text();
                 postSimpleInfo.lastUpdateTime = text.contains(":") ? LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) : text;
             }catch (Exception ex){
                 logger.info(el.html());
