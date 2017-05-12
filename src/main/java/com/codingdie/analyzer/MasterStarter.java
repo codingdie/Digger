@@ -3,9 +3,9 @@ package com.codingdie.analyzer;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.codingdie.analyzer.spider.akka.SpiderMasterActor;
-import com.codingdie.analyzer.spider.config.ConfigUtil;
-import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
+import com.codingdie.analyzer.spider.postindex.IndexSpiderMasterActor;
+import com.codingdie.analyzer.config.ConfigUtil;
+import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.google.gson.Gson;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -25,7 +25,7 @@ public class MasterStarter {
             String configStr = initAkkaStartParam(args);
             Config config = ConfigFactory.parseString(configStr);
             ActorSystem system = ActorSystem.create("master", config);
-            ActorRef resultCollectActorRef = system.actorOf(Props.create(SpiderMasterActor.class), "SpiderMasterActor");
+            ActorRef resultCollectActorRef = system.actorOf(Props.create(IndexSpiderMasterActor.class), "DetailSpiderMasterActor");
         }
     }
 

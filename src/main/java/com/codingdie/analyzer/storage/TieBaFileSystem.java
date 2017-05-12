@@ -1,5 +1,9 @@
 package com.codingdie.analyzer.storage;
 
+import com.codingdie.analyzer.storage.spider.IndexSpiderTaskStorage;
+import com.codingdie.analyzer.storage.spider.PostDetailStorage;
+import com.codingdie.analyzer.storage.spider.PostIndexStorage;
+
 import java.io.File;
 
 /**
@@ -9,9 +13,9 @@ public class TieBaFileSystem {
     public  static  final int ROLE_MASTER=0;
     public  static  final int ROLE_SLAVE=1;
 
-    private  SpiderTaskStorage spiderTaskStorage;
-    private  PostIndexStorage postIndexStorage;
-    private  PostContentStorage postContentStorage;
+    private IndexSpiderTaskStorage indexSpiderTaskStorage;
+    private PostIndexStorage postIndexStorage;
+    private PostDetailStorage postDetailStorage;
 
     private File root;
     public TieBaFileSystem(String name,int role){
@@ -24,7 +28,7 @@ public class TieBaFileSystem {
             if(!spiderTaskRootPath.exists()){
                 spiderTaskRootPath.mkdirs();
             }
-            this.spiderTaskStorage=new SpiderTaskStorage(spiderTaskRootPath);
+            this.indexSpiderTaskStorage =new IndexSpiderTaskStorage(spiderTaskRootPath);
             File postIndexRootPath = new File(root.getAbsolutePath() + File.separatorChar + "postindex");
             if(!postIndexRootPath.exists()){
                 postIndexRootPath.mkdirs();
@@ -36,20 +40,20 @@ public class TieBaFileSystem {
             if(!postContentRootPath.exists()){
                 postContentRootPath.mkdirs();
             }
-            this.postContentStorage=new PostContentStorage(postContentRootPath);
+            this.postDetailStorage =new PostDetailStorage(postContentRootPath);
         }
     }
 
-    public SpiderTaskStorage getSpiderTaskStorage() {
-        return spiderTaskStorage;
+    public IndexSpiderTaskStorage getIndexSpiderTaskStorage() {
+        return indexSpiderTaskStorage;
     }
 
     public PostIndexStorage getPostIndexStorage() {
         return postIndexStorage;
     }
 
-    public PostContentStorage getPostContentStorage() {
-        return postContentStorage;
+    public PostDetailStorage getPostDetailStorage() {
+        return postDetailStorage;
     }
 
     public void clear(){

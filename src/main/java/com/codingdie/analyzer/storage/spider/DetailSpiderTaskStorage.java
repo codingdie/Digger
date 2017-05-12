@@ -1,12 +1,10 @@
-package com.codingdie.analyzer.storage;
+package com.codingdie.analyzer.storage.spider;
 
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.google.gson.Gson;
 import org.jsoup.helper.StringUtil;
 
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +13,14 @@ import java.util.stream.Collectors;
 /**
  * Created by xupeng on 2017/5/10.
  */
-public class SpiderTaskStorage {
+public class DetailSpiderTaskStorage {
 
     private File taskFile;
 
 
     private File root;
 
-    public SpiderTaskStorage(File rootPath) {
+    public DetailSpiderTaskStorage(File rootPath) {
         this.root = rootPath;
         this.taskFile = new File(root.getAbsolutePath() + File.separator + "task.task");
 

@@ -1,6 +1,6 @@
 package com.codingdie.analyzer.spider.network;
 
-import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
+import com.codingdie.analyzer.config.SpiderConfigFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -99,8 +99,7 @@ public class HttpService {
                     }
                     Thread.sleep(1000L);
                 } else {
-                    html = response.body().string();
-                    netlogger.info(request.url()+":success");
+                    html = response.body().string().trim();
 
                     newCookie(response.headers("Set-Cookie"));
                 }
@@ -109,6 +108,7 @@ public class HttpService {
                 ex.printStackTrace();
             }
         }
+        netlogger.info(request.url()+":success");
 
         return html;
     }
@@ -156,5 +156,8 @@ public class HttpService {
         }
         return builder.build();
     }
-
+     public synchronized void  destroy(){
+        timer.cancel();
+        httpService=null;
+     }
 }

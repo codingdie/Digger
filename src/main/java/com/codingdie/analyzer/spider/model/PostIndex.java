@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.storage.domain;
+package com.codingdie.analyzer.spider.model;
 
 import java.io.Serializable;
 
@@ -11,7 +11,8 @@ public class PostIndex implements Serializable {
     public final static int  STATUS_DELETE=2;
 
     private long postId;
-    private String host;
+    private long pn;
+    private String spiderHost;
     private int  status=STATUS_NO_CONTENT;
     private long modifyTime=System.currentTimeMillis();
     private String title;
@@ -25,12 +26,12 @@ public class PostIndex implements Serializable {
         this.postId = postId;
     }
 
-    public String getHost() {
-        return host;
+    public String getSpiderHost() {
+        return spiderHost;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setSpiderHost(String spiderHost) {
+        this.spiderHost = spiderHost;
     }
 
     public int getStatus() {
@@ -63,5 +64,13 @@ public class PostIndex implements Serializable {
 
     public void setCreateUser(String createUser) {
         this.createUser = createUser;
+    }
+
+    public long getPn() {
+        return pn;
+    }
+
+    public void setPn(long pn) {
+        this.pn = pn;
     }
 }

@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.config;
+package com.codingdie.analyzer.config;
 
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
@@ -18,10 +18,15 @@ public class ConfigUtil {
 
     public static final String SPILLTER = ",";
 
-    public static void initConfig(String configFolder) throws IOException {
-        SpiderConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
-        SpiderConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
-        SpiderConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
+    public static void initConfig(String configFolder) {
+        try {
+            SpiderConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
+            SpiderConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
+            SpiderConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public static SlavesConfig initSlavesConfig(String configFolder) {
@@ -51,7 +56,6 @@ public class ConfigUtil {
         System.out.println(workConfig.tiebaName);
         String string = HttpService.getInstance().excute(new Request.Builder()
                 .url("https://tieba.baidu.com/f?kw=" + workConfig.tiebaName + "&ie=utf-8").build());
-        System.out.println(string);
         Document document = Jsoup.parse(string);
         workConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
         workConfig.time = LocalDateTime.now();

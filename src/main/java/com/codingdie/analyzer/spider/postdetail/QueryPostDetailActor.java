@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.akka;
+package com.codingdie.analyzer.spider.postdetail;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.spider.akka.message.QueryPostDetailMessage;

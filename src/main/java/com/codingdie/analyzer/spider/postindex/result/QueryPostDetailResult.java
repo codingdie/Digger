@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.akka.result;
+package com.codingdie.analyzer.spider.postindex.result;
 
 import java.io.Serializable;
 

@@ -1,27 +1,39 @@
 package storage;
 
+import com.codingdie.analyzer.spider.network.HtmlParser;
+import com.codingdie.analyzer.config.ConfigUtil;
 import com.codingdie.analyzer.spider.model.PageTask;
+import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
-import com.codingdie.analyzer.storage.domain.PostIndex;
+import com.codingdie.analyzer.spider.model.PostIndex;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import junit.framework.TestCase;
+import okhttp3.Request;
 
-import java.io.File;
 import java.text.NumberFormat;
 
 /**
  * Created by xupeng on 2017/5/10.
  */
-public class SpiderTaskStorageTest extends TestCase {
+public class IndexSpiderTaskStorageTest extends TestCase {
 
+    public void testA(){
+        ConfigUtil.initConfig("conf");
+        String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(186350)).build());
+        System.out.println(HtmlParser.parseList(html).size());
+    }
+
+    private String buildUrl(int pn) {
+        return "https://tieba.baidu.com/f?kw=李毅&ie=utf-8&pn=" + pn;
+    }
     public void testAddTasks() {
         TieBaFileSystem tieBaFileSystem = new TieBaFileSystem("李毅1", TieBaFileSystem.ROLE_MASTER);
-        tieBaFileSystem.getSpiderTaskStorage().saveTask(new Gson().fromJson("{\"pn\":18300,\"status\":2}", PageTask.class));
+        tieBaFileSystem.getIndexSpiderTaskStorage().saveTask(new Gson().fromJson("{\"pn\":18300,\"status\":2}", PageTask.class));
 
-        tieBaFileSystem.getSpiderTaskStorage().saveTask(new Gson().fromJson("{\"pn\":18300,\"status\":2}", PageTask.class));
+        tieBaFileSystem.getIndexSpiderTaskStorage().saveTask(new Gson().fromJson("{\"pn\":18300,\"status\":2}", PageTask.class));
 
-        tieBaFileSystem.getSpiderTaskStorage().parseAndRebuild();
+        tieBaFileSystem.getIndexSpiderTaskStorage().parseAndRebuild();
         tieBaFileSystem.clear();
 
     }
@@ -31,7 +43,7 @@ public class SpiderTaskStorageTest extends TestCase {
         for (int i = 0; i < 1000; i++) {
             PostIndex postIndex = new PostIndex();
             postIndex.setPostId(i);
-            postIndex.setHost("host" + i);
+            postIndex.setSpiderHost("host" + i);
             postIndex.setModifyTime(System.currentTimeMillis());
             tieBaFileSystem.getPostIndexStorage().putIndex(postIndex);
         }

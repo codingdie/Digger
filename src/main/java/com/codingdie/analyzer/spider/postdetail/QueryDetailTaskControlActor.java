@@ -1,10 +1,11 @@
-package com.codingdie.analyzer.spider.akka;
+package com.codingdie.analyzer.spider.postdetail;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
+import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.akka.message.QueryPostDetailMessage;
+import com.codingdie.analyzer.spider.postdetail.QueryPostDetailActor;
 
 import java.util.ArrayList;
 import java.util.List;

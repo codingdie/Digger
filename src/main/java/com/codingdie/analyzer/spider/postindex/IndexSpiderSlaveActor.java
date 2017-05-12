@@ -1,12 +1,13 @@
-package com.codingdie.analyzer.spider.akka;
+package com.codingdie.analyzer.spider.postindex;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.akka.result.QueryPageResult;
-import com.codingdie.analyzer.spider.config.SpiderConfigFactory;
+import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
+import com.codingdie.analyzer.config.SpiderConfigFactory;
+import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Created by xupeng on 2017/4/14.
  */
-public class QueryPageTaskControlActor extends AbstractActor {
+public class IndexSpiderSlaveActor extends AbstractActor {
 
     private  List<ActorRef> actorRefList=new ArrayList<>();
     private  ActorSelection resultCollectActorSelection=null;
@@ -23,7 +24,7 @@ public class QueryPageTaskControlActor extends AbstractActor {
     int detail_actor_count=10;
     private int finishedTaskCount =0;
     Logger logger=Logger.getLogger("slave-task");
-    public static  enum SIGN {SHOW_CHILDCOUNT,STOP}
+    public static  enum SIGN {STOP}
 
     @Override
     public void preStart() throws Exception {
@@ -33,7 +34,7 @@ public class QueryPageTaskControlActor extends AbstractActor {
             ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
             actorRefList.add(queryPageActor);
         }
-        String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/SpiderMasterActor";
+        String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/DetailSpiderMasterActor";
         System.out.println(path);
         resultCollectActorSelection = getContext().getSystem().actorSelection(path);
         totalTaskCount =0;
@@ -55,6 +56,8 @@ public class QueryPageTaskControlActor extends AbstractActor {
             printProcess();
 
         }).matchEquals(SIGN.STOP,r->{
+            HttpService.getInstance().destroy();
+
             getContext().getSystem().terminate();
 
         }).build();

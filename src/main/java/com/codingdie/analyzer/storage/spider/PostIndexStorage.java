@@ -1,7 +1,8 @@
-package com.codingdie.analyzer.storage;
+package com.codingdie.analyzer.storage.spider;
 
-import com.codingdie.analyzer.storage.domain.PostIndex;
+import com.codingdie.analyzer.spider.model.PostIndex;
 import com.google.gson.Gson;
+import org.apache.log4j.Logger;
 import org.jsoup.helper.StringUtil;
 
 import java.io.*;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by xupeng on 2017/5/10.
  */
 public class PostIndexStorage {
+    Logger logger=Logger.getLogger("postindex");
     public static int FILE_SIZE = 10;
     private File root;
     private List<File> indexFiles = new ArrayList<>(FILE_SIZE);
@@ -99,8 +101,13 @@ public class PostIndexStorage {
 
 
     public void putIndex(PostIndex postIndex){
-        longPostIndexHashMap.put(postIndex.getPostId(),postIndex);
-        saveIndex(postIndex);
+        if(longPostIndexHashMap.containsKey(postIndex.getPostId())){
+            logger.info("duplicate:"+new Gson().toJson(postIndex));
+        }else{
+            longPostIndexHashMap.put(postIndex.getPostId(),postIndex);
+            saveIndex(postIndex);
+        }
+
     }
 
     public int countAllIndex(){
