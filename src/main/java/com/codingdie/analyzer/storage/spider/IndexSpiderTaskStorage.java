@@ -24,7 +24,7 @@ public class IndexSpiderTaskStorage {
 
     public IndexSpiderTaskStorage(File rootPath) {
         this.root = rootPath;
-        this.taskFile = new File(root.getAbsolutePath() + File.separator + "task.task");
+        this.taskFile = new File(root.getAbsolutePath() + File.separator + "index.task");
 
         if (!this.taskFile.exists()) {
             try {
@@ -53,7 +53,16 @@ public class IndexSpiderTaskStorage {
                 });
                 pageTasks.sort((o1, o2) ->
                 {
-                    return  (o1.pn-o2.pn)*10+(o1.status-o2.status);
+                    if(o1.pn>o2.pn){
+                        return  1;
+                    }else{
+                        if(o1.pn==o2.pn){
+                            return o1.status-o2.status;
+
+                        }else{
+                            return -1;
+                        }
+                    }
                 });
                 saveTasks(pageTasks);
             }else{
@@ -67,7 +76,7 @@ public class IndexSpiderTaskStorage {
     }
 
    private List<PageTask> parse(){
-       Map<Integer,PageTask> pageTaskMap=new HashMap<>();
+       Map<Long,PageTask> pageTaskMap=new HashMap<>();
         try {
             BufferedReader bufferedReader=new BufferedReader(new FileReader(taskFile));
             String line=null;

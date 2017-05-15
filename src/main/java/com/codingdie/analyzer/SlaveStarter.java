@@ -25,10 +25,8 @@ public class SlaveStarter {
             String configStr = initAkkaStartParam(args);
             Config config = ConfigFactory.parseString(configStr);
             ActorSystem system = ActorSystem.create("slave", config);
-            ActorRef queryPageTaskControlActor = system.actorOf(Props.create(IndexSpiderSlaveActor.class), "DetailSpiderSlaveActor");
-            ActorRef queryDetailTaskControlActor = system.actorOf(Props.create(QueryDetailTaskControlActor.class), "QueryDetailTaskControlActor");
-            System.out.println(queryPageTaskControlActor.path().toString());
-            System.out.println(queryDetailTaskControlActor.path().toString());
+            ActorRef indexSpiderSlaveActor = system.actorOf(Props.create(IndexSpiderSlaveActor.class), "IndexSpiderSlaveActor");
+            System.out.println(indexSpiderSlaveActor.path().toString());
         }
 
     }

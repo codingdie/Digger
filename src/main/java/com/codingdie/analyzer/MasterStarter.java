@@ -3,6 +3,8 @@ package com.codingdie.analyzer;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.codingdie.analyzer.spider.postdetail.DetailSpiderMasterActor;
+import com.codingdie.analyzer.spider.postdetail.DetailSpiderSlaveActor;
 import com.codingdie.analyzer.spider.postindex.IndexSpiderMasterActor;
 import com.codingdie.analyzer.config.ConfigUtil;
 import com.codingdie.analyzer.config.SpiderConfigFactory;
@@ -25,7 +27,8 @@ public class MasterStarter {
             String configStr = initAkkaStartParam(args);
             Config config = ConfigFactory.parseString(configStr);
             ActorSystem system = ActorSystem.create("master", config);
-            ActorRef resultCollectActorRef = system.actorOf(Props.create(IndexSpiderMasterActor.class), "DetailSpiderMasterActor");
+            system.actorOf(Props.create(IndexSpiderMasterActor.class), "IndexSpiderMasterActor");
+
         }
     }
 

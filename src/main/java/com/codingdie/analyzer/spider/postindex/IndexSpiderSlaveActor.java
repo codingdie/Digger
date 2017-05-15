@@ -4,39 +4,38 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
+import akka.util.Timeout;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
 import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
+import scala.concurrent.Future;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by xupeng on 2017/4/14.
  */
 public class IndexSpiderSlaveActor extends AbstractActor {
 
-    private  List<ActorRef> actorRefList=new ArrayList<>();
-    private  ActorSelection resultCollectActorSelection=null;
-    private int totalTaskCount =0;
-    int detail_actor_count=10;
-    private int finishedTaskCount =0;
     Logger logger=Logger.getLogger("slave-task");
-    public static  enum SIGN {STOP}
+    private  List<ActorRef> pageActors =new ArrayList<>();
+    private int totalTaskCount =0;
 
+    private int finishedTaskCount =0;
+    public static   enum SIGN {STOP}
+    private ConcurrentHashMap<Long,ActorRef> senderMap=new ConcurrentHashMap<>();
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
-        for(; totalTaskCount < detail_actor_count; totalTaskCount++){
+        for(; totalTaskCount < SpiderConfigFactory.getInstance().slavesConfig.page_actor_count; totalTaskCount++){
             ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
-            actorRefList.add(queryPageActor);
+            pageActors.add(queryPageActor);
         }
-        String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/DetailSpiderMasterActor";
-        System.out.println(path);
-        resultCollectActorSelection = getContext().getSystem().actorSelection(path);
         totalTaskCount =0;
     }
 
@@ -44,15 +43,16 @@ public class IndexSpiderSlaveActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
 
-            ActorRef actorRef= actorRefList.get(totalTaskCount %detail_actor_count);
+            ActorRef actorRef= pageActors.get(totalTaskCount %SpiderConfigFactory.getInstance().slavesConfig.page_actor_count);
             actorRef.tell(m,getSelf());
+            senderMap.put(m.pn,getSender());
             totalTaskCount++;
             printProcess();
 
         }).match(QueryPageResult.class,m->{
-
             finishedTaskCount++;
-            resultCollectActorSelection.tell(m,getSelf());
+            senderMap.get(m.pn).tell(m,getSelf());
+            senderMap.remove(m.pn);
             printProcess();
 
         }).matchEquals(SIGN.STOP,r->{

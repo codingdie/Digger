@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class QueryPageResult implements Serializable {
     public List<PostSimpleInfo> postSimpleInfos;
-    public int  pn;
+    public long  pn;
     public boolean  success=false;
 
 
