@@ -57,7 +57,6 @@ public class IndexSpiderSlaveActor extends AbstractActor {
 
         }).matchEquals(SIGN.STOP,r->{
             HttpService.getInstance().destroy();
-
             getContext().getSystem().terminate();
 
         }).build();

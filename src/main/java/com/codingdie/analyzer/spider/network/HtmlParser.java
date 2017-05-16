@@ -30,7 +30,7 @@ public class HtmlParser {
                 ex.printStackTrace();
             }
             try {
-                postSimpleInfo.postId = Long.valueOf(el.select(".threadlist_title a").attr("href").split("/")[2].split("//?")[0]) ;
+                postSimpleInfo.postId = Long.valueOf(el.select(".threadlist_title a").attr("href").split("/")[2].split("\\?")[0]) ;
                 postSimpleInfo.title = el.select(".threadlist_title a").text();
             } catch (Exception ex) {
                 ex.printStackTrace();

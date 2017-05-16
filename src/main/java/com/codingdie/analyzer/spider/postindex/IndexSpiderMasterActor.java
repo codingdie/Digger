@@ -13,6 +13,7 @@ import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
 import com.codingdie.analyzer.storage.spider.IndexSpiderTaskStorage;
+import com.codingdie.analyzer.util.MailUtil;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
@@ -54,7 +55,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        System.out.println("stop DetailSpiderMasterActor");
+        System.out.println("stop IndexSpiderMasterActor");
     }
 
     @Override
@@ -81,7 +82,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
     private void initFailedChecker() {
         getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(30, TimeUnit.SECONDS), () -> {
-            failedFlag = (failedTasks.size() - failedCount) > 100;
+            failedFlag = (failedTasks.size() - failedCount) > 20*slaves.size();
             failedCount = failedTasks.size();
         }, getContext().getSystem().dispatcher());
     }
@@ -207,10 +208,13 @@ public class IndexSpiderMasterActor extends AbstractActor {
             slavesRunningTaskMapData.put(senderPath, slavesRunningTaskMapData.get(senderPath) - 1);
 
             if ((todoTasks.size() == 0 && excutingTasks.size() == 0)) {
+                MailUtil.sendMail("finish!","finish");
                 System.out.println("finish all task! stop system");
                 stopSpider();
             }
             if (failedFlag) {
+                MailUtil.sendMail("lots of failed task! please check","you need check cookie or somthing else.");
+
                 System.out.println("system will stop because of lots of failed task!");
                 stopSpider();
             }
@@ -233,11 +237,6 @@ public class IndexSpiderMasterActor extends AbstractActor {
         slaves.iterator().forEachRemaining(item -> {
             item.tell(IndexSpiderSlaveActor.SIGN.STOP, ActorRef.noSender());
         });
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         getContext().getSystem().terminate();
         System.out.println("stop system,total  excuting time:" + (System.currentTimeMillis() - beginTime));
     }

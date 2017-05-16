@@ -11,13 +11,25 @@ import com.google.gson.GsonBuilder;
 import junit.framework.TestCase;
 import okhttp3.Request;
 
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.text.NumberFormat;
+import java.util.Properties;
 
 /**
  * Created by xupeng on 2017/5/10.
  */
 public class IndexSpiderTaskStorageTest extends TestCase {
 
+    public void testB() throws Exception{
+
+
+        System.out.println("5072279654".split("\\?")[0]);
+    }
     public void testA(){
         ConfigUtil.initConfig("conf");
         String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(186350)).build());
