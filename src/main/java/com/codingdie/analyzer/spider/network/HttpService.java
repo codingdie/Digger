@@ -1,10 +1,11 @@
 package com.codingdie.analyzer.spider.network;
 
-import com.codingdie.analyzer.config.SpiderConfigFactory;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.log4j.Logger;
+import org.jsoup.helper.StringUtil;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -47,7 +48,7 @@ public class HttpService {
             public void run() {
                 try {
                     if(linkedBlockingQueue.size()==0){
-                        for(int i = 0; i< SpiderConfigFactory.getInstance().workConfig.max_http_request_per_second; i++){
+                        for(int i = 0; i< TieBaAnalyserConfigFactory.getInstance().workConfig.max_http_request_per_second; i++){
                             linkedBlockingQueue.put(new Integer(count++));
                         }
                     }
@@ -59,10 +60,10 @@ public class HttpService {
     }
 
 
-    public  String  excute(Request request) {
+    public  String  excute(Request request,String cookie) {
 
-        request = request.newBuilder().header("Cookie", SpiderConfigFactory.getInstance().workConfig.cookie)
-//                .header("Proxy-Authorization", "Basic " + Base64.getEncoder().encodeToString(SpiderConfigFactory.getInstance().masterConfig.key.getBytes()))
+        request = request.newBuilder().header("Cookie", StringUtil.isBlank(cookie)? TieBaAnalyserConfigFactory.getInstance().spiderConfig.cookie:cookie)
+//                .header("Proxy-Authorization", "Basic " + Base64.getEncoder().encodeToString(TieBaAnalyserConfigFactory.getInstance().masterConfig.key.getBytes()))
                 .build();
 
         String html = null;
@@ -130,7 +131,7 @@ public class HttpService {
             cookielogger.info(str);
 
             String[] strs = str.split(";")[0].split("=");
-            String newCokkie = Arrays.stream(SpiderConfigFactory.getInstance().workConfig.cookie.split(";")).filter(s -> {
+            String newCokkie = Arrays.stream(TieBaAnalyserConfigFactory.getInstance().spiderConfig.cookie.split(";")).filter(s -> {
                 return !s.contains(strs[0]);
             }).reduce(new BinaryOperator<String>() {
                 @Override
@@ -140,7 +141,7 @@ public class HttpService {
                 }
             }).get() + ";" + strs[0] + "=" + strs[1];
 
-            SpiderConfigFactory.getInstance().workConfig.cookie = newCokkie;
+            TieBaAnalyserConfigFactory.getInstance().spiderConfig.cookie = newCokkie;
             cookielogger.info(newCokkie);
 
         });

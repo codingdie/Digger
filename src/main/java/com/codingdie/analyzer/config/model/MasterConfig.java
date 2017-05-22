@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.config;
+package com.codingdie.analyzer.config.model;
 
 /**
  * Created by xupeng on 2017/4/27.

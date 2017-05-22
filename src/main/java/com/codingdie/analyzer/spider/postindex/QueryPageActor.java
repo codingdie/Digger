@@ -1,11 +1,11 @@
 package com.codingdie.analyzer.spider.postindex;
 
 import akka.actor.AbstractActor;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.network.HtmlParser;
 import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import okhttp3.Request;
 import org.apache.log4j.Logger;
@@ -23,7 +23,7 @@ public class QueryPageActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
-            String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build());
+            String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build(),m.cookie);
             QueryPageResult queryPageResult = new QueryPageResult();
             queryPageResult.pn = m.pn;
             if(StringUtil.isBlank(html)){
@@ -46,7 +46,7 @@ public class QueryPageActor extends AbstractActor {
     }
 
     private String buildUrl(long pn) {
-        return "https://tieba.baidu.com/f?kw=" + SpiderConfigFactory.getInstance().workConfig.tiebaName + "&ie=utf-8&pn=" + pn;
+        return "https://tieba.baidu.com/f?kw=" + TieBaAnalyserConfigFactory.getInstance().spiderConfig.tiebaName + "&ie=utf-8&pn=" + pn;
     }
 
 }

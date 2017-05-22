@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.postindex.QueryPageActor;
@@ -30,12 +30,12 @@ public class DetailSpiderSlaveActor extends AbstractActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
+        detail_actor_count = TieBaAnalyserConfigFactory.getInstance().slavesConfig.detail_actor_count;
         for(; totalTaskCount < detail_actor_count; totalTaskCount++){
             ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
             actorRefList.add(queryPageActor);
         }
-        String path = "akka.tcp://master@" + SpiderConfigFactory.getInstance().masterConfig.host + ":2550/user/DetailSpiderMasterActor";
+        String path = "akka.tcp://master@" + TieBaAnalyserConfigFactory.getInstance().masterConfig.host + ":2550/user/DetailSpiderMasterActor";
         System.out.println(path);
         resultCollectActorSelection = getContext().getSystem().actorSelection(path);
         totalTaskCount =0;
@@ -59,7 +59,6 @@ public class DetailSpiderSlaveActor extends AbstractActor {
         }).matchEquals(SIGN.STOP, r->{
             HttpService.getInstance().destroy();
 
-            getContext().getSystem().terminate();
 
         }).build();
     }

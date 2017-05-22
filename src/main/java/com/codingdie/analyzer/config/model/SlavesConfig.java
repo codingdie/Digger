@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.config;
+package com.codingdie.analyzer.config.model;
 
 import java.util.ArrayList;
 import java.util.List;

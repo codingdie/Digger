@@ -1,5 +1,9 @@
 package com.codingdie.analyzer.config;
 
+import com.codingdie.analyzer.config.model.MasterConfig;
+import com.codingdie.analyzer.config.model.SlavesConfig;
+import com.codingdie.analyzer.config.model.SpiderConfig;
+import com.codingdie.analyzer.config.model.WorkConfig;
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
@@ -18,11 +22,24 @@ public class ConfigUtil {
 
     public static final String SPILLTER = ",";
 
-    public static void initConfig(String configFolder) {
+    public static void initConfigForMaster(String configFolder) {
         try {
-            SpiderConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
-            SpiderConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
-            SpiderConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
+            System.out.println(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().masterConfig = ConfigUtil.initMasterConfig(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().spiderConfig = ConfigUtil.initSpiderConfig(configFolder);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void initConfigForSlave(String configFolder) {
+        try {
+            System.out.println(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().slavesConfig = ConfigUtil.initSlavesConfig(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().workConfig = ConfigUtil.initWorkConfig(configFolder);
+            TieBaAnalyserConfigFactory.getInstance().spiderConfig = ConfigUtil.initSpiderConfig(configFolder);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -46,22 +63,27 @@ public class ConfigUtil {
         return configPaths;
     }
 
+    public static SpiderConfig initSpiderConfig(String configFolder) throws IOException {
+        List<String> configPaths = getConfigPaths(configFolder, "spider.conf");
+
+        SpiderConfig spiderConfig = parseSpiderTargetConfig(configPaths);
+        TieBaAnalyserConfigFactory.getInstance().spiderConfig = spiderConfig;
+
+
+        System.out.println(spiderConfig.tiebaName);
+        String string = HttpService.getInstance().excute(new Request.Builder()
+                .url("https://tieba.baidu.com/f?kw=" + spiderConfig.tiebaName + "&ie=utf-8").build(),null);
+        Document document = Jsoup.parse(string);
+        spiderConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
+        spiderConfig.time = LocalDateTime.now();
+
+
+        return spiderConfig;
+    }
     public static WorkConfig initWorkConfig(String configFolder) throws IOException {
         List<String> configPaths = getConfigPaths(configFolder, "work.conf");
 
-        WorkConfig workConfig = parseTargetConfig(configPaths);
-        SpiderConfigFactory.getInstance().workConfig = workConfig;
-
-
-        System.out.println(workConfig.tiebaName);
-        String string = HttpService.getInstance().excute(new Request.Builder()
-                .url("https://tieba.baidu.com/f?kw=" + workConfig.tiebaName + "&ie=utf-8").build());
-        Document document = Jsoup.parse(string);
-        workConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
-        workConfig.time = LocalDateTime.now();
-
-
-        return workConfig;
+        return parseWorkConfig(configPaths);
     }
 
     public static MasterConfig initMasterConfig(String configFolder) throws IOException {
@@ -115,8 +137,8 @@ public class ConfigUtil {
 
     }
 
-    private static WorkConfig parseTargetConfig(List<String> confPaths) {
-        WorkConfig workConfig = null;
+    private static SpiderConfig parseSpiderTargetConfig(List<String> confPaths) {
+        SpiderConfig spiderConfig = null;
         try {
             String confPath = confPaths.stream().filter(s -> {
                 if (new File(s).exists()) {
@@ -136,19 +158,57 @@ public class ConfigUtil {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     if (line.contains("tieba_name=")) {
-                        if (workConfig == null) {
-                            workConfig = new WorkConfig();
+                        if (spiderConfig == null) {
+                            spiderConfig = new SpiderConfig();
                         }
-                        workConfig.tiebaName = line.replace("tieba_name=", "").trim();
+                        spiderConfig.tiebaName = line.replace("tieba_name=", "").trim();
                     }
 
                     if (line.contains("cookie=")) {
-                        if (workConfig == null) {
+                        if (spiderConfig == null) {
+                            spiderConfig = new SpiderConfig();
+                        }
+                        spiderConfig.cookie = line.replace("cookie=", "").trim();
+                    }
+
+                }
+                bufferedReader.close();
+                fileReader.close();
+
+
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return spiderConfig;
+
+
+    }
+
+    private static WorkConfig parseWorkConfig(List<String> confPaths) {
+        WorkConfig workConfig = null;
+        try {
+            String confPath = confPaths.stream().filter(s -> {
+                if (new File(s).exists()) {
+                    System.out.println(new File(s).getAbsolutePath());
+
+                    return true;
+                }
+                return false;
+            }).findFirst().orElse(null);
+            if (confPath != null) {
+                File file = new File(confPath);
+                FileReader fileReader = new FileReader(file);
+
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                String line = null;
+                String total = "";
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    if (line.contains("max_http_request_per_second=")) {
+                        if(workConfig==null){
                             workConfig = new WorkConfig();
                         }
-                        workConfig.cookie = line.replace("cookie=", "").trim();
-                    }
-                    if (line.contains("max_http_request_per_second=")) {
                         workConfig.max_http_request_per_second = Integer.valueOf(line.replace("max_http_request_per_second=", "").trim());
                     }
                 }
@@ -190,6 +250,10 @@ public class ConfigUtil {
                         masterConfig.host = line.replace("host=", "").trim();
                     }
                     if (line.contains("max_running_task=")) {
+                        if(masterConfig==null){
+                            masterConfig = new MasterConfig();
+                        }
+
                         masterConfig.max_running_task = Integer.valueOf(line.replace("max_running_task=", "").trim());
                     }
                 }

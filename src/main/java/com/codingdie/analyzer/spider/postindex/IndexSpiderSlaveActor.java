@@ -2,20 +2,16 @@ package com.codingdie.analyzer.spider.postindex;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.Props;
-import akka.util.Timeout;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
-import scala.concurrent.Future;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by xupeng on 2017/4/14.
@@ -32,7 +28,7 @@ public class IndexSpiderSlaveActor extends AbstractActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        for(; totalTaskCount < SpiderConfigFactory.getInstance().slavesConfig.page_actor_count; totalTaskCount++){
+        for(; totalTaskCount < TieBaAnalyserConfigFactory.getInstance().slavesConfig.page_actor_count; totalTaskCount++){
             ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
             pageActors.add(queryPageActor);
         }
@@ -43,7 +39,7 @@ public class IndexSpiderSlaveActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
 
-            ActorRef actorRef= pageActors.get(totalTaskCount %SpiderConfigFactory.getInstance().slavesConfig.page_actor_count);
+            ActorRef actorRef= pageActors.get(totalTaskCount % TieBaAnalyserConfigFactory.getInstance().slavesConfig.page_actor_count);
             actorRef.tell(m,getSelf());
             senderMap.put(m.pn,getSender());
             totalTaskCount++;
@@ -57,7 +53,6 @@ public class IndexSpiderSlaveActor extends AbstractActor {
 
         }).matchEquals(SIGN.STOP,r->{
             HttpService.getInstance().destroy();
-            getContext().getSystem().terminate();
 
         }).build();
     }

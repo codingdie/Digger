@@ -3,9 +3,11 @@ package com.codingdie.analyzer.spider.postindex;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.Cancellable;
 import akka.util.Timeout;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
-import com.codingdie.analyzer.config.WorkConfig;
+import com.codingdie.analyzer.config.ConfigUtil;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
+import com.codingdie.analyzer.config.model.SpiderConfig;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostIndex;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
@@ -43,6 +45,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
     private List<PageTask> finishedTasks = new ArrayList<>();
     private List<PageTask> failedTasks = new ArrayList<>();
     private List<ActorRef> slaves = new ArrayList<>();
+    private List<Cancellable> cancellables = new ArrayList<>();
 
     private long beginTime = 0;
     private ConcurrentHashMap<String, Integer> slavesRunningTaskMapData = new ConcurrentHashMap<>();
@@ -51,6 +54,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
     private TieBaFileSystem tieBaFileSystem;
     private ReentrantLock reentrantLock = new ReentrantLock();
     private Logger logger = Logger.getLogger("master-task");
+
 
     @Override
     public void postStop() throws Exception {
@@ -61,6 +65,8 @@ public class IndexSpiderMasterActor extends AbstractActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
+        HttpService.getInstance().destroy();
+        ConfigUtil.initConfigForMaster(TieBaAnalyserConfigFactory.configFolder);
         initStorage();
         connectSlaves();
         initStatistical();
@@ -71,20 +77,22 @@ public class IndexSpiderMasterActor extends AbstractActor {
     }
 
     private void initProcessPrinter() {
-        getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
+        Cancellable cancellable= getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
 
                 printProcess();
             }
         }, getContext().getSystem().dispatcher());
+        cancellables.add(cancellable);
     }
 
     private void initFailedChecker() {
-        getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(30, TimeUnit.SECONDS), () -> {
+        Cancellable cancellable=  getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(30, TimeUnit.SECONDS), () -> {
             failedFlag = (failedTasks.size() - failedCount) > 20*slaves.size();
             failedCount = failedTasks.size();
         }, getContext().getSystem().dispatcher());
+        cancellables.add(cancellable);
     }
 
     private void startAllocateTask() {
@@ -92,7 +100,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
         List<PageTask> pageTasks = indexSpiderTaskStorage.parseAndRebuild();
 
         if (pageTasks.size() == 0) {
-            Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().workConfig.totalCount).intValue();
+            Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.totalCount).intValue();
             totalPage = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalPage; i++) {
                 todoTasks.add(new PageTask(i * 50));
@@ -110,11 +118,11 @@ public class IndexSpiderMasterActor extends AbstractActor {
             initFinishedCount = finishedTasks.size();
         }
 
-        getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
+        Cancellable cancellable= getContext().getSystem().scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
 
-                int maxRunningTask = SpiderConfigFactory.getInstance().masterConfig.max_running_task;
+                int maxRunningTask = TieBaAnalyserConfigFactory.getInstance().masterConfig.max_running_task;
 
                 if (excutingTasks.size() > maxRunningTask || todoTasks.size() == 0) {
                     return;
@@ -132,6 +140,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
                 reentrantLock.unlock();
             }
         }, getContext().getSystem().dispatcher());
+        cancellables.add(cancellable);
 
     }
 
@@ -146,7 +155,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
     }
 
     private void connectSlaves() {
-        SpiderConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
+        TieBaAnalyserConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
             String path = "akka.tcp://slave@" + item + ":2552/user/IndexSpiderSlaveActor";
             ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection(path);
             Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
@@ -165,14 +174,15 @@ public class IndexSpiderMasterActor extends AbstractActor {
     private void initStorage() {
         long tm = System.currentTimeMillis();
         System.out.println("开始初始化存储");
-        WorkConfig workConfig = SpiderConfigFactory.getInstance().workConfig;
-        tieBaFileSystem = new TieBaFileSystem(workConfig.tiebaName, TieBaFileSystem.ROLE_MASTER);
+        SpiderConfig spiderConfig = TieBaAnalyserConfigFactory.getInstance().spiderConfig;
+        tieBaFileSystem = new TieBaFileSystem(spiderConfig.tiebaName, TieBaFileSystem.ROLE_MASTER);
         System.out.println("初始化存储完毕用时:" + (System.currentTimeMillis() - tm));
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(QueryPageResult.class, r -> {
+
             if (r.success && r.postSimpleInfos != null) {
                 r.postSimpleInfos.iterator().forEachRemaining(i -> {
                     new Gson().toJson(i);
@@ -209,13 +219,12 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
             if ((todoTasks.size() == 0 && excutingTasks.size() == 0)) {
                 MailUtil.sendMail("finish!","finish");
-                System.out.println("finish all task! stop system");
+                System.out.println("finish all task! stop indexspider");
                 stopSpider();
             }
             if (failedFlag) {
                 MailUtil.sendMail("lots of failed task! please check","you need check cookie or somthing else.");
-
-                System.out.println("system will stop because of lots of failed task!");
+                System.out.println("indexspider will stop because of lots of failed task!");
                 stopSpider();
             }
         }).match(PageTask.class, t -> {
@@ -234,11 +243,11 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
     private void stopSpider() {
         HttpService.getInstance().destroy();
-        slaves.iterator().forEachRemaining(item -> {
-            item.tell(IndexSpiderSlaveActor.SIGN.STOP, ActorRef.noSender());
+        cancellables.forEach(i->{
+            i.cancel();
         });
-        getContext().getSystem().terminate();
-        System.out.println("stop system,total  excuting time:" + (System.currentTimeMillis() - beginTime));
+        getContext().stop(self());
+        System.out.println("stop indexspider,total  excuting time:" + (System.currentTimeMillis() - beginTime));
     }
 
     private double caculatefailureRate() {

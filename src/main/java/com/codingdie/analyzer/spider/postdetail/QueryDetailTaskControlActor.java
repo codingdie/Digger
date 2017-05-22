@@ -3,9 +3,8 @@ package com.codingdie.analyzer.spider.postdetail;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.akka.message.QueryPostDetailMessage;
-import com.codingdie.analyzer.spider.postdetail.QueryPostDetailActor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class QueryDetailTaskControlActor extends AbstractActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        detail_actor_count = SpiderConfigFactory.getInstance().slavesConfig.detail_actor_count;
+        detail_actor_count = TieBaAnalyserConfigFactory.getInstance().slavesConfig.detail_actor_count;
 
         for(; pos< detail_actor_count; pos++){
             ActorRef queryPostDetailActor = context().actorOf(Props.create(QueryPostDetailActor.class), "QueryPostDetailActor"+pos);

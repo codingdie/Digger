@@ -5,8 +5,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.util.Timeout;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
-import com.codingdie.analyzer.config.WorkConfig;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
+import com.codingdie.analyzer.config.model.SpiderConfig;
+import com.codingdie.analyzer.config.model.WorkConfig;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
@@ -81,7 +82,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
         List<PageTask> pageTasks = indexSpiderTaskStorage.parseAndRebuild();
 
         if (pageTasks.size() == 0) {
-            Integer totalCount = Integer.valueOf(SpiderConfigFactory.getInstance().workConfig.totalCount).intValue();
+            Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.totalCount).intValue();
             totalTask = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalTask; i++) {
                 todoTasks.add(new PageTask(i * 50));
@@ -103,7 +104,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
             @Override
             public void run() {
 
-                int maxRunningTask = SpiderConfigFactory.getInstance().masterConfig.max_running_task;
+                int maxRunningTask = TieBaAnalyserConfigFactory.getInstance().masterConfig.max_running_task;
 
                 if (excutingTasks.size() > maxRunningTask) {
                     return;
@@ -141,7 +142,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
     }
 
     private void connectSlaves() {
-        SpiderConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
+        TieBaAnalyserConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
             String path = "akka.tcp://slave@" + item + ":2552/user/DetailSpiderSlaveActor";
             ActorSelection queryPageTaskControlActor = getContext().getSystem().actorSelection(path);
             Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
@@ -159,8 +160,8 @@ public class DetailSpiderMasterActor extends AbstractActor {
 
     private void initStorage() {
         System.out.println("开始初始化存储");
-        WorkConfig workConfig = SpiderConfigFactory.getInstance().workConfig;
-        tieBaFileSystem = new TieBaFileSystem(workConfig.tiebaName, TieBaFileSystem.ROLE_MASTER);
+        SpiderConfig spiderConfig = TieBaAnalyserConfigFactory.getInstance().spiderConfig;
+        tieBaFileSystem = new TieBaFileSystem(spiderConfig.tiebaName, TieBaFileSystem.ROLE_MASTER);
         System.out.println("初始化存储完毕");
 
     }
@@ -236,15 +237,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
 
     private void stopSpider() {
         HttpService.getInstance().destroy();
-        slaves.iterator().forEachRemaining(item -> {
-            item.tell(DetailSpiderSlaveActor.SIGN.STOP, ActorRef.noSender());
-        });
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        getContext().getSystem().terminate();
+
         System.out.println("stop system,total  excuting time:" + (System.currentTimeMillis() - beginTime));
     }
 

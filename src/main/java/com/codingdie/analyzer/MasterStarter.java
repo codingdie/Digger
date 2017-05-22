@@ -3,77 +3,49 @@ package com.codingdie.analyzer;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.codingdie.analyzer.spider.postdetail.DetailSpiderMasterActor;
-import com.codingdie.analyzer.spider.postdetail.DetailSpiderSlaveActor;
-import com.codingdie.analyzer.spider.postindex.IndexSpiderMasterActor;
+import com.codingdie.analyzer.config.AkkaConfigUtil;
+import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
+import com.codingdie.analyzer.controller.MasterController;
 import com.codingdie.analyzer.config.ConfigUtil;
-import com.codingdie.analyzer.config.SpiderConfigFactory;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.log4j.Logger;
+import scala.collection.immutable.Iterable;
+import scala.compat.java8.functionConverterImpls.FromJavaConsumer;
+import scala.concurrent.duration.FiniteDuration;
+import scala.runtime.AbstractFunction1;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by xupeng on 2017/4/24.
  */
 public class MasterStarter {
-
+    static  Logger logger=Logger.getLogger("master-control");
 
     public static void main(String[] args) throws Exception {
-        if (initApplicationConfig(args)) {
-            String configStr = initAkkaStartParam(args);
-            Config config = ConfigFactory.parseString(configStr);
-            ActorSystem system = ActorSystem.create("master", config);
-            system.actorOf(Props.create(IndexSpiderMasterActor.class), "IndexSpiderMasterActor");
-
-        }
-    }
-
-
-    private static boolean initApplicationConfig(String[] args) throws IOException {
-        String configFolder = "";
         if (args.length > 0) {
-            configFolder = args[0];
+            TieBaAnalyserConfigFactory.configFolder = args[0];
         }
-        ConfigUtil.initConfig(configFolder);
-        if (SpiderConfigFactory.getInstance().slavesConfig.hosts == null || SpiderConfigFactory.getInstance().slavesConfig.hosts.size() == 0) {
-            System.out.println("找不到配置文件或未配置slave节点");
-            return false;
-        }
-        System.out.println(new Gson().toJson(SpiderConfigFactory.getInstance()));
+        final  ActorSystem system = ActorSystem.create("master", AkkaConfigUtil.initAkkaConfigWithConsoleParam(args));
+        system.actorOf(Props.create(MasterController.class), "MasterController");
+        system.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS),()->{
 
-        return true;
+            Iterable<ActorRef> actorRefs= system.provider().guardian().children();
+            actorRefs.foreach(new FromJavaConsumer<ActorRef>(i->{
+                logger.info(i.path().toString());
+            }));
+
+        },system.dispatcher());
+
     }
 
-    private static String initAkkaStartParam(String[] args) throws IOException {
-        String host = "127.0.0.1";
-        String port = "2550";
 
-        if (args.length > 1) {
-            host = args[1];
-        }
-        if (args.length > 2) {
-            port = args[2];
-        }
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("server-application.conf")));
-        String configStr = "";
-        String line = null;
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.contains("hostname = \"127.0.0.1\"")) {
-                line = line.replace("hostname = \"127.0.0.1\"", "hostname = \"" + host + "\"");
-            }
-            if (line.contains("port = 2550")) {
-                line = line.replace("port = 2550", "port = " + port);
-            }
-            configStr += line;
-            configStr += "\n";
-        }
-        System.out.println(configStr);
-        return configStr;
-    }
 
 
 }

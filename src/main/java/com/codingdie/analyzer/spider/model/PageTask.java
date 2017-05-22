@@ -16,5 +16,6 @@ public class PageTask implements Serializable{
     }
     public long pn=50;
     public int status=STATUS_TODO;
+    public String cookie;
 
 }
