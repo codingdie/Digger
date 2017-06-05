@@ -5,6 +5,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.remote.AssociationErrorEvent;
 import com.codingdie.analyzer.config.AkkaConfigUtil;
+import com.codingdie.analyzer.config.ConfigUtil;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.controller.MasterControllServer;
 import com.codingdie.analyzer.spider.AssociateListener;
@@ -25,6 +26,8 @@ public class MasterStarter {
         if (args.length > 0) {
             TieBaAnalyserConfigFactory.configFolder = args[0];
         }
+        ConfigUtil.initConfigForMaster(TieBaAnalyserConfigFactory.configFolder);
+
         final  ActorSystem system = ActorSystem.create("master", AkkaConfigUtil.initAkkaConfigWithConsoleParam(args));
 
         system.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS),()->{

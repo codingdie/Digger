@@ -62,11 +62,13 @@ public class IndexSpiderMasterActor extends AbstractActor {
         System.out.println("stop IndexSpiderMasterActor");
     }
 
+    public IndexSpiderMasterActor(){
+        super();
+    }
     @Override
     public void preStart() throws Exception {
         super.preStart();
         HttpService.getInstance().destroy();
-        ConfigUtil.initConfigForMaster(TieBaAnalyserConfigFactory.configFolder);
         initStorage();
         connectSlaves();
         initStatistical();

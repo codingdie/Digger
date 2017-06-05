@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
  */
 public class SpiderConfig  implements Serializable{
     public String tiebaName;
-    public String totalCount;
-    public LocalDateTime time;
+    public int totalCount;
+    public String time;
     public String cookie;
 
 }

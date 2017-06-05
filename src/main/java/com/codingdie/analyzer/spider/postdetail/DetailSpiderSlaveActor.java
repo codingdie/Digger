@@ -35,9 +35,7 @@ public class DetailSpiderSlaveActor extends AbstractActor {
             ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
             actorRefList.add(queryPageActor);
         }
-        String path = "akka.tcp://master@" + TieBaAnalyserConfigFactory.getInstance().masterConfig.host + ":2550/user/DetailSpiderMasterActor";
-        System.out.println(path);
-        resultCollectActorSelection = getContext().getSystem().actorSelection(path);
+
         totalTaskCount =0;
     }
 

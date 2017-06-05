@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,14 +73,15 @@ public class ConfigUtil {
 
         System.out.println(spiderConfig.tiebaName);
         String string = HttpService.getInstance().excute(new Request.Builder()
-                .url("https://tieba.baidu.com/f?kw=" + spiderConfig.tiebaName + "&ie=utf-8").build(),null);
+                .url("https://tieba.baidu.com/f?kw=" + spiderConfig.tiebaName + "&ie=utf-8").build(), null);
         Document document = Jsoup.parse(string);
-        spiderConfig.totalCount = document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1];
-        spiderConfig.time = LocalDateTime.now();
+        spiderConfig.totalCount = Integer.valueOf(document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1]).intValue();
+        spiderConfig.time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
 
         return spiderConfig;
     }
+
     public static WorkConfig initWorkConfig(String configFolder) throws IOException {
         List<String> configPaths = getConfigPaths(configFolder, "work.conf");
 
@@ -206,7 +208,7 @@ public class ConfigUtil {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     if (line.contains("max_http_request_per_second=")) {
-                        if(workConfig==null){
+                        if (workConfig == null) {
                             workConfig = new WorkConfig();
                         }
                         workConfig.max_http_request_per_second = Integer.valueOf(line.replace("max_http_request_per_second=", "").trim());
@@ -246,11 +248,19 @@ public class ConfigUtil {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     if (line.contains("host=")) {
-                        masterConfig = new MasterConfig();
+                        if (masterConfig == null) {
+                            masterConfig = new MasterConfig();
+                        }
                         masterConfig.host = line.replace("host=", "").trim();
                     }
+                    if (line.contains("admin_port=")) {
+                        if (masterConfig == null) {
+                            masterConfig = new MasterConfig();
+                        }
+                        masterConfig.admin_port = Integer.valueOf(line.replace("admin_port=", "").trim());
+                    }
                     if (line.contains("max_running_task=")) {
-                        if(masterConfig==null){
+                        if (masterConfig == null) {
                             masterConfig = new MasterConfig();
                         }
 
