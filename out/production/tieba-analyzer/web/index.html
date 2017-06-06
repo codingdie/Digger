@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>TieBa Analyser</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+
+</head>
+<style>
+
+</style>
+<body>
+<div id="app" class="container">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>贴吧分析系统控制台</h3>
+        </div>
+
+    </div>
+    <div class="row ">
+
+        <div class="form-inline col-xs-12 ">
+            <div class="form-group ">
+                <label for="configName">1，配置名称</label>
+                <input type="text" class="form-control" value="masterConfig" id="configName" placeholder="配置名称">
+            </div>
+            <div class="form-group">
+                <label for="configField">配置字段</label>
+                <input type="text" value="max_running_task" class="form-control" id="configField" placeholder="配置Json">
+            </div>
+
+            <div class="form-group">
+                <label for="configValue">配置数值</label>
+                <input type="text" class="form-control" id="configValue" placeholder="配置数值">
+            </div>
+            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default" onclick="updateConfig(this)" data-toggle="popover">更新配置</a>
+
+        </div>
+
+        <div class=" col-xs-12 " style="">
+            <pre>eg:配置名称 :masterConfig 配置字段:max_running_task 配置数值:90 </pre></div>
+
+    </div>
+    <div class="row ">
+
+        <div class="form-inline col-xs-12 ">
+
+            <div class="form-group">
+                <label for="tiebaName">2，贴吧名称</label>
+                <input type="text" class="form-control" id="tiebaName" placeholder="贴吧名称">
+            </div>
+            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default" onclick="startIndexSpider(this)" data-toggle="popover">开始贴吧索引抓取</a>
+            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default"  data-toggle="popover">开始贴吧帖子抓取(developing)</a>
+            <button  class="btn btn-default">开始分析贴吧用户价值排名(todo)</button>
+            <button  class="btn btn-default">开始分析贴吧帖子热度排名(todo)</button>
+            <button  class="btn btn-default">提取此贴吧高频话题(todo)</button>
+
+        </div>
+
+    </div>
+
+    <div class="row ">
+        <div class=" col-xs-12 ">
+            <label>现有配置:</label>
+             <pre id="configJsonShow">
+
+             </pre>
+        </div>
+
+
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $('[data-toggle="popover"]').popover({content:"123"})
+        })
+        showConfig()
+
+    })
+    function showConfig() {
+        $.get("/config/show",function(data,status){
+            var result=JSON.parse(data)
+            $("#tiebaName").val(result.spiderConfig.tiebaName)
+            $("#configJsonShow").text(data);
+        });
+    }
+    function startIndexSpider(btn) {
+        $.get("/indexspider/start?tiebaName="+ $("#tiebaName").val(),function(data,status){
+
+            $(btn).attr("data-content",data)
+            $(btn).popover("show")
+            showConfig()
+        });
+    }
+    function updateConfig(btn) {
+        $.get("/config/update?configName="+$("#configName").val()+"&configField="+$("#configField").val()+"&configValue="+$("#configValue").val(),function(data,status){
+
+            $(btn).attr("data-content",data)
+            $(btn).popover("show")
+            showConfig()
+        });
+    }
+</script>
+</body>
+</html>

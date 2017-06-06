@@ -19,7 +19,6 @@ public class AkkaConfigUtil {
     public static final int DEFAULT_PORT = 2552;
 
     public static Config initAkkaConfig(String host, int port) throws IOException {
-
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("" +
                 "application.conf")));
         String configStr = "";
@@ -36,6 +35,7 @@ public class AkkaConfigUtil {
         }
         return ConfigFactory.parseString(configStr);
     }
+
     public static Config initAkkaConfigWithConsoleParam(String[] args) throws IOException {
         String host = DEFAULT_HOST;
         int port = DEFAULT_PORT;

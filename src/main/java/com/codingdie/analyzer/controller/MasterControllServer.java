@@ -9,6 +9,7 @@ import akka.http.javadsl.ServerBinding;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
 import akka.http.javadsl.server.AllDirectives;
+import akka.http.javadsl.server.PathMatcher0;
 import akka.http.javadsl.server.PathMatchers;
 import akka.http.javadsl.server.Route;
 import akka.stream.ActorMaterializer;
@@ -16,13 +17,11 @@ import akka.stream.javadsl.Flow;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.postdetail.DetailSpiderMasterActor;
 import com.codingdie.analyzer.spider.postindex.IndexSpiderMasterActor;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 
-import java.io.StringReader;
-import java.util.HashMap;
+import java.io.File;
 import java.util.concurrent.CompletionStage;
+import java.util.regex.Pattern;
 
 /**
  * Created by xupeng on 2017/6/2.
@@ -35,15 +34,16 @@ public class MasterControllServer extends AllDirectives {
         final ActorMaterializer materializer = ActorMaterializer.create(actorSystem);
         //In order to access all directives we need an instance where the routes are define.
         MasterControllServer app = new MasterControllServer();
+        Route route0 = path("", () ->
+                get(() -> getFromFile("/web/index.html"))
+        );
         Route route1 = path(PathMatchers.segment("indexspider")
                 .slash("start"), () ->
                 get(() -> {
                     actorSystem.actorOf(Props.create(IndexSpiderMasterActor.class), "IndexSpiderMasterActor");
-
                     return complete("start indexspider");
                 })
         );
-
         Route route2 = path(PathMatchers.segment("detailspider")
                 .slash("start"), () ->
                 get(() -> {
@@ -52,19 +52,24 @@ public class MasterControllServer extends AllDirectives {
                 }));
         Route route3 = path(PathMatchers.segment("config")
                 .slash("update"), () ->
-                get(() -> parameter("configName",configClassName ->parameter("configJson",configJson -> {
-                    JsonParser jsonParser=new JsonParser();
-                    jsonParser.parse(configJson).getAsJsonObject().entrySet().forEach(jsonElementEntry -> {
-                        System.out.println(jsonElementEntry.getKey()+":"+jsonElementEntry.getValue().getAsString());
-                        TieBaAnalyserConfigFactory.getInstance().updateConfig(configClassName,jsonElementEntry.getKey(),jsonElementEntry.getValue().getAsString());
-                    });
-                    return complete("update  config succuss\n"+TieBaAnalyserConfigFactory.getInstance().toString());
-                }))));
+                get(() -> parameter("configName", configName -> parameter("configField", configField ->parameter("configValue",configValue -> {
+                    TieBaAnalyserConfigFactory.getInstance().updateConfig(configName, configField, configValue);
+                    return complete("update  config succuss" );
+                })))));
         Route route4 = path(PathMatchers.segment("config")
-                .slash("show"), ()->get(() -> complete(TieBaAnalyserConfigFactory.getInstance().toString())));
-        final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = app.route(route1, route2,route3,route4).flow(actorSystem, materializer);
+                .slash("show"), () -> get(() -> complete(TieBaAnalyserConfigFactory.getInstance().toString())));
+        Route route5 = path("logs", () -> get(() -> getFromBrowseableDirectory("logs")));
+        Route route6 = path(PathMatchers.segment(Pattern.compile(".*/logs/.*.log")), s ->complete("xupeng") );
+
+        final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = app.route(route0, route1, route2, route3, route4,route5,route6).flow(actorSystem, materializer);
         final CompletionStage<ServerBinding> binding = http.bindAndHandle(routeFlow,
                 ConnectHttp.toHost("0.0.0.0", TieBaAnalyserConfigFactory.getInstance().masterConfig.admin_port), materializer);
 
+    }
+
+
+    @Override
+    public Route getFromFile(String path) {
+        return getFromFile(new File(this.getClass().getResource(path).getFile()));
     }
 }

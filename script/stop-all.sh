@@ -3,6 +3,7 @@ USER_NAME='root';
 SLAVES_CONF='conf/slaves.conf'
 SPIDER_CONF='conf/work.conf'
 MASTER_CONF='conf/master.conf'
+DEPLOY_CONF='conf/deploy.conf'
 
 
 for line in `cat $SPIDER_CONF`
@@ -14,12 +15,19 @@ do
     fi
 done
 
-for line in `cat $SLAVES_CONF`
+
+for line in `cat $DEPLOY_CONF`
 do
+
     if [[ $line =~ "user=" ]]
     then
         USER_NAME=${line#"user="}
     fi
+done
+
+
+for line in `cat $SLAVES_CONF`
+do
     if [[ $line =~ "hosts=" ]]
     then
         hosts=${line#"hosts="}

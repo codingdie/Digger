@@ -7,4 +7,5 @@ import java.time.LocalDateTime;
  */
 public class WorkConfig {
     public int max_http_request_per_second = 1;
+    public String workdir;
 }

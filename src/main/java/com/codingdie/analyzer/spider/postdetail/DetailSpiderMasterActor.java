@@ -7,7 +7,6 @@ import akka.actor.Cancellable;
 import akka.util.Timeout;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.config.model.SpiderConfig;
-import com.codingdie.analyzer.config.model.WorkConfig;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
@@ -82,7 +81,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
         List<PageTask> pageTasks = indexSpiderTaskStorage.parseAndRebuild();
 
         if (pageTasks.size() == 0) {
-            Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.totalCount).intValue();
+            Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count).intValue();
             totalTask = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalTask; i++) {
                 todoTasks.add(new PageTask(i * 50));
@@ -161,7 +160,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
     private void initStorage() {
         System.out.println("开始初始化存储");
         SpiderConfig spiderConfig = TieBaAnalyserConfigFactory.getInstance().spiderConfig;
-        tieBaFileSystem = new TieBaFileSystem(spiderConfig.tiebaName, TieBaFileSystem.ROLE_MASTER);
+        tieBaFileSystem = new TieBaFileSystem(spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
         System.out.println("初始化存储完毕");
 
     }

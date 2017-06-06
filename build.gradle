@@ -109,10 +109,10 @@ task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,
 
 
 task startMaster(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , project.rootDir.toString() ,"127.0.0.1",2550
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , project.rootDir.toString()+File.separator+"conf" ,"127.0.0.1",2550
 }
 
 
 task startSlave(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , project.rootDir.toString() ,"127.0.0.1",2552
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , project.rootDir.toString()+File.separator+"conf" ,"127.0.0.1",2552
 }

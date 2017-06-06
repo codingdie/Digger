@@ -46,7 +46,7 @@ public class QueryPageActor extends AbstractActor {
     }
 
     private String buildUrl(long pn) {
-        return "https://tieba.baidu.com/f?kw=" + TieBaAnalyserConfigFactory.getInstance().spiderConfig.tiebaName + "&ie=utf-8&pn=" + pn;
+        return "https://tieba.baidu.com/f?kw=" + TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name + "&ie=utf-8&pn=" + pn;
     }
 
 }
