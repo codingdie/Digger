@@ -7,6 +7,7 @@ import com.codingdie.analyzer.config.model.WorkConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by xupeng on 2017/4/27.
@@ -33,7 +35,6 @@ public class TieBaAnalyserConfigFactory {
                 if(!Modifier.isStatic(i.getModifiers())){
                     try {
                         String config = configFolder + File.separator + (i.getName().toLowerCase().replace("config", "")) + ".conf";
-                        System.out.println(config);
 
                         i.set(tieBaAnalyserConfigFactory,ConfigParser.decode(new File(config),Class.forName(i.getGenericType().getTypeName())));
                     }catch (Exception ex){
@@ -42,50 +43,50 @@ public class TieBaAnalyserConfigFactory {
                 }
 
             });
+            System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(tieBaAnalyserConfigFactory));
+
         }
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(tieBaAnalyserConfigFactory));
         return tieBaAnalyserConfigFactory;
     }
 
     public void saveBack() {
-        new JsonParser().parse(new Gson().toJson(masterConfig)).getAsJsonObject().entrySet().forEach(item -> {
-            try {
-                File file = new File(configFolder + File.separator + "master.conf");
-                file.delete();
-                file.createNewFile();
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-                bufferedWriter.write(item.getKey() + "=" + item.getValue().getAsString() + "\n");
-            } catch (Exception ex) {
-                ex.printStackTrace();
+        Arrays.stream(tieBaAnalyserConfigFactory.getClass().getFields()).forEach(i->{
+            if(!Modifier.isStatic(i.getModifiers())){
+                try {
+                    String configPath = configFolder + File.separator + (i.getName().toLowerCase().replace("config", "")) + ".conf";
+                    File configFile= new File(configPath);
+                    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(configFile,false));
+                    bufferedWriter.write(ConfigParser.encode(i.get(this)));
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
 
         });
-    }
-
-    private void saveBackConfig(Object config, String fileName) {
 
     }
 
-    private final static String[] propertyTypeStrs = {
-            "java.lang.String",
-            "int",
-            "double",
-    };
+
+
+
 
     public void updateConfig(String name, String key, String value) {
         try {
-
             Field field = this.getClass().getField(name);
             Object object = field.get(this);
             Field keyFieled = object.getClass().getField(key);
-            System.out.println(keyFieled.getGenericType().getTypeName());
-            if (keyFieled.getGenericType().getTypeName().equals(propertyTypeStrs[0])) {
+            if (keyFieled.getGenericType().getTypeName().equals(ConfigParser.propertyTypeStrs[0])) {
                 keyFieled.set(object, value);
-            } else if (keyFieled.getGenericType().getTypeName().equals(propertyTypeStrs[1])) {
+            } else if (keyFieled.getGenericType().getTypeName().equals(ConfigParser.propertyTypeStrs[1])) {
                 keyFieled.set(object, Integer.valueOf(value).intValue());
-            } else if (keyFieled.getGenericType().getTypeName().equals(propertyTypeStrs[2])) {
+            } else if (keyFieled.getGenericType().getTypeName().equals(ConfigParser.propertyTypeStrs[2])) {
                 keyFieled.set(object, Double.valueOf(value).doubleValue());
+            } else if (keyFieled.getGenericType().getTypeName().equals(ConfigParser.propertyTypeStrs[3])) {
+                keyFieled.set(object, new Gson().fromJson(value,new TypeToken<List<String>>(){}.getType()));
             }
+            saveBack();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

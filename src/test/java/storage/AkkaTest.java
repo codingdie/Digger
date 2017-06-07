@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,16 @@ import java.util.regex.Pattern;
  */
 public class AkkaTest extends TestCase{
      public  void  testA(){
-         String a="http://localhost:8081/logs/parse-info.log";
-         System.out.println(Pattern.matches(".*/logs/.*.log1",a));
+
+         Integer a=1;
+         Long b=1L;
+         Long c=1L;
+
+         if( b==c){
+             System.out.println("ok");
+         }
+
+//         String a="http://localhost:8081/logs/parse-info.log";
+//         System.out.println(Pattern.matches(".*/logs/.*.log1",a));
      }
 }

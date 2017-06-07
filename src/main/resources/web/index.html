@@ -88,7 +88,7 @@
     function showConfig() {
         $.get("/config/show",function(data,status){
             var result=JSON.parse(data)
-            $("#tiebaName").val(result.spiderConfig.tiebaName)
+            $("#tiebaName").val(result.spiderConfig.tieba_name)
             $("#configJsonShow").text(data);
         });
     }
