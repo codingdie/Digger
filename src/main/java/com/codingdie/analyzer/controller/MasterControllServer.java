@@ -35,7 +35,7 @@ public class MasterControllServer extends AllDirectives {
         //In order to access all directives we need an instance where the routes are define.
         MasterControllServer app = new MasterControllServer();
         Route route0 = path("", () ->
-                get(() -> getFromFile("/web/index.html"))
+                get(() -> getFromResource("web/index.html"))
         );
         Route route1 = path(PathMatchers.segment("indexspider")
                 .slash("start"), () ->
@@ -68,8 +68,4 @@ public class MasterControllServer extends AllDirectives {
     }
 
 
-    @Override
-    public Route getFromFile(String path) {
-        return getFromFile(new File(this.getClass().getResource(path).getFile()));
-    }
 }

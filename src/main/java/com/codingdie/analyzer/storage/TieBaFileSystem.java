@@ -1,6 +1,7 @@
 package com.codingdie.analyzer.storage;
 
-import com.codingdie.analyzer.storage.spider.IndexSpiderTaskStorage;
+import com.codingdie.analyzer.spider.task.Task;
+import com.codingdie.analyzer.storage.spider.TaskStorage;
 import com.codingdie.analyzer.storage.spider.PostDetailStorage;
 import com.codingdie.analyzer.storage.spider.PostIndexStorage;
 
@@ -13,7 +14,6 @@ public class TieBaFileSystem {
     public  static  final int ROLE_MASTER=0;
     public  static  final int ROLE_SLAVE=1;
 
-    private IndexSpiderTaskStorage indexSpiderTaskStorage;
     private PostIndexStorage postIndexStorage;
     private PostDetailStorage postDetailStorage;
 
@@ -24,11 +24,6 @@ public class TieBaFileSystem {
             this.root.mkdirs();
         }
         if(role==ROLE_MASTER){
-            File spiderTaskRootPath = new File(root.getAbsolutePath() + File.separatorChar + "spidertask");
-            if(!spiderTaskRootPath.exists()){
-                spiderTaskRootPath.mkdirs();
-            }
-            this.indexSpiderTaskStorage =new IndexSpiderTaskStorage(spiderTaskRootPath);
             File postIndexRootPath = new File(root.getAbsolutePath() + File.separatorChar + "postindex");
             if(!postIndexRootPath.exists()){
                 postIndexRootPath.mkdirs();
@@ -42,10 +37,15 @@ public class TieBaFileSystem {
             }
             this.postDetailStorage =new PostDetailStorage(postContentRootPath);
         }
+
     }
 
-    public IndexSpiderTaskStorage getIndexSpiderTaskStorage() {
-        return indexSpiderTaskStorage;
+    public <T extends Task> TaskStorage<T>  getTaskStorage(Class<T> tClass) {
+        File spiderTaskRootPath = new File(root.getAbsolutePath() + File.separatorChar + "task");
+        if(!spiderTaskRootPath.exists()){
+            spiderTaskRootPath.mkdirs();
+        }
+        return  new TaskStorage<T>(spiderTaskRootPath);
     }
 
     public PostIndexStorage getPostIndexStorage() {

@@ -1,30 +1,31 @@
 package com.codingdie.analyzer.storage.spider;
 
-import com.codingdie.analyzer.spider.model.PageTask;
+import com.codingdie.analyzer.spider.task.Task;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jsoup.helper.StringUtil;
 
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Created by xupeng on 2017/5/10.
  */
-public class IndexSpiderTaskStorage {
+public class TaskStorage<T extends Task> {
 
     private File taskFile;
 
 
     private File root;
 
-    public IndexSpiderTaskStorage(File rootPath) {
+    public   TaskStorage(File rootPath) {
+        Class<T> tClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+
         this.root = rootPath;
-        this.taskFile = new File(root.getAbsolutePath() + File.separator + "index.task");
+        this.taskFile = new File(root.getAbsolutePath() + File.separator+tClass.getName()  );
 
         if (!this.taskFile.exists()) {
             try {
@@ -36,73 +37,64 @@ public class IndexSpiderTaskStorage {
 
     }
 
-    public List<PageTask> parseAndRebuild(){
-        List<PageTask> pageTasks=parse();
+    public List<T> parseAndRebuild(){
+        List<T> pageTs=parse();
 
         try {
             this.taskFile.delete();
             this.taskFile.createNewFile();
 
-            if(pageTasks.stream().anyMatch(i->{
-                return i.status!=PageTask.STATUS_FINISHED;
+            if(pageTs.stream().anyMatch(i->{
+                return i.status!=T.STATUS_FINISHED;
             })){
-                pageTasks.iterator().forEachRemaining(i->{
-                    if(i.status!=PageTask.STATUS_FINISHED){
-                        i.status=PageTask.STATUS_TODO;
+                pageTs.iterator().forEachRemaining(i->{
+                    if(i.status!=T.STATUS_FINISHED){
+                        i.status=T.STATUS_TODO;
                     }
                 });
-                pageTasks.sort((o1, o2) ->
-                {
-                    if(o1.pn>o2.pn){
-                        return  1;
-                    }else{
-                        if(o1.pn==o2.pn){
-                            return o1.status-o2.status;
+                 pageTs.sort((o1, o2) -> {
+                    return o1.compareTo(o2);
+                 });
 
-                        }else{
-                            return -1;
-                        }
-                    }
-                });
-                saveTasks(pageTasks);
+                saveList(pageTs);
             }else{
-                pageTasks.clear();
+                pageTs.clear();
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return  pageTasks;
+        return  pageTs;
 
     }
 
-   private List<PageTask> parse(){
-       Map<Long,PageTask> pageTaskMap=new HashMap<>();
+   private List<T> parse(){
+       Map<String,T> pageTMap=new HashMap<>();
         try {
             BufferedReader bufferedReader=new BufferedReader(new FileReader(taskFile));
             String line=null;
             while ((line=bufferedReader.readLine())!=null){
                 if(!StringUtil.isBlank(line)){
-                    PageTask pageTask=new Gson().fromJson(line,PageTask.class);
-                    pageTaskMap.put(pageTask.pn,pageTask);
+                    T pageT=new Gson().fromJson(line,new TypeToken<T>(){}.getType());
+                    pageTMap.put(pageT.getKey(),pageT);
                 }
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }
-       return  pageTaskMap.entrySet().stream().map(i->{
+       return  pageTMap.entrySet().stream().map(i->{
          return i.getValue();
        }).collect(Collectors.toList());
    }
 
 
-    public void saveTasks(List<PageTask> pageTasks) {
+    public void saveList(List<T> pageTs) {
         try {
             BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile,true));
 
-            for(int i=0;i<pageTasks.size();i++){
-                PageTask pageTask=pageTasks.get(i);
+            for(int i=0;i<pageTs.size();i++){
+                T pageT=pageTs.get(i);
                 try {
-                    todoWriter.write(new Gson().toJson(pageTask));
+                    todoWriter.write(new Gson().toJson(pageT));
                     todoWriter.write("\n");
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -118,10 +110,10 @@ public class IndexSpiderTaskStorage {
             e.printStackTrace();
         }
     }
-    public void saveTask(PageTask pageTask) {
+    public void save(T task) {
         try {
             BufferedWriter todoWriter = new BufferedWriter(new FileWriter(taskFile,true));
-            todoWriter.write(new Gson().toJson(pageTask));
+            todoWriter.write(new Gson().toJson(task));
             todoWriter.write("\n");
             todoWriter.flush();
             todoWriter.close();
