@@ -11,7 +11,10 @@ import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
 import com.codingdie.analyzer.spider.task.TaskManager;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
-import com.codingdie.analyzer.util.MailUtil;
+import com.codingdie.analyzer.storage.spider.TaskStorage;
+import okhttp3.Request;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +35,6 @@ public class IndexSpiderMasterActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        taskManager=null;
         System.out.println("stop IndexSpiderMasterActor");
     }
 
@@ -44,33 +46,37 @@ public class IndexSpiderMasterActor extends AbstractActor {
     public void preStart() throws Exception {
         super.preStart();
         HttpService.getInstance().destroy();
-        initStorage();
         startTaskManager();
 
     }
 
 
     private void startTaskManager() {
-        taskManager = new TaskManager<PageTask>(tieBaFileSystem,getContext().getSystem(),"/user/IndexSpiderSlaveActor");
+        System.out.println("开始初始化存储");
+        long tm = System.currentTimeMillis();
+        tieBaFileSystem = new TieBaFileSystem(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
+        taskManager = new TaskManager<>(PageTask.class, tieBaFileSystem,getContext().getSystem(),"/user/IndexSpiderSlaveActor");
         if (taskManager.getTotalTaskSize() == 0) {
+            initPageCountFromNetwork();
             Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count).intValue();
             int totalPage = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalPage; i++) {
                 taskManager.putTask(new PageTask(i * 50));
             }
+        }else{
+            TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count =taskManager.getTotalTaskSize();
         }
+        System.out.println("初始化存储完毕用时:" + (System.currentTimeMillis() - tm));
         taskManager.startAlloc(getSelf());
     }
 
-
-
-    private void initStorage() {
-        long tm = System.currentTimeMillis();
-        System.out.println("开始初始化存储");
-        SpiderConfig spiderConfig = TieBaAnalyserConfigFactory.getInstance().spiderConfig;
-        tieBaFileSystem = new TieBaFileSystem(spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        System.out.println("初始化存储完毕用时:" + (System.currentTimeMillis() - tm));
+    private void initPageCountFromNetwork() {
+        String string = HttpService.getInstance().excute(new Request.Builder()
+                .url("https://tieba.baidu.com/f?kw=" + TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name + "&ie=utf-8").build(),"");
+        Document document = Jsoup.parse(string);
+        TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count =Integer.valueOf(document.select(".last.pagination-item").get(0).attr("href").split("pn=")[1]) ;
     }
+
 
     @Override
     public Receive createReceive() {
@@ -91,6 +97,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
                 });
 
             }
+            System.out.println("finish task:"+r.getKey());
             taskManager.receiveResult(r,getSender());
 
         }).build();

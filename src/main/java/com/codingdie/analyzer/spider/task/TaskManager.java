@@ -11,6 +11,7 @@ import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
 import com.codingdie.analyzer.storage.spider.TaskStorage;
 import com.codingdie.analyzer.util.MailUtil;
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -24,12 +25,13 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by xupeng on 2017/6/12.
  */
 public class TaskManager<T extends Task> {
-    private Logger logger = Logger.getLogger("master-task");
+    private Logger logger = Logger.getLogger("index-task");
 
     private int totalTaskSize = 0;
     private int lastFinishedTaskSize = 0;
@@ -52,11 +54,9 @@ public class TaskManager<T extends Task> {
     private ActorSystem actorSystem;
     private ActorRef receiverActor;
 
-    public TaskManager(TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
+    public TaskManager(Class<T> tClass,TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
         this.actorSystem = actorSystem;
-        Class<T> tClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         this.taskStorage = tieBaFileSystem.getTaskStorage(tClass);
-        TaskStorage taskStorage = tieBaFileSystem.getTaskStorage(tClass);
         List<T> list = taskStorage.parseAndRebuild();
         totalTaskSize = list.size();
         list.iterator().forEachRemaining(i -> {
@@ -91,9 +91,10 @@ public class TaskManager<T extends Task> {
     private void initStatistical() {
         beginTime = System.currentTimeMillis();
         slaves.iterator().forEachRemaining(i -> {
-            slavesRunningTaskMapData.put(i.path().toString(), 0);
-            slavesFinishedTaskMapData.put(i.path().toString(), 0);
-            slavesFailedTaskMapData.put(i.path().toString(), 0);
+            String key = getHostFromActorPath(i.path().toString());
+            slavesRunningTaskMapData.put(key, 0);
+            slavesFinishedTaskMapData.put(key, 0);
+            slavesFailedTaskMapData.put(key, 0);
         });
     }
 
@@ -117,7 +118,11 @@ public class TaskManager<T extends Task> {
 
     public void receiveResult(TaskResult result, ActorRef sender) {
         T task = excutingTasks.get(result.getKey());
+        if(task==null){
+            return;
+        }
         String senderPath = getHostFromActorPath(sender.path().toString());
+
         if (result.success) {
             task.status = Task.STATUS_FINISHED;
             slavesFinishedTaskMapData.put(senderPath, slavesFinishedTaskMapData.get(senderPath) + 1);
@@ -166,7 +171,7 @@ public class TaskManager<T extends Task> {
 
     public void startAlloc(ActorRef actorRef) {
         receiverActor = actorRef;
-
+        System.out.println("total task:"+todoTasks.size());
         cancellables.add(actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
@@ -175,12 +180,13 @@ public class TaskManager<T extends Task> {
                     return;
                 }
                 int taskCount = maxRunningTask - excutingTasks.size();
-                for (int i = 0; i < taskCount; i++) {
+                todoTasks.keySet().stream().sorted((o1, o2) -> {
+                    return Integer.valueOf(o1).compareTo(Integer.valueOf(o2));
+                }).limit(taskCount).collect(Collectors.toList()).forEach(i->{
                     assignTaskToSlave(todoTasks.get(i),receiverActor);
-                }
-                for (int i = 0; i < taskCount; i++) {
-                    todoTasks.remove(0);
-                }
+                    todoTasks.remove(i);
+                });
+
             }
         }, actorSystem.dispatcher()));
         initProcessPrinter();
@@ -188,6 +194,9 @@ public class TaskManager<T extends Task> {
     }
 
     private void assignTaskToSlave(T task, ActorRef resultReceiver) {
+        if(task==null){
+            return;
+        }
         ActorRef actorRef = null;
         while ((actorRef = getSlaveToRun()) == null) {
             try {
@@ -214,14 +223,14 @@ public class TaskManager<T extends Task> {
 
     private ActorRef getSlaveToRun() {
         if (slaves.size() > 0) {
-            String path = slavesRunningTaskMapData.entrySet().stream().min((o1, o2) -> {
+            String host = slavesRunningTaskMapData.entrySet().stream().min((o1, o2) -> {
                 return o1.getValue() - o2.getValue();
             }).get().getKey();
 
             ActorRef actorRef = slaves.stream().filter(t -> {
-                return t.path().toString().equals(path);
+                return getHostFromActorPath(t.path().toString()).equals(host);
             }).findAny().get();
-            slavesRunningTaskMapData.put(path, slavesRunningTaskMapData.get(path) + 1);
+            slavesRunningTaskMapData.put(host, slavesRunningTaskMapData.get(host) + 1);
             return actorRef;
         }
         return null;
@@ -237,12 +246,11 @@ public class TaskManager<T extends Task> {
         slaves.iterator().forEachRemaining(slave -> {
             DecimalFormat df = new DecimalFormat("######0.00");
 
-            String key = slave.path().toString();
-            String host = getHostFromActorPath(key);
-            int totalTask = slavesFinishedTaskMapData.get(key) + slavesFailedTaskMapData.get(key) + slavesRunningTaskMapData.get(key);
-            double speed = slavesFinishedTaskMapData.get(key) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
+            String host = getHostFromActorPath(slave.path().toString());
+            int totalTask = slavesFinishedTaskMapData.get(host) + slavesFailedTaskMapData.get(host) + slavesRunningTaskMapData.get(host);
+            double speed = slavesFinishedTaskMapData.get(host) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
 
-            stringBuilder.append(host + ": totalTask:" + totalTask + " progressTask:" + slavesRunningTaskMapData.get(key) + "  finishedTask " + slavesFinishedTaskMapData.get(key) + " failedTask:" + slavesFailedTaskMapData.get(key) + "\nspeed:" + df.format(speed));
+            stringBuilder.append(host + ": totalTask:" + totalTask + " progressTask:" + slavesRunningTaskMapData.get(host) + "  finishedTask " + slavesFinishedTaskMapData.get(host) + " failedTask:" + slavesFailedTaskMapData.get(host) + "\nspeed:" + df.format(speed));
             stringBuilder.append("\n");
         });
         return stringBuilder.toString();
@@ -267,53 +275,15 @@ public class TaskManager<T extends Task> {
         Cancellable cancellable = actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(30, TimeUnit.SECONDS), () -> {
             failedFlag = (failedTasks.size() - failedCount) > 20 * slaves.size();
             failedCount = failedTasks.size();
-            if (true) {
-
-                MailUtil.sendMail("lots of failed task! please check", "you need check cookie or somthing else.");
+            if (failedFlag) {
                 System.out.println("indexspider will stop because of lots of failed task!");
                 stopManager();
+                MailUtil.sendMail("lots of failed task! please check", "you need check cookie or somthing else.");
+
             }
         }, actorSystem.dispatcher());
         cancellables.add(cancellable);
     }
 
-    public long getBeginTime() {
-        return beginTime;
-    }
 
-    public ConcurrentHashMap<String, T> getTodoTasks() {
-        return todoTasks;
-    }
-
-    public ConcurrentHashMap<String, T> getExcutingTasks() {
-        return excutingTasks;
-    }
-
-    public ConcurrentHashMap<String, T> getFinishedTasks() {
-        return finishedTasks;
-    }
-
-    public ConcurrentHashMap<String, T> getFailedTasks() {
-        return failedTasks;
-    }
-
-    public ConcurrentHashMap<String, Integer> getSlavesRunningTaskMapData() {
-        return slavesRunningTaskMapData;
-    }
-
-    public ConcurrentHashMap<String, Integer> getSlavesFinishedTaskMapData() {
-        return slavesFinishedTaskMapData;
-    }
-
-    public ConcurrentHashMap<String, Integer> getSlavesFailedTaskMapData() {
-        return slavesFailedTaskMapData;
-    }
-
-    public TaskStorage<T> getTaskStorage() {
-        return taskStorage;
-    }
-
-    public ActorSystem getActorSystem() {
-        return actorSystem;
-    }
 }

@@ -20,12 +20,12 @@ public class TaskStorage<T extends Task> {
 
 
     private File root;
+    private Class<T> tClass;
 
-    public   TaskStorage(File rootPath) {
-        Class<T> tClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-
+    public   TaskStorage(File rootPath,Class<T> tClass) {
+        this.tClass=tClass;
         this.root = rootPath;
-        this.taskFile = new File(root.getAbsolutePath() + File.separator+tClass.getName()  );
+        this.taskFile = new File(root.getAbsolutePath() + File.separator+tClass.getSimpleName().toLowerCase()+".task"  );
 
         if (!this.taskFile.exists()) {
             try {
@@ -74,8 +74,8 @@ public class TaskStorage<T extends Task> {
             String line=null;
             while ((line=bufferedReader.readLine())!=null){
                 if(!StringUtil.isBlank(line)){
-                    T pageT=new Gson().fromJson(line,new TypeToken<T>(){}.getType());
-                    pageTMap.put(pageT.getKey(),pageT);
+                    T task=new Gson().fromJson(line,tClass);
+                    pageTMap.put(task.getKey(),task);
                 }
             }
         }catch (Exception ex){

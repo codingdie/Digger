@@ -1,11 +1,11 @@
 package storage;
 
 import akka.http.javadsl.model.DateTime;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import junit.framework.TestCase;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,15 +18,27 @@ import java.util.Random;
  */
 public class AkkaTest extends TestCase{
 
-    public class  S<T>{
-       public S(){
-           System.out.println(this.getClass().getTypeName());
+    public abstract  class  Foo<T>{
+        public Foo(){
+
         }
     }
+    public   class  A<T>{
+        public A(){
+            Foo<T> foo = new Foo<T>(){};
+            Type mySuperClass = foo.getClass().getGenericSuperclass();
+            Type type = ((ParameterizedType)mySuperClass).getActualTypeArguments()[0];
+            System.out.println(type);
+
+
+            System.out.println( new TypeToken<A<T>>(){}.getRawType());
+
+        }
+    }
+
      public  void  testA()throws Exception,Throwable{
 
-         new S<String>();
-
+          new  A<String>();
      }
      private void qsort(int[] tests,int begin ,int end){
 

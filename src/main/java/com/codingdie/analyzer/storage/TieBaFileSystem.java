@@ -45,7 +45,7 @@ public class TieBaFileSystem {
         if(!spiderTaskRootPath.exists()){
             spiderTaskRootPath.mkdirs();
         }
-        return  new TaskStorage<T>(spiderTaskRootPath);
+        return  new TaskStorage<T>(spiderTaskRootPath,tClass);
     }
 
     public PostIndexStorage getPostIndexStorage() {
