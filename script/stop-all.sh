@@ -37,6 +37,7 @@ do
         IFS="$OLD_IFS"
         for host in ${array[*]}
             do
+            echo  $host
             ssh   $USER_NAME@${host}  "cd $WORKDIR;sh stop-slavenode.sh"
         done
     fi
@@ -51,6 +52,7 @@ do
     if [[ $line =~ "host=" ]]
     then
         host=${line#"host="}
+        echo  $host
         ssh   $USER_NAME@${host}  "cd $WORKDIR;sh stop-masternode.sh"
     fi
 done

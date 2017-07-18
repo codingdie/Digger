@@ -67,6 +67,8 @@ public class IndexSpiderMasterActor extends AbstractActor {
             TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count =taskManager.getTotalTaskSize();
         }
         System.out.println("初始化存储完毕用时:" + (System.currentTimeMillis() - tm));
+        System.out.println("当前Index数量:" + tieBaFileSystem.getPostIndexStorage().countAllIndex());
+
         taskManager.startAlloc(getSelf());
     }
 
