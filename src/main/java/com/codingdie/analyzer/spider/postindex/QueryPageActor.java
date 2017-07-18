@@ -3,7 +3,7 @@ package com.codingdie.analyzer.spider.postindex;
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.network.HtmlParser;
-import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
+import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
@@ -24,24 +24,24 @@ public class QueryPageActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
             String html =HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build(),m.cookie);
-            QueryPageResult queryPageResult = new QueryPageResult();
-            queryPageResult.pn = m.pn;
+            CrawlPageResult crawlPageResult = new CrawlPageResult();
+            crawlPageResult.pn = m.pn;
             if(StringUtil.isBlank(html)){
                 logger.info(m.pn+":html null");
-                queryPageResult.success = false;
+                crawlPageResult.success = false;
             }else{
                 List<PostSimpleInfo> postSimpleInfos = HtmlParser.parseList(html);
-                queryPageResult.postSimpleInfos = postSimpleInfos;
-                queryPageResult.success = true;
-                long normalCount = queryPageResult.postSimpleInfos.stream().filter(i -> {
+                crawlPageResult.postSimpleInfos = postSimpleInfos;
+                crawlPageResult.success = true;
+                long normalCount = crawlPageResult.postSimpleInfos.stream().filter(i -> {
                     return i.type.equals(PostSimpleInfo.TYPE_NORMAL);
                 }).count();
                 if(normalCount==0){
-                    queryPageResult.success=false;
+                    crawlPageResult.success=false;
                 }
                 logger.info(m.pn+":"+normalCount);
             }
-            getSender().tell(queryPageResult, getSelf());
+            getSender().tell(crawlPageResult, getSelf());
         }).build();
     }
 

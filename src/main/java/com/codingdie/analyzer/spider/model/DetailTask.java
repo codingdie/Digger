@@ -1,20 +1,26 @@
 package com.codingdie.analyzer.spider.model;
 
+import com.codingdie.analyzer.spider.task.Task;
+
 import java.io.Serializable;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class DetailTask implements Serializable{
-    public static final int STATUS_TODO=0;
-    public static final int STATUS_EXCUTING=1;
-    public static final int STATUS_FINISHED=2;
-    public static final int STATUS_FAILED=3;
+public class DetailTask extends Task {
 
     public DetailTask(long postId){
         this.postId=postId;
     }
     public long postId=50;
-    public int status=STATUS_TODO;
 
+    @Override
+    public int compareTo(Object o) {
+        return 0;
+    }
+
+    @Override
+    public String getKey() {
+        return String.valueOf(postId);
+    }
 }

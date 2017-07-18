@@ -1,23 +1,17 @@
 package com.codingdie.analyzer.spider.postindex;
 
 import akka.actor.AbstractActor;
-import akka.actor.Cancellable;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.config.model.SpiderConfig;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostIndex;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
+import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
 import com.codingdie.analyzer.spider.task.TaskManager;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
-import com.codingdie.analyzer.storage.spider.TaskStorage;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by xupeng on 2017/4/26.
@@ -27,7 +21,6 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
     private TaskManager<PageTask> taskManager;
 
-    private List<Cancellable> cancellables = new ArrayList<>();
 
     private TieBaFileSystem tieBaFileSystem;
 
@@ -82,7 +75,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(QueryPageResult.class, r -> {
+        return receiveBuilder().match(CrawlPageResult.class, r -> {
             if (r.success && r.postSimpleInfos != null) {
                 r.postSimpleInfos.iterator().forEachRemaining(i -> {
                     if (i.type.equals(PostSimpleInfo.TYPE_NORMAL)) {

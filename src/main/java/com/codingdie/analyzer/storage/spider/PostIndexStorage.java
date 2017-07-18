@@ -9,6 +9,8 @@ import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by xupeng on 2017/5/10.
@@ -107,8 +109,17 @@ public class PostIndexStorage {
             longPostIndexHashMap.put(postIndex.getPostId(),postIndex);
             saveIndex(postIndex);
         }
-
     }
+
+    public void modifyIndex(PostIndex postIndex){
+        if(!longPostIndexHashMap.containsKey(postIndex.getPostId())){
+            logger.info("index not exit");
+        }else{
+            longPostIndexHashMap.put(postIndex.getPostId(),postIndex);
+            saveIndex(postIndex);
+        }
+    }
+
 
     public int countAllIndex(){
        return longPostIndexHashMap.size();
@@ -116,6 +127,17 @@ public class PostIndexStorage {
     public PostIndex getIndex(long postId){
       return  longPostIndexHashMap.get(postId);
     }
+
+    public void iterateNoContentIndex(Consumer<PostIndex> function){
+
+        longPostIndexHashMap.forEachEntry(1,longPostIndexEntry -> {
+            PostIndex value = longPostIndexEntry.getValue();
+            if(value.getStatus()==PostIndex.STATUS_NO_CONTENT) {
+                function.accept(value);
+            }
+        });
+    }
+
 
     private void saveIndex(PostIndex postIndex){
         try {

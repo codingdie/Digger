@@ -5,7 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.postindex.result.QueryPageResult;
+import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
 import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
 
@@ -45,7 +45,7 @@ public class IndexSpiderSlaveActor extends AbstractActor {
             totalTaskCount++;
             printProcess();
 
-        }).match(QueryPageResult.class,m->{
+        }).match(CrawlPageResult.class, m->{
             finishedTaskCount++;
             senderMap.get(m.pn).tell(m,getSelf());
             senderMap.remove(m.pn);

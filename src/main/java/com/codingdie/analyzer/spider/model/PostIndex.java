@@ -1,6 +1,8 @@
 package com.codingdie.analyzer.spider.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by xupeng on 2017/5/10.
@@ -17,6 +19,7 @@ public class PostIndex implements Serializable {
     private long modifyTime=System.currentTimeMillis();
     private String title;
     private String createUser;
+    private List<String> contentSlaves=new ArrayList<>();
 
     public long getPostId() {
         return postId;
@@ -72,5 +75,25 @@ public class PostIndex implements Serializable {
 
     public void setPn(long pn) {
         this.pn = pn;
+    }
+
+    public static int getStatusNoContent() {
+        return STATUS_NO_CONTENT;
+    }
+
+    public static int getStatusHasContent() {
+        return STATUS_HAS_CONTENT;
+    }
+
+    public static int getStatusDelete() {
+        return STATUS_DELETE;
+    }
+
+    public List<String> getContentSlaves() {
+        return contentSlaves;
+    }
+
+    public void setContentSlaves(List<String> contentSlaves) {
+        this.contentSlaves = contentSlaves;
     }
 }

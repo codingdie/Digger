@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Created by xupeng on 2017/6/12.
  */
-public class TaskManager<T extends Task> {
+public  class TaskManager<T extends Task> {
     private Logger logger = Logger.getLogger("index-task");
 
     private int totalTaskSize = 0;
@@ -97,7 +97,11 @@ public class TaskManager<T extends Task> {
             slavesFailedTaskMapData.put(key, 0);
         });
     }
-
+    public void putTasks(List<T> ts) {
+        ts.forEach(i->{
+            putTask(i);
+        });
+    }
     public void putTask(T t) {
         todoTasks.remove(t.getKey());
         excutingTasks.remove(t.getKey());
@@ -178,6 +182,9 @@ public class TaskManager<T extends Task> {
                 int maxRunningTask = TieBaAnalyserConfigFactory.getInstance().masterConfig.max_running_task;
                 if (excutingTasks.size() > maxRunningTask || todoTasks.size() == 0) {
                     return;
+                }
+                if(todoTasks.isEmpty()){
+                    putTasks(getTaskWhenTaskPoolEmpty());
                 }
                 int taskCount = maxRunningTask - excutingTasks.size();
                 todoTasks.keySet().stream().sorted((o1, o2) -> {
@@ -285,5 +292,7 @@ public class TaskManager<T extends Task> {
         cancellables.add(cancellable);
     }
 
-
+    public   List<T> getTaskWhenTaskPoolEmpty(){
+        return new ArrayList<>() ;
+    }
 }
