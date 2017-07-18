@@ -34,16 +34,22 @@ public class CrawlPostDetailActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(DetailTask.class, m -> {
-
+            PostDetail postDetail=crawlPostDetail(m);
+            if(postDetail!=null){
+                getSender().tell(postDetail, getSelf());
+            }
 
         }).build();
     }
 
-    public static PostDetail crawlPostDetail(long postId) {
-        String result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + postId).build(), null);
+    public static PostDetail crawlPostDetail(DetailTask task) {
+        String result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + task.postId).build(), task.cookie);
+        if(StringUtil.isBlank(result)){
+            return null;
+        }
         PostDetail postDetail = parseDetail(result, null);
         for (int i = 2; i <= postDetail.getPageCount(); i++) {
-            result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + postId + "?pn=" + i).build(), null);
+            result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + task.postId + "?pn=" + i).build(), task.cookie);
             parseDetail(result, postDetail);
         }
         return postDetail;

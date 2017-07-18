@@ -1,5 +1,6 @@
 package com.codingdie.analyzer.spider.model;
 
+import com.codingdie.analyzer.config.model.SpiderConfig;
 import com.codingdie.analyzer.spider.task.Task;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public class DetailTask extends Task {
         this.postId=postId;
     }
     public long postId=50;
+
 
     @Override
     public int compareTo(Object o) {

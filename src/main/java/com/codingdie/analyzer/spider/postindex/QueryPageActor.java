@@ -26,7 +26,7 @@ public class QueryPageActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
-            String html = HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m.pn)).build(), m.cookie);
+            String html = HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m)).build(), m.cookie);
             CrawlPageResult crawlPageResult = new CrawlPageResult();
             crawlPageResult.pn = m.pn;
             if (StringUtil.isBlank(html)) {
@@ -76,8 +76,8 @@ public class QueryPageActor extends AbstractActor {
         return postSimpleInfos;
     }
 
-    private String buildUrl(long pn) {
-        return "https://tieba.baidu.com/f?kw=" + TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name + "&ie=utf-8&pn=" + pn;
+    private String buildUrl(PageTask task) {
+        return "https://tieba.baidu.com/f?kw=" + task.tiebaName+ "&ie=utf-8&pn=" + task.pn;
     }
 
 }

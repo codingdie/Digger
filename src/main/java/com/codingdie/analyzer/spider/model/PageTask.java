@@ -1,5 +1,6 @@
 package com.codingdie.analyzer.spider.model;
 
+import com.codingdie.analyzer.config.model.SpiderConfig;
 import com.codingdie.analyzer.spider.task.Task;
 
 import java.io.Serializable;
@@ -10,10 +11,10 @@ import java.io.Serializable;
 public class PageTask extends Task<PageTask>  {
 
     public PageTask(int pn){
+        super();
         this.pn=pn;
     }
     public long pn=50;
-
 
     @Override
     public int compareTo(PageTask o) {
