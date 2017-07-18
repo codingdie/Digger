@@ -6,6 +6,7 @@ SPIDER_CONF='conf/work.conf'
 DEPLOY_CONF='conf/deploy.conf'
 
 
+sh stop-all.sh
 for line in `cat $SPIDER_CONF`
 do
 

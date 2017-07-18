@@ -34,7 +34,7 @@ public class MasterControllServer extends AllDirectives {
         final ActorMaterializer materializer = ActorMaterializer.create(actorSystem);
         //In order to access all directives we need an instance where the routes are define.
         MasterControllServer app = new MasterControllServer();
-        Route route0 = path("/", () ->
+        Route route0 = path("", () ->
                 get(() -> getFromResource("web/index.html"))
         );
         Route route1 = path(PathMatchers.segment("indexspider")
