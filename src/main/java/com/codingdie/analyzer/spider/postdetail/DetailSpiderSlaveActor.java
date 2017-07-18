@@ -33,7 +33,7 @@ public class DetailSpiderSlaveActor extends AbstractActor {
         super.preStart();
         detail_actor_count = TieBaAnalyserConfigFactory.getInstance().slavesConfig.detail_actor_count;
         for (; totalTaskCount < detail_actor_count; totalTaskCount++) {
-            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPostDetailActor" + totalTaskCount);
+            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "CrawlPostDetailActor" + totalTaskCount);
             actorRefList.add(queryPageActor);
         }
 

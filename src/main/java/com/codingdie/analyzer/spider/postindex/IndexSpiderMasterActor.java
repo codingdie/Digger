@@ -78,14 +78,14 @@ public class IndexSpiderMasterActor extends AbstractActor {
         return receiveBuilder().match(CrawlPageResult.class, r -> {
             if (r.success && r.postSimpleInfos != null) {
                 r.postSimpleInfos.iterator().forEachRemaining(i -> {
-                    if (i.type.equals(PostSimpleInfo.TYPE_NORMAL)) {
+                    if (i.getType().equals(PostSimpleInfo.TYPE_NORMAL)) {
                         PostIndex postIndex = new PostIndex();
                         postIndex.setSpiderHost(getHostFromActorPath(getSender().path().toString()));
-                        postIndex.setPostId(i.postId);
+                        postIndex.setPostId(i.getPostId());
                         postIndex.setModifyTime(System.currentTimeMillis());
-                        postIndex.setTitle(i.title);
+                        postIndex.setTitle(i.getTitle());
                         postIndex.setPn(r.pn);
-                        postIndex.setCreateUser(i.createUser);
+                        postIndex.setCreateUser(i.getCreateUser());
                         tieBaFileSystem.getPostIndexStorage().putIndex(postIndex);
                     }
 
