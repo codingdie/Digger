@@ -42,7 +42,7 @@ public class DetailSpiderMasterActor extends AbstractActor {
     private void startTaskManager() {
         System.out.println("开始初始化存储");
         long tm = System.currentTimeMillis();
-        tieBaFileSystem = new TieBaFileSystem(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
+        tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
         taskManager = new TaskManager<DetailTask>(DetailTask.class, tieBaFileSystem, getContext().getSystem(), "/user/DetailSpiderSlaveActor");
         tieBaFileSystem.getPostIndexStorage().iterateNoContentIndex(postIndex -> {
             taskManager.putTask(new DetailTask(postIndex.getPostId()));

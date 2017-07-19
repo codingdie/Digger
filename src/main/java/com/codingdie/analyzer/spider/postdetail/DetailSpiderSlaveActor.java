@@ -6,6 +6,7 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.PageTask;
+import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.postindex.QueryPageActor;
 import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
@@ -49,8 +50,7 @@ public class DetailSpiderSlaveActor extends AbstractActor {
             totalTaskCount++;
             printProcess();
 
-        }).match(CrawlPageResult.class, m -> {
-
+        }).match(CrawlPostDetailResult.class, m -> {
             finishedTaskCount++;
             resultCollectActorSelection.tell(m, getSelf());
             printProcess();

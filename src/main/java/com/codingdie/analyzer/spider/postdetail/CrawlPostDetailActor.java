@@ -1,11 +1,14 @@
 package com.codingdie.analyzer.spider.postdetail;
 
 import akka.actor.AbstractActor;
+import com.codingdie.analyzer.config.AkkaConfigUtil;
 import com.codingdie.analyzer.spider.model.DetailTask;
 import com.codingdie.analyzer.spider.model.PostDetail;
 import com.codingdie.analyzer.spider.model.PostFloor;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
+import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
 import com.codingdie.analyzer.spider.network.HttpService;
+import com.codingdie.analyzer.storage.TieBaFileSystem;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
@@ -34,10 +37,17 @@ public class CrawlPostDetailActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(DetailTask.class, m -> {
+            TieBaFileSystem tieBaFileSystem=TieBaFileSystem.getInstance(m.tiebaName,TieBaFileSystem.ROLE_SLAVE);
             PostDetail postDetail=crawlPostDetail(m);
+            CrawlPostDetailResult result=new CrawlPostDetailResult();
+            result.setPostId(m.postId);
             if(postDetail!=null){
-                getSender().tell(postDetail, getSelf());
+                tieBaFileSystem.getPostDetailStorage().savePostDetail(postDetail);
+                result.success=true;
+                result.getHosts().add(AkkaConfigUtil.HOST);
             }
+            getSender().tell(result, getSelf());
+
 
         }).build();
     }

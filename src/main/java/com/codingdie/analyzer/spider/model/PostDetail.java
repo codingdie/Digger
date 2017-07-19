@@ -7,6 +7,7 @@ import java.util.List;
  * Created by xupeng on 17-7-18.
  */
 public class PostDetail {
+    private long postId;
     private String title;
     private String author;
     private String time;
@@ -51,5 +52,13 @@ public class PostDetail {
 
     public void setFloors(List<PostFloor> floors) {
         this.floors = floors;
+    }
+
+    public long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(long postId) {
+        this.postId = postId;
     }
 }

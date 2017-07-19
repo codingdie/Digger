@@ -47,7 +47,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
     private void startTaskManager() {
         System.out.println("开始初始化存储");
         long tm = System.currentTimeMillis();
-        tieBaFileSystem = new TieBaFileSystem(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
+        tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
         taskManager = new TaskManager<>(PageTask.class, tieBaFileSystem,getContext().getSystem(),"/user/IndexSpiderSlaveActor");
         if (taskManager.getTotalTaskSize() == 0) {
             initPageCountFromNetwork();

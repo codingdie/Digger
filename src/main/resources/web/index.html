@@ -56,7 +56,9 @@
                 <input type="text" class="form-control" id="tiebaName" placeholder="贴吧名称">
             </div>
             <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default" onclick="startIndexSpider(this)" data-toggle="popover">开始贴吧索引抓取</a>
-            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default"  data-toggle="popover">开始贴吧帖子抓取(developing)</a>
+            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default"  onclick="startDetailSpider(this)" data-toggle="popover">开始贴吧帖子抓取(developing)</a>
+            <a role="button"  data-trigger="focus" tabindex="0"  class="btn btn-default"  onclick="showIndexCount(this)" data-toggle="popover">显示该贴吧的索引数量</a>
+
             <button  class="btn btn-default">开始分析贴吧用户价值排名(todo)</button>
             <button  class="btn btn-default">开始分析贴吧帖子热度排名(todo)</button>
             <button  class="btn btn-default">提取此贴吧高频话题(todo)</button>
@@ -92,8 +94,21 @@
             $("#configJsonShow").text(data);
         });
     }
+    function showIndexCount() {
+        $.get("/index/count",function(data,status){
+            alert(data);
+        });
+    }
     function startIndexSpider(btn) {
         $.get("/indexspider/start?tiebaName="+ $("#tiebaName").val(),function(data,status){
+
+            $(btn).attr("data-content",data)
+            $(btn).popover("show")
+            showConfig()
+        });
+    }
+    function startDetailSpider(btn) {
+        $.get("/detailspider/start?tiebaName="+ $("#tiebaName").val(),function(data,status){
 
             $(btn).attr("data-content",data)
             $(btn).popover("show")

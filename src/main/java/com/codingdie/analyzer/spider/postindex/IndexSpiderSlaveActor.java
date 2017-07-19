@@ -38,13 +38,11 @@ public class IndexSpiderSlaveActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(PageTask.class, m -> {
-
             ActorRef actorRef= pageActors.get(totalTaskCount % TieBaAnalyserConfigFactory.getInstance().slavesConfig.page_actor_count);
             actorRef.tell(m,getSelf());
             senderMap.put(m.pn,getSender());
             totalTaskCount++;
             printProcess();
-
         }).match(CrawlPageResult.class, m->{
             finishedTaskCount++;
             senderMap.get(m.pn).tell(m,getSelf());
