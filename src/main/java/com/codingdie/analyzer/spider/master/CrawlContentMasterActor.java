@@ -1,21 +1,20 @@
-package com.codingdie.analyzer.spider.postdetail;
+package com.codingdie.analyzer.spider.master;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.DetailTask;
+import com.codingdie.analyzer.spider.model.ContentTask;
 import com.codingdie.analyzer.spider.model.PostIndex;
 import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.spider.task.TaskManager;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
 
 /**
  * Created by xupeng on 2017/4/26.
  */
-public class DetailSpiderMasterActor extends AbstractActor {
+public class CrawlContentMasterActor extends AbstractActor {
 
 
-    private TaskManager<DetailTask> taskManager;
+    private TaskManager<ContentTask> taskManager;
 
     private TieBaFileSystem tieBaFileSystem;
 
@@ -23,10 +22,10 @@ public class DetailSpiderMasterActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        System.out.println("stop DetailSpiderMasterActor");
+        System.out.println("stop CrawlContentMasterActor");
     }
 
-    public DetailSpiderMasterActor() {
+    public CrawlContentMasterActor() {
         super();
     }
 
@@ -40,12 +39,11 @@ public class DetailSpiderMasterActor extends AbstractActor {
 
 
     private void startTaskManager() {
-        System.out.println("开始初始化存储");
         long tm = System.currentTimeMillis();
         tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        taskManager = new TaskManager<DetailTask>(DetailTask.class, tieBaFileSystem, getContext().getSystem(), "/user/DetailSpiderSlaveActor");
+        taskManager = new TaskManager<ContentTask>(ContentTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawlContentSlaveActor");
         tieBaFileSystem.getPostIndexStorage().iterateNoContentIndex(postIndex -> {
-            taskManager.putTask(new DetailTask(postIndex.getPostId()));
+            taskManager.putTask(new ContentTask(postIndex.getPostId()));
         });
         taskManager.startAlloc(getSelf());
     }

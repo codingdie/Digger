@@ -1,8 +1,7 @@
 package com.codingdie.analyzer.spider.model.result;
 
-import com.codingdie.analyzer.spider.task.TaskResult;
+import com.codingdie.analyzer.spider.model.task.TaskResult;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  */
 public class CrawlPostDetailResult extends TaskResult {
     private long postId = -1;
-    private List<String> hosts=new ArrayList<>();
+    private List<String> hosts = new ArrayList<>();
 
     @Override
     public String getKey() {
@@ -22,6 +21,11 @@ public class CrawlPostDetailResult extends TaskResult {
         super();
     }
 
+    public static CrawlPostDetailResult TimeOut(long postId) {
+        CrawlPostDetailResult crawlPostDetailResult = TimeOut(CrawlPostDetailResult.class);
+        crawlPostDetailResult.setPostId(postId);
+        return crawlPostDetailResult;
+    }
     public long getPostId() {
         return postId;
     }

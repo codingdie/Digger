@@ -1,14 +1,13 @@
 package com.codingdie.analyzer.storage.spider;
 
-import com.codingdie.analyzer.spider.task.Task;
+import com.codingdie.analyzer.spider.model.task.Task;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.jsoup.helper.StringUtil;
 
-
 import java.io.*;
-import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

@@ -9,7 +9,7 @@ import java.util.List;
 public class PostDetail {
     private long postId;
     private String title;
-    private String author;
+    private PostAuthor author;
     private String time;
     private int  pageCount;
     private List<PostFloor> floors=new ArrayList<>();
@@ -22,11 +22,11 @@ public class PostDetail {
         this.title = title;
     }
 
-    public String getAuthor() {
+    public PostAuthor getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(PostAuthor author) {
         this.author = author;
     }
 

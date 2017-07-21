@@ -1,75 +1,72 @@
 package storage;
 
-import akka.http.javadsl.model.DateTime;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
 import junit.framework.TestCase;
 
-import java.lang.reflect.*;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import static akka.pattern.PatternsCS.ask;
 
 /**
  * Created by xupeng on 2017/5/17.
  */
-public class AkkaTest extends TestCase{
+public class AkkaTest extends TestCase {
 
-    public abstract  class  Foo<T>{
-        public Foo(){
+    public static class A extends AbstractActor {
 
-        }
-    }
-    public   class  A<T>{
-        public A(){
-            Foo<T> foo = new Foo<T>(){};
-            Type mySuperClass = foo.getClass().getGenericSuperclass();
-            Type type = ((ParameterizedType)mySuperClass).getActualTypeArguments()[0];
-            System.out.println(type);
+        @Override
+        public Receive createReceive() {
+            return receiveBuilder().matchEquals("123", p -> {
 
 
-            System.out.println( new TypeToken<A<T>>(){}.getRawType());
-
+                getSender().tell(System.currentTimeMillis(), null);
+            }).build();
         }
     }
 
-     public  void  testA()throws Exception,Throwable{
+    public void testA() throws Exception {
+        ActorSystem system = ActorSystem.create();
 
-          new  A<String>();
-     }
-     private void qsort(int[] tests,int begin ,int end){
+        ActorRef actor = system.actorOf(Props.create(A.class), "123");
+        final long yime = System.currentTimeMillis();
 
-         int k= qsortUnit(tests,begin,end);
 
-         if(k-1-begin>1){
-             qsort(tests,begin,k-1);
-         }
-         if(end-k-1>1){
-             qsort(tests,k+1,end);
-         }
+        ask(actor, "123", 40000).toCompletableFuture().whenCompleteAsync((o, throwable) -> {
 
-     }
-     private int  qsortUnit(int [] array,int low,int high){
-         int key = array[low];
-         while (low < high)
-         {
-                /*从后向前搜索比key小的值*/
-             while (array[high] >= key && high > low)
-                 --high;
-                /*比key小的放左边*/
-             array[low] = array[high];
-                /*从前向后搜索比key大的值，比key大的放右边*/
-             while (array[low] <= key && high > low)
-                 ++low;
-                /*比key大的放右边*/
-             array[high] = array[low];
-         }
-            /*左边都比key小，右边都比key大。//将key放在游标当前位置。//此时low等于high */
-         array[low] = key;
+            System.out.println(o);
+            if (o == null) o = "0";
+//            print(Thread.currentThread());
 
-        return high;
-     }
+            System.out.println("result1:" + (Long.valueOf(String.valueOf(o)).longValue() - yime));
+        });
+
+//        ask(actor, "123", 7000).toCompletableFuture().whenComplete((o, throwable) -> {
+//            if (o == null) o = "0";
+//            print(Thread.currentThread());
+//
+//            System.out.println("result2:" + (Long.valueOf(String.valueOf(o)).longValue() - yime));
+//
+//        });
+//        ask(actor, "123", 12000).toCompletableFuture().whenComplete((o, throwable) -> {
+//            if (o == null) o = "0";
+//            print(Thread.currentThread());
+//
+//            System.out.println("result3:" + (Long.valueOf(String.valueOf(o)).longValue() - yime));
+//        });
+    }
+
+    public void print(Thread root) {
+
+
+        if (root == null) return;
+        System.out.println("root:" + root.getId() + "\t" + root.getName());
+
+        ThreadGroup group = root.getThreadGroup();
+        Thread[] list = new Thread[group.activeCount()];
+        group.enumerate(list);
+        for (Thread thread : list) {
+            System.out.println(thread.getId() + "\t" + thread.getName());
+        }
+    }
 }

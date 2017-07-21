@@ -1,39 +1,41 @@
 package com.codingdie.analyzer.spider.model;
 
+import java.util.List;
+
 /**
  * Created by xupeng on 17-7-18.
  */
 public class PostFloor {
-    private  int index;
-    private  String textContent;
-    private  String htmlContent;
+
+    private String postId;
+
+    private int postIndex;
+    private String content;
     private  String clientType;
     private  String time;
-    private  String author;
+    private PostAuthor author;
+    private int commentNum;
+    private String forumId;
+    private String threadId;
+    private boolean isAnonym;
+    private String type;
+    private List<PostRemark> remarks;
 
 
-    public int getIndex() {
-        return index;
+    public int getPostIndex() {
+        return postIndex;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setPostIndex(int postIndex) {
+        this.postIndex = postIndex;
     }
 
-    public String getTextContent() {
-        return textContent;
+    public String getContent() {
+        return content;
     }
 
-    public void setTextContent(String textContent) {
-        this.textContent = textContent;
-    }
-
-    public String getHtmlContent() {
-        return htmlContent;
-    }
-
-    public void setHtmlContent(String htmlContent) {
-        this.htmlContent = htmlContent;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getClientType() {
@@ -52,11 +54,67 @@ public class PostFloor {
         this.time = time;
     }
 
-    public String getAuthor() {
+    public PostAuthor getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(PostAuthor author) {
         this.author = author;
+    }
+
+    public int getCommentNum() {
+        return commentNum;
+    }
+
+    public void setCommentNum(int commentNum) {
+        this.commentNum = commentNum;
+    }
+
+    public String getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(String forumId) {
+        this.forumId = forumId;
+    }
+
+    public String getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(String threadId) {
+        this.threadId = threadId;
+    }
+
+    public boolean isAnonym() {
+        return isAnonym;
+    }
+
+    public void setAnonym(boolean anonym) {
+        isAnonym = anonym;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
+    public List<PostRemark> getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(List<PostRemark> remarks) {
+        this.remarks = remarks;
     }
 }

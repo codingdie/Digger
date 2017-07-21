@@ -1,11 +1,10 @@
-package com.codingdie.analyzer.spider.postindex;
+package com.codingdie.analyzer.spider.slave;
 
 import akka.actor.AbstractActor;
-import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
-import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
+import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
+import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -14,7 +13,8 @@ import org.jsoup.nodes.Document;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by xupeng on 2017/4/14.

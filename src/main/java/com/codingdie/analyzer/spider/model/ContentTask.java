@@ -1,16 +1,13 @@
 package com.codingdie.analyzer.spider.model;
 
-import com.codingdie.analyzer.config.model.SpiderConfig;
-import com.codingdie.analyzer.spider.task.Task;
-
-import java.io.Serializable;
+import com.codingdie.analyzer.spider.model.task.Task;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class DetailTask extends Task {
+public class ContentTask extends Task {
 
-    public DetailTask(long postId){
+    public ContentTask(long postId) {
         this.postId=postId;
     }
     public long postId=50;

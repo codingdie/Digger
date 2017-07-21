@@ -1,15 +1,11 @@
 package com.codingdie.analyzer.storage;
 
-import com.codingdie.analyzer.spider.task.Task;
-import com.codingdie.analyzer.storage.spider.TaskStorage;
+import com.codingdie.analyzer.spider.model.task.Task;
 import com.codingdie.analyzer.storage.spider.PostDetailStorage;
 import com.codingdie.analyzer.storage.spider.PostIndexStorage;
+import com.codingdie.analyzer.storage.spider.TaskStorage;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by xupeng on 2017/5/10.

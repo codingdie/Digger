@@ -5,6 +5,7 @@ apply plugin: "java"
 
 sourceCompatibility = 1.8
 
+def fs=java.io.File.separator
 repositories {
     maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
     mavenCentral()
@@ -52,8 +53,8 @@ dependencies {
 
 task slaveJar(type: Jar,dependsOn: [classes]){
     baseName "slavenode"
-    from("build"+File.separator+"classes"+File.separator+"java"+File.separator+"main","build"+File.separator+"resources"+File.separator+"main")
-    destinationDir new File("build"+File.separator+"release"+File.separator+"libs")
+    from("build"+ fs+"classes"+fs+"java"+fs+"main","build"+fs+"resources"+fs+"main")
+    destinationDir new File("build"+fs+"release"+fs+"libs")
 
     manifest{
         attributes "Main-Class": "com.codingdie.analyzer.SlaveStarter"
@@ -65,8 +66,8 @@ task slaveJar(type: Jar,dependsOn: [classes]){
 
 task serverJar(type: Jar,dependsOn: [classes]){
     baseName "masternode"
-    from("build"+File.separator+"classes"+File.separator+"java"+File.separator+"main","build"+File.separator+"resources"+File.separator+"main")
-    destinationDir new File("build"+File.separator+"release"+File.separator+"libs")
+    from("build"+fs+"classes"+fs+"java"+fs+"main","build"+fs+"resources"+fs+"main")
+    destinationDir new File("build"+fs+"release"+fs+"libs")
     manifest{
         attributes "Main-Class": "com.codingdie.analyzer.MasterStarter"
         String someString = ""
@@ -77,42 +78,43 @@ task serverJar(type: Jar,dependsOn: [classes]){
 
 task copylibs(type: Copy){
     from configurations.runtime
-    into ("build"+File.separator+"release"+File.separator+"libs")
+    into ("build"+fs+"release"+fs+"libs")
 }
 task copyconf(type: Copy){
-    from(project.rootDir.toString()+""+File.separator+"conf") {
+    from(project.rootDir.toString()+""+fs+"conf") {
         include "*.conf"
     }
-    into ("build"+File.separator+"release"+File.separator+"conf")
+    into ("build"+fs+"release"+fs+"conf")
 }
 task copyscript(type: Copy){
-    from(project.rootDir.toString()+""+File.separator+"script") {
+    from(project.rootDir.toString()+""+fs+"script") {
         include "*.sh"
     }
-    into ("build"+File.separator+"release")
+    into ("build"+fs+"release")
 }
 
 jar{
-    new File("build"+File.separator+"release"+File.separator+"logs").mkdirs()
+    new File("build"+fs+"release"+fs+"logs").mkdirs()
 }
 task copyRunJar(type: Copy ){
 
-    from("build"+File.separator+"libs") {
+    from("build"+fs+"libs") {
         include "*node*.jar"
     }
-    into ("build"+File.separator+"release")
+    into ("build"+fs+"release")
 }
 
 task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,copyRunJar]){
 
 }
 
+def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
 
 task startMaster(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , project.rootDir.toString()+File.separator+"conf" ,"127.0.0.1",2550
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , developConfFolder,"127.0.0.1",2552
 }
 
 
 task startSlave(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , project.rootDir.toString()+File.separator+"conf" ,"127.0.0.1",2552
+    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , developConfFolder ,"127.0.0.1",2550
 }

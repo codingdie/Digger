@@ -1,13 +1,12 @@
-package com.codingdie.analyzer.spider.postindex;
+package com.codingdie.analyzer.spider.master;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.PostIndex;
 import com.codingdie.analyzer.spider.model.PostSimpleInfo;
-import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
-import com.codingdie.analyzer.spider.task.TaskManager;
+import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.TieBaFileSystem;
 import okhttp3.Request;
 import org.jsoup.Jsoup;

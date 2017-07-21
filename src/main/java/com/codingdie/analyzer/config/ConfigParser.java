@@ -1,7 +1,5 @@
 package com.codingdie.analyzer.config;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 import org.jsoup.helper.StringUtil;
 
 import java.io.BufferedReader;
@@ -44,7 +42,7 @@ public class ConfigParser {
 
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+//                ex.printStackTrace();
             }
         });
 

@@ -1,7 +1,6 @@
-package com.codingdie.analyzer.spider.task;
+package com.codingdie.analyzer.spider.model.task;
 
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.PageTask;
 
 import java.io.Serializable;
 
@@ -25,4 +24,7 @@ public abstract class Task<T> implements Serializable {
     public  abstract  int compareTo(T o);
     public  abstract  String getKey();
 
+    public String getSlaveUri() throws Exception {
+        throw new Exception("定义此种Task的Slave连接器地址");
+    }
 }

@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.postindex;
+package com.codingdie.analyzer.spider.slave;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;

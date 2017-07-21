@@ -1,9 +1,6 @@
 package com.codingdie.analyzer.spider.model;
 
-import com.codingdie.analyzer.config.model.SpiderConfig;
-import com.codingdie.analyzer.spider.task.Task;
-
-import java.io.Serializable;
+import com.codingdie.analyzer.spider.model.task.Task;
 
 /**
  * Created by xupeng on 2017/4/19.

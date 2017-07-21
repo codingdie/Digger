@@ -6,7 +6,6 @@ import com.codingdie.analyzer.config.model.SpiderConfig;
 import com.codingdie.analyzer.config.model.WorkConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedWriter;
@@ -43,7 +42,6 @@ public class TieBaAnalyserConfigFactory {
                 }
 
             });
-            System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(tieBaAnalyserConfigFactory));
 
         }
         return tieBaAnalyserConfigFactory;

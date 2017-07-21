@@ -1,7 +1,7 @@
 package com.codingdie.analyzer.storage.spider;
 
 import com.codingdie.analyzer.spider.model.PostDetail;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,14 +26,14 @@ public class PostDetailStorage {
         try {
             file.createNewFile();
             BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-            writer.write(new Gson().toJson(detail));
+            writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(detail));
             writer.flush();
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         return true;
     }
+
+
 }
