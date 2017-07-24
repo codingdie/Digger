@@ -1,4 +1,4 @@
-package com.codingdie.analyzer;
+package com.codingdie.analyzer.cluster;
 
 import akka.actor.AbstractActor;
 import akka.cluster.Cluster;

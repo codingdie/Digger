@@ -77,7 +77,7 @@ public class QueryPageActor extends AbstractActor {
     }
 
     private String buildUrl(PageTask task) {
-        return "https://tieba.baidu.com/f?kw=" + task.tiebaName+ "&ie=utf-8&pn=" + task.pn;
+        return "https://tieba.baidu.com/f?kw=" + task.getTiebaName() + "&ie=utf-8&pn=" + task.pn;
     }
 
 }

@@ -13,7 +13,7 @@ public class CrawlPostDetailResult extends TaskResult {
     private List<String> hosts = new ArrayList<>();
 
     @Override
-    public String getKey() {
+    public String taskId() {
         return String.valueOf(postId);
     }
 

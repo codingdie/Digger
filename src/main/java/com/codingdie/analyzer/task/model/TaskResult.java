@@ -8,7 +8,6 @@ import java.io.Serializable;
 public abstract class TaskResult implements Serializable {
     public static final String ERROR_TIMEOUT = "timeout";
 
-    public abstract String getKey();
 
     public boolean success = false;
     public String error = "未知原因";
@@ -30,4 +29,7 @@ public abstract class TaskResult implements Serializable {
         }
         return null;
     }
+
+    public abstract String taskId();
+
 }

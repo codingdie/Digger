@@ -1,10 +1,11 @@
 package com.codingdie.analyzer.task;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
-import akka.cluster.Cluster;
-import akka.cluster.Member;
+import akka.util.Timeout;
+import com.codingdie.analyzer.cluster.ClusterManager;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.tieba.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
@@ -13,14 +14,15 @@ import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.codingdie.analyzer.task.model.Task;
 import com.codingdie.analyzer.task.model.TaskResult;
 import com.codingdie.analyzer.util.MailUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -36,8 +38,6 @@ public class TaskManager<T extends Task> {
     private long beginTime = 0;
     private int failedCount = 0;
     private boolean failedFlag = false;
-
-    private List<ActorRef> slaves = new Vector<ActorRef>();
     private List<Cancellable> cancellables = new ArrayList<>();
 
     private ConcurrentHashMap<String, T> todoTasks = new ConcurrentHashMap<>();
@@ -48,8 +48,11 @@ public class TaskManager<T extends Task> {
     private ConcurrentHashMap<String, Integer> slavesRunningTaskMapData = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Integer> slavesFinishedTaskMapData = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Integer> slavesFailedTaskMapData = new ConcurrentHashMap<>();
+
     private TaskStorage<T> taskStorage;
+
     private ActorSystem actorSystem;
+
     private ActorRef receiverActor;
 
     public TaskManager(Class<T> tClass, TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
@@ -59,37 +62,16 @@ public class TaskManager<T extends Task> {
         totalTaskSize = list.size();
         list.iterator().forEachRemaining(i -> {
             if (i.status != T.STATUS_FINISHED) {
-                todoTasks.put(i.getKey(), i);
+                todoTasks.put(i.taskId(), i);
             } else {
-                finishedTasks.put(i.getKey(), i);
+                finishedTasks.put(i.taskId(), i);
             }
         });
         lastFinishedTaskSize = finishedTasks.size();
-        initStatistical();
-
-    }
-
-    public List<String> getActiveSlaves() {
-        Set<Member> members = Cluster.get(actorSystem).state().getUnreachable();
-        List<String> activeMembers = new ArrayList<>();
-        Cluster.get(actorSystem).state().getMembers().forEach(member -> {
-            if (!members.contains(member) && member.hasRole("slave")) {
-                activeMembers.add(member.address().toString());
-            }
-        });
-        return activeMembers;
-    }
-
-
-    private void initStatistical() {
         beginTime = System.currentTimeMillis();
-        slaves.iterator().forEachRemaining(i -> {
-            String key = getHostFromActorPath(i.path().toString());
-            slavesRunningTaskMapData.put(key, 0);
-            slavesFinishedTaskMapData.put(key, 0);
-            slavesFailedTaskMapData.put(key, 0);
-        });
+
     }
+
 
     public void putTasks(List<T> ts) {
         ts.forEach(i -> {
@@ -98,30 +80,31 @@ public class TaskManager<T extends Task> {
     }
 
     public void putTask(T t) {
-        todoTasks.remove(t.getKey());
-        excutingTasks.remove(t.getKey());
-        finishedTasks.remove(t.getKey());
-        failedTasks.remove(t.getKey());
+        todoTasks.remove(t.taskId());
+        excutingTasks.remove(t.taskId());
+        finishedTasks.remove(t.taskId());
+        failedTasks.remove(t.taskId());
 
         if (t.status == Task.STATUS_TODO) {
-            todoTasks.put(t.getKey(), t);
+            todoTasks.put(t.taskId(), t);
         } else if (t.status == Task.STATUS_EXCUTING) {
-            excutingTasks.put(t.getKey(), t);
+            excutingTasks.put(t.taskId(), t);
         } else if (t.status == Task.STATUS_FINISHED) {
-            finishedTasks.put(t.getKey(), t);
+            finishedTasks.put(t.taskId(), t);
         } else if (t.status == Task.STATUS_FAILED) {
-            failedTasks.put(t.getKey(), t);
+            failedTasks.put(t.taskId(), t);
         }
         taskStorage.save(t);
     }
 
     public void receiveResult(TaskResult result, ActorRef sender) {
-        T task = excutingTasks.get(result.getKey());
+        System.out.println("finish  task " + result.taskId() + ":" + result.success);
+
+        T task = excutingTasks.get(result.taskId());
         if (task == null) {
             return;
         }
         String senderPath = getHostFromActorPath(sender.path().toString());
-
         if (result.success) {
             task.status = Task.STATUS_FINISHED;
             slavesFinishedTaskMapData.put(senderPath, slavesFinishedTaskMapData.get(senderPath) + 1);
@@ -163,14 +146,9 @@ public class TaskManager<T extends Task> {
     }
 /**/
 
-    public List<ActorRef> getSlaves() {
-        return slaves;
-    }
-
 
     public void startAlloc(ActorRef actorRef) {
         receiverActor = actorRef;
-        System.out.println("total task:" + todoTasks.size());
         cancellables.add(actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
@@ -199,18 +177,11 @@ public class TaskManager<T extends Task> {
         if (task == null) {
             return;
         }
-        ActorRef actorRef = null;
-        while ((actorRef = getSlaveToRun()) == null) {
-            try {
-                Thread.sleep(3000L);
-                System.out.println("no avtive slave,wait 3 seconds to try");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        ActorRef actorRef = getSlaveToRun();
         actorRef.tell(task, resultReceiver);
         task.status = PageTask.STATUS_EXCUTING;
         putTask(task);
+
     }
 
     private void initProcessPrinter() {
@@ -224,18 +195,53 @@ public class TaskManager<T extends Task> {
     }
 
     private ActorRef getSlaveToRun() {
-        if (slaves.size() > 0) {
+        ActorRef actorRef = null;
+        while (actorRef == null) {
+            initMapData();
             String host = slavesRunningTaskMapData.entrySet().stream().min((o1, o2) -> {
                 return o1.getValue() - o2.getValue();
             }).get().getKey();
-
-            ActorRef actorRef = slaves.stream().filter(t -> {
-                return getHostFromActorPath(t.path().toString()).equals(host);
-            }).findAny().get();
-            slavesRunningTaskMapData.put(host, slavesRunningTaskMapData.get(host) + 1);
-            return actorRef;
+            if (StringUtils.isNoneBlank(host)) {
+                ActorSelection actorSelection = actorSystem.actorSelection(host + "/TaskReceiver");
+                Future<ActorRef> future = actorSelection.resolveOne(new Timeout(10, TimeUnit.SECONDS));
+                try {
+                    actorRef = Await.result(future, new FiniteDuration(10, TimeUnit.SECONDS));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (actorRef != null) {
+                    slavesRunningTaskMapData.put(host, slavesRunningTaskMapData.get(host) + 1);
+                    return actorRef;
+                }
+            }
+            try {
+                System.out.println("no salves, wating slave connect to excute task");
+                Thread.sleep(3000L);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
+
+
+    }
+
+    private void initMapData() {
+        List<String> activeSlaves = ClusterManager.Instance().getActiveSlaves();
+        for (String slavePath : activeSlaves) {
+            if (!slavesRunningTaskMapData.containsKey(slavePath)) {
+                slavesRunningTaskMapData.put(slavePath, 0);
+                slavesFinishedTaskMapData.put(slavePath, 0);
+                slavesFailedTaskMapData.put(slavePath, 0);
+            }
+        }
+        slavesFailedTaskMapData.keySet().stream().filter(s -> {
+            return activeSlaves.contains(s);
+        }).collect(Collectors.toSet()).forEach(s -> {
+            slavesFailedTaskMapData.remove(s);
+            slavesFinishedTaskMapData.remove(s);
+            slavesFailedTaskMapData.remove(s);
+        });
     }
 
     public void printProcess() {
@@ -244,11 +250,9 @@ public class TaskManager<T extends Task> {
 
     private String buildSlaveProcessLogStr() {
         StringBuilder stringBuilder = new StringBuilder();
-
-        slaves.iterator().forEachRemaining(slave -> {
+        slavesRunningTaskMapData.keySet().iterator().forEachRemaining(slave -> {
             DecimalFormat df = new DecimalFormat("######0.00");
-
-            String host = getHostFromActorPath(slave.path().toString());
+            String host = getHostFromActorPath(slave);
             int totalTask = slavesFinishedTaskMapData.get(host) + slavesFailedTaskMapData.get(host) + slavesRunningTaskMapData.get(host);
             double speed = slavesFinishedTaskMapData.get(host) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
 
@@ -275,7 +279,7 @@ public class TaskManager<T extends Task> {
 
     private void initFailedChecker() {
         Cancellable cancellable = actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(30, TimeUnit.SECONDS), () -> {
-            failedFlag = (failedTasks.size() - failedCount) > 20 * slaves.size();
+            failedFlag = (failedTasks.size() - failedCount) > 20 * slavesRunningTaskMapData.keySet().size();
             failedCount = failedTasks.size();
             if (failedFlag) {
                 System.out.println("indexspider will stop because of lots of failed task!");

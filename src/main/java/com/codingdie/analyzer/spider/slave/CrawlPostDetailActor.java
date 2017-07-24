@@ -23,7 +23,6 @@ import java.util.List;
  */
 public class CrawlPostDetailActor extends AbstractActor {
 
-
     @Override
     public void postStop() throws Exception {
         super.postStop();
@@ -32,7 +31,7 @@ public class CrawlPostDetailActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(PostDetailTask.class, m -> {
-            TieBaFileSystem tieBaFileSystem = TieBaFileSystem.getInstance(m.tiebaName, TieBaFileSystem.ROLE_SLAVE);
+            TieBaFileSystem tieBaFileSystem = TieBaFileSystem.getInstance(m.getTiebaName(), TieBaFileSystem.ROLE_SLAVE);
             PostDetail postDetail = crawlPostDetail(m);
             CrawlPostDetailResult result = new CrawlPostDetailResult();
             result.setPostId(m.postId);

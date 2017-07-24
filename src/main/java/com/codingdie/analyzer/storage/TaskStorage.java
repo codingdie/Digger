@@ -74,7 +74,7 @@ public class TaskStorage<T extends Task> {
             while ((line = bufferedReader.readLine()) != null) {
                 if (!StringUtil.isBlank(line)) {
                     T task = new Gson().fromJson(line, tClass);
-                    pageTMap.put(task.getKey(), task);
+                    pageTMap.put(task.taskId(), task);
                 }
             }
         } catch (Exception ex) {

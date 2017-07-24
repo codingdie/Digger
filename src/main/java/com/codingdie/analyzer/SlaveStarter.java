@@ -6,7 +6,6 @@ import akka.actor.Props;
 import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.slave.CrawIndexSlaveActor;
-import com.codingdie.analyzer.spider.slave.CrawlContentSlaveActor;
 
 import java.util.Arrays;
 

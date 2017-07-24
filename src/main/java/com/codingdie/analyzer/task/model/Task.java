@@ -1,30 +1,25 @@
 package com.codingdie.analyzer.task.model;
 
-import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-
 import java.io.Serializable;
 
 /**
  * Created by xupeng on 2017/6/12.
  */
-public abstract class Task<T> implements Serializable {
-    public static final int STATUS_TODO=0;
-    public static final int STATUS_EXCUTING=1;
-    public static final int STATUS_FINISHED=2;
-    public static final int STATUS_FAILED=3;
-
-    public Task(){
-        tiebaName= TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name;
-    }
-    public int status=STATUS_TODO;
+public abstract class Task implements Serializable {
+    public static final int STATUS_TODO = 0;
+    public static final int STATUS_EXCUTING = 1;
+    public static final int STATUS_FINISHED = 2;
+    public static final int STATUS_FAILED = 3;
+    public int status = STATUS_TODO;
     public String cookie;
-    public String tiebaName;
 
+    public abstract String taskId();
 
-    public  abstract  int compareTo(T o);
-    public  abstract  String getKey();
+    public abstract String excutorName();
 
-    public String getSlaveUri() throws Exception {
-        throw new Exception("定义此种Task的Slave连接器地址");
+    public <T extends Task> int compareTo(T t) {
+        return this.status - t.status;
     }
+
+
 }

@@ -1,11 +1,9 @@
 package com.codingdie.analyzer.spider.model.tieba;
 
-import com.codingdie.analyzer.task.model.Task;
-
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class PostDetailTask extends Task {
+public class PostDetailTask extends TieBaTask {
 
     public PostDetailTask(long postId) {
         this.postId=postId;
@@ -14,13 +12,13 @@ public class PostDetailTask extends Task {
 
 
     @Override
-    public int compareTo(Object o) {
-        return 0;
+    public String taskId() {
+        return String.valueOf(postId);
     }
 
     @Override
-    public String getKey() {
-        return String.valueOf(postId);
+    public String excutorName() {
+        return CrawlContentSlaveActor.class.getTypeName();
     }
 
 

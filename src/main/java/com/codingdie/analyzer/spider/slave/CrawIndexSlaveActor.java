@@ -29,7 +29,7 @@ public class CrawIndexSlaveActor extends AbstractActor {
     public void preStart() throws Exception {
         super.preStart();
         for(; totalTaskCount < TieBaAnalyserConfigFactory.getInstance().slavesConfig.page_actor_count; totalTaskCount++){
-            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor.class), "QueryPageActor"+ totalTaskCount);
+            ActorRef queryPageActor = context().actorOf(Props.create(QueryPageActor::new), "QueryPageActor" + totalTaskCount);
             pageActors.add(queryPageActor);
         }
         totalTaskCount =0;

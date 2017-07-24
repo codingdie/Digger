@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.controller;
+package com.codingdie.analyzer.spider.master.controller;
 
 import akka.NotUsed;
 import akka.actor.ActorSystem;
@@ -38,7 +38,7 @@ public class MasterControllServer extends AllDirectives {
         Route route1 = path(PathMatchers.segment("indexspider")
                 .slash("start"), () ->
                 get(() -> {
-                    actorSystem.actorOf(Props.create(IndexSpiderMasterActor.class), "IndexSpiderMasterActor");
+                    actorSystem.actorOf(Props.create(IndexSpiderMasterActor::new), "IndexSpiderMasterActor");
                     return complete("start indexspider");
                 })
         );
