@@ -1,19 +1,18 @@
 package com.codingdie.analyzer;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.remote.AssociationErrorEvent;
-import com.codingdie.analyzer.config.AkkaConfigUtil;
+import akka.cluster.Cluster;
+import akka.cluster.Member;
+import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.controller.MasterControllServer;
-import com.codingdie.analyzer.spider.AssociateListener;
 import org.apache.log4j.Logger;
-import scala.collection.immutable.Iterable;
-import scala.compat.java8.functionConverterImpls.FromJavaConsumer;
-import scala.concurrent.duration.FiniteDuration;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by xupeng on 2017/4/24.
@@ -26,20 +25,21 @@ public class MasterStarter {
             TieBaAnalyserConfigFactory.configFolder = args[0];
         }
         TieBaAnalyserConfigFactory.getInstance();
-
-        final  ActorSystem system = ActorSystem.create("master", AkkaConfigUtil.initAkkaConfigWithConsoleParam(args));
-        system.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS),()->{
-            Iterable<ActorRef> actorRefs= system.provider().guardian().children();
-            actorRefs.foreach(new FromJavaConsumer<ActorRef>(i->{
-                logger.info(i.path().toString());
-            }));
-
-        },system.dispatcher());
-        system.eventStream().subscribe(system.actorOf(Props.create(AssociateListener.class), "AssociateListener"), AssociationErrorEvent.class);
-
+        final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("master")).build());
+        system.actorOf(Props.create(ClusterListenerActor.class), "testActor");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Set<Member> unreachable = Cluster.get(system).state().getUnreachable();
+                Cluster.get(system).state().getMembers().forEach(member -> {
+                    if (!unreachable.contains(member)) {
+                        System.out.println(member.address().toString() + "\t" + member.getRoles().toArray()[0]);
+                    }
+                });
+            }
+        }, 0, 3000l);
         new MasterControllServer().start(system);
     }
-
 
 
 

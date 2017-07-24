@@ -1,7 +1,7 @@
 package com.codingdie.analyzer.spider.slave;
 
 import akka.actor.AbstractActor;
-import com.codingdie.analyzer.config.AkkaConfigUtil;
+import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
 import com.codingdie.analyzer.spider.model.tieba.*;
 import com.codingdie.analyzer.spider.network.HttpService;
@@ -39,7 +39,7 @@ public class CrawlPostDetailActor extends AbstractActor {
             if (postDetail != null) {
                 tieBaFileSystem.getContentStorage().saveContent(postDetail);
                 result.success = true;
-                result.getHosts().add(AkkaConfigUtil.HOST);
+                result.getHosts().add(AkkaConfigBuilder.getCurHost());
             } else {
                 result.errorReason("CrawlDetailError");
             }

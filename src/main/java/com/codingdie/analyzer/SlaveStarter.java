@@ -3,20 +3,19 @@ package com.codingdie.analyzer;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.codingdie.analyzer.config.AkkaConfigUtil;
+import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.slave.CrawIndexSlaveActor;
 import com.codingdie.analyzer.spider.slave.CrawlContentSlaveActor;
-import com.typesafe.config.Config;
+
+import java.util.Arrays;
 
 /**
  * Created by xupeng on 2017/4/14.
  */
 public class SlaveStarter {
     public static void main(String[] args) throws Exception {
-        Config config = AkkaConfigUtil.initAkkaConfigWithConsoleParam(args);
-        ActorSystem system = ActorSystem.create("slave", config);
-
+        final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("slave")).build());
         TieBaAnalyserConfigFactory.getInstance();
         ActorRef indexSpiderSlaveActor = system.actorOf(Props.create(CrawIndexSlaveActor.class), "CrawIndexSlaveActor");
         ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(CrawlContentSlaveActor.class), CrawlContentSlaveActor.class.getSimpleName());

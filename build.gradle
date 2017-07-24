@@ -7,7 +7,6 @@ sourceCompatibility = 1.8
 
 def fs=java.io.File.separator
 repositories {
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
     mavenCentral()
     mavenLocal()
     jcenter()
@@ -15,8 +14,12 @@ repositories {
 
 dependencies {
     //akka
-    compile "com.typesafe.akka:akka-actor_2.11:2.5.0"
-    compile group: "com.typesafe.akka", name: "akka-http_2.11", version:"10.0.6"
+    compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version:'2.5.3'
+
+    compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.3'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version:'10.0.9'
+
+    compile group: 'com.typesafe.akka', name: 'akka-cluster_2.11', version: '2.5.3'
 
 //    compile "com.typesafe.akka:akka-agent_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-camel_2.11:2.5.0"
@@ -30,8 +33,6 @@ dependencies {
 //    compile "com.typesafe.akka:akka-persistence_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-persistence-query_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-persistence-tck_2.11:2.5.0"
-    compile "com.typesafe.akka:akka-remote_2.11:2.5.0"
-    compile "com.typesafe.akka:akka-slf4j_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-stream_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-stream-testkit_2.11:2.5.0"
 //    compile "com.typesafe.akka:akka-testkit_2.11:2.5.0"

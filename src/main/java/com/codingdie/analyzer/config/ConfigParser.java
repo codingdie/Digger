@@ -55,8 +55,8 @@ public class ConfigParser {
             Arrays.stream(str.split("\n")).forEach(s -> {
                 try {
                     String[] strs = s.split("=", 2);
-                    Field field = tClass.getField(strs[0]);
-                    String value = strs[1];
+                    Field field = tClass.getField(strs[0].trim());
+                    String value = strs[1].trim();
                     if (field.getGenericType().getTypeName().equals(propertyTypeStrs[0])) {
                         field.set(t, value);
                     } else if (field.getGenericType().getTypeName().equals(propertyTypeStrs[1])) {

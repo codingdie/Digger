@@ -22,11 +22,11 @@ public class MailUtil {
             // 发送服务器需要身份验证
             props.setProperty("mail.smtp.auth", "true");
             // 设置邮件服务器主机名
-            props.setProperty("mail.host", "smtp.qq.com");
+            props.setProperty("mail.HOST", "smtp.qq.com");
             // 发送邮件协议名称
             props.setProperty("mail.transport.protocol", "smtp");
-            props.setProperty("mail.smtp.port", "465");
-            props.setProperty("mail.smtp.socketFactory.port", "465");
+            props.setProperty("mail.smtp.PORT", "465");
+            props.setProperty("mail.smtp.socketFactory.PORT", "465");
             props.setProperty("mail.smtp.socketFactory.class", SSL_FACTORY);
             // 设置环境信息
             Session session = Session.getInstance(props);

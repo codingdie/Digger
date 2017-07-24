@@ -1,10 +1,10 @@
 package com.codingdie.analyzer.task;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
-import akka.util.Timeout;
+import akka.cluster.Cluster;
+import akka.cluster.Member;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.model.tieba.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
@@ -14,14 +14,12 @@ import com.codingdie.analyzer.task.model.Task;
 import com.codingdie.analyzer.task.model.TaskResult;
 import com.codingdie.analyzer.util.MailUtil;
 import org.apache.log4j.Logger;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -67,26 +65,21 @@ public class TaskManager<T extends Task> {
             }
         });
         lastFinishedTaskSize = finishedTasks.size();
-        connectSlaves(salveActorUri);
         initStatistical();
 
     }
 
-    private void connectSlaves(String actorUri) {
-        TieBaAnalyserConfigFactory.getInstance().slavesConfig.hosts.iterator().forEachRemaining((String item) -> {
-            String path = "akka.tcp://slave@" + item + ":" + TieBaAnalyserConfigFactory.getInstance().slavesConfig.port + actorUri;
-            ActorSelection queryPageTaskControlActor = actorSystem.actorSelection(path);
-            Future<ActorRef> future = queryPageTaskControlActor.resolveOne(Timeout.apply(3, TimeUnit.SECONDS));
-            try {
-                ActorRef actorRef = Await.result(future, Duration.apply(3, TimeUnit.SECONDS));
-                slaves.add(actorRef);
-                System.out.println(actorRef.path().toString() + "connect succuss");
-            } catch (Exception ex) {
-                System.out.println(path + "connect failed");
+    public List<String> getActiveSlaves() {
+        Set<Member> members = Cluster.get(actorSystem).state().getUnreachable();
+        List<String> activeMembers = new ArrayList<>();
+        Cluster.get(actorSystem).state().getMembers().forEach(member -> {
+            if (!members.contains(member) && member.hasRole("slave")) {
+                activeMembers.add(member.address().toString());
             }
         });
-        System.out.println("finish connect slaves,total:" + slaves.size());
+        return activeMembers;
     }
+
 
     private void initStatistical() {
         beginTime = System.currentTimeMillis();
