@@ -6,8 +6,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.routing.BalancingPool;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.ContentTask;
 import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
+import com.codingdie.analyzer.spider.model.tieba.PostDetailTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
 
@@ -36,7 +36,7 @@ public class CrawlContentSlaveActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(ContentTask.class, m -> {
+        return receiveBuilder().match(PostDetailTask.class, m -> {
             final ActorRef sender = sender();
             final ActorRef self = getSelf();
 

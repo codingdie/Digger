@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.model.task;
+package com.codingdie.analyzer.task.model;
 
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 

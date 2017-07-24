@@ -1,9 +1,9 @@
 package com.codingdie.analyzer.spider.slave;
 
 import akka.actor.AbstractActor;
-import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
+import com.codingdie.analyzer.spider.model.tieba.PageTask;
+import com.codingdie.analyzer.spider.model.tieba.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.apache.log4j.Logger;

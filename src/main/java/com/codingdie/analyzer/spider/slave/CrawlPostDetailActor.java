@@ -2,10 +2,10 @@ package com.codingdie.analyzer.spider.slave;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.AkkaConfigUtil;
-import com.codingdie.analyzer.spider.model.*;
 import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
+import com.codingdie.analyzer.spider.model.tieba.*;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Request;
@@ -31,13 +31,13 @@ public class CrawlPostDetailActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(ContentTask.class, m -> {
+        return receiveBuilder().match(PostDetailTask.class, m -> {
             TieBaFileSystem tieBaFileSystem = TieBaFileSystem.getInstance(m.tiebaName, TieBaFileSystem.ROLE_SLAVE);
             PostDetail postDetail = crawlPostDetail(m);
             CrawlPostDetailResult result = new CrawlPostDetailResult();
             result.setPostId(m.postId);
             if (postDetail != null) {
-                tieBaFileSystem.getPostDetailStorage().savePostDetail(postDetail);
+                tieBaFileSystem.getContentStorage().saveContent(postDetail);
                 result.success = true;
                 result.getHosts().add(AkkaConfigUtil.HOST);
             } else {
@@ -49,7 +49,7 @@ public class CrawlPostDetailActor extends AbstractActor {
         }).build();
     }
 
-    public static PostDetail crawlPostDetail(ContentTask task) {
+    public static PostDetail crawlPostDetail(PostDetailTask task) {
         String result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + task.postId).build(), task.cookie);
         if (StringUtil.isBlank(result)) {
             return null;
@@ -122,7 +122,7 @@ public class CrawlPostDetailActor extends AbstractActor {
         return post;
     }
 
-    public static List<PostRemark> crawlRemarks(PostFloor postFloor, ContentTask task) {
+    public static List<PostRemark> crawlRemarks(PostFloor postFloor, PostDetailTask task) {
         List<PostRemark> resultList = new ArrayList<>();
         int i = 0;
         while (resultList.size() < postFloor.getCommentNum()) {

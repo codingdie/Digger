@@ -5,8 +5,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.codingdie.analyzer.config.AkkaConfigUtil;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
+import com.codingdie.analyzer.spider.slave.CrawIndexSlaveActor;
 import com.codingdie.analyzer.spider.slave.CrawlContentSlaveActor;
-import com.codingdie.analyzer.spider.slave.IndexSpiderSlaveActor;
 import com.typesafe.config.Config;
 
 /**
@@ -18,7 +18,7 @@ public class SlaveStarter {
         ActorSystem system = ActorSystem.create("slave", config);
 
         TieBaAnalyserConfigFactory.getInstance();
-        ActorRef indexSpiderSlaveActor = system.actorOf(Props.create(IndexSpiderSlaveActor.class), "IndexSpiderSlaveActor");
+        ActorRef indexSpiderSlaveActor = system.actorOf(Props.create(CrawIndexSlaveActor.class), "CrawIndexSlaveActor");
         ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(CrawlContentSlaveActor.class), CrawlContentSlaveActor.class.getSimpleName());
         System.out.println(detailSpiderSlaveActor.path().toString());
         System.out.println(indexSpiderSlaveActor.path().toString());

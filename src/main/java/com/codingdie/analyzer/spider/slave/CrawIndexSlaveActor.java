@@ -4,8 +4,8 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.PageTask;
 import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
+import com.codingdie.analyzer.spider.model.tieba.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by xupeng on 2017/4/14.
  */
-public class IndexSpiderSlaveActor extends AbstractActor {
+public class CrawIndexSlaveActor extends AbstractActor {
 
     Logger logger=Logger.getLogger("slave-task");
     private  List<ActorRef> pageActors =new ArrayList<>();

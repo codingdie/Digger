@@ -1,9 +1,9 @@
-package com.codingdie.analyzer.storage;
+package com.codingdie.analyzer.storage.tieba;
 
-import com.codingdie.analyzer.spider.model.task.Task;
-import com.codingdie.analyzer.storage.spider.PostDetailStorage;
-import com.codingdie.analyzer.storage.spider.PostIndexStorage;
-import com.codingdie.analyzer.storage.spider.TaskStorage;
+import com.codingdie.analyzer.storage.ContentStorage;
+import com.codingdie.analyzer.storage.IndexStorage;
+import com.codingdie.analyzer.storage.TaskStorage;
+import com.codingdie.analyzer.task.model.Task;
 
 import java.io.File;
 
@@ -18,8 +18,8 @@ public class TieBaFileSystem {
     private static Object  slaveInstanceLock= new Object();
     private static Object  masterInstanceLock= new Object();
 
-    private PostIndexStorage postIndexStorage;
-    private PostDetailStorage postDetailStorage;
+    private IndexStorage indexStorage;
+    private ContentStorage contentStorage;
 
     private File root;
 
@@ -54,14 +54,14 @@ public class TieBaFileSystem {
             if (!postIndexRootPath.exists()) {
                 postIndexRootPath.mkdirs();
             }
-            this.postIndexStorage = new PostIndexStorage(postIndexRootPath);
+            this.indexStorage = new IndexStorage(postIndexRootPath);
         }
         if (role == ROLE_SLAVE) {
             File postContentRootPath = new File(root.getAbsolutePath() + File.separatorChar + "postcontent");
             if (!postContentRootPath.exists()) {
                 postContentRootPath.mkdirs();
             }
-            this.postDetailStorage = new PostDetailStorage(postContentRootPath);
+            this.contentStorage = new ContentStorage(postContentRootPath);
         }
 
     }
@@ -74,12 +74,12 @@ public class TieBaFileSystem {
         return new TaskStorage<T>(spiderTaskRootPath, tClass);
     }
 
-    public PostIndexStorage getPostIndexStorage() {
-        return postIndexStorage;
+    public IndexStorage getIndexStorage() {
+        return indexStorage;
     }
 
-    public PostDetailStorage getPostDetailStorage() {
-        return postDetailStorage;
+    public ContentStorage getContentStorage() {
+        return contentStorage;
     }
 
     public void clear() {

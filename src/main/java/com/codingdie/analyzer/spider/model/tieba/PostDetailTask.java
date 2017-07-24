@@ -1,13 +1,13 @@
-package com.codingdie.analyzer.spider.model;
+package com.codingdie.analyzer.spider.model.tieba;
 
-import com.codingdie.analyzer.spider.model.task.Task;
+import com.codingdie.analyzer.task.model.Task;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class ContentTask extends Task {
+public class PostDetailTask extends Task {
 
-    public ContentTask(long postId) {
+    public PostDetailTask(long postId) {
         this.postId=postId;
     }
     public long postId=50;
@@ -22,4 +22,6 @@ public class ContentTask extends Task {
     public String getKey() {
         return String.valueOf(postId);
     }
+
+
 }

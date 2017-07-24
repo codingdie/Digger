@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.model;
+package com.codingdie.analyzer.spider.model.tieba;
 
 import java.util.List;
 

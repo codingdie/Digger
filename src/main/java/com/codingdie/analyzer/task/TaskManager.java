@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master;
+package com.codingdie.analyzer.task;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -6,12 +6,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.util.Timeout;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.model.task.Task;
-import com.codingdie.analyzer.spider.model.task.TaskResult;
+import com.codingdie.analyzer.spider.model.tieba.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
-import com.codingdie.analyzer.storage.spider.TaskStorage;
+import com.codingdie.analyzer.storage.TaskStorage;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
+import com.codingdie.analyzer.task.model.Task;
+import com.codingdie.analyzer.task.model.TaskResult;
 import com.codingdie.analyzer.util.MailUtil;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Created by xupeng on 2017/6/12.
  */
-public class TaskReceiver<T extends Task> {
+public class TaskManager<T extends Task> {
     private Logger logger = Logger.getLogger("index-task");
 
     private int totalTaskSize = 0;
@@ -54,7 +54,7 @@ public class TaskReceiver<T extends Task> {
     private ActorSystem actorSystem;
     private ActorRef receiverActor;
 
-    public TaskReceiver(Class<T> tClass, TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
+    public TaskManager(Class<T> tClass, TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
         this.actorSystem = actorSystem;
         this.taskStorage = tieBaFileSystem.getTaskStorage(tClass);
         List<T> list = taskStorage.parseAndRebuild();

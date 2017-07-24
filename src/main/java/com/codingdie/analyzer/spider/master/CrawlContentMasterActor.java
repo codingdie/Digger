@@ -2,11 +2,12 @@ package com.codingdie.analyzer.spider.master;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.ContentTask;
-import com.codingdie.analyzer.spider.model.PostIndex;
 import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
+import com.codingdie.analyzer.spider.model.tieba.PostDetailTask;
+import com.codingdie.analyzer.spider.model.tieba.PostIndex;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
+import com.codingdie.analyzer.task.TaskManager;
 
 /**
  * Created by xupeng on 2017/4/26.
@@ -14,7 +15,7 @@ import com.codingdie.analyzer.storage.TieBaFileSystem;
 public class CrawlContentMasterActor extends AbstractActor {
 
 
-    private TaskManager<ContentTask> taskManager;
+    private TaskManager<PostDetailTask> taskManager;
 
     private TieBaFileSystem tieBaFileSystem;
 
@@ -41,9 +42,9 @@ public class CrawlContentMasterActor extends AbstractActor {
     private void startTaskManager() {
         long tm = System.currentTimeMillis();
         tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        taskManager = new TaskManager<ContentTask>(ContentTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawlContentSlaveActor");
-        tieBaFileSystem.getPostIndexStorage().iterateNoContentIndex(postIndex -> {
-            taskManager.putTask(new ContentTask(postIndex.getPostId()));
+        taskManager = new TaskManager<PostDetailTask>(PostDetailTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawlContentSlaveActor");
+        tieBaFileSystem.getIndexStorage().iterateNoContentIndex(postIndex -> {
+            taskManager.putTask(new PostDetailTask(postIndex.getPostId()));
         });
         taskManager.startAlloc(getSelf());
     }
@@ -53,11 +54,11 @@ public class CrawlContentMasterActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(CrawlPostDetailResult.class, r -> {
             if (r.success) {
-                PostIndex postIndex = tieBaFileSystem.getPostIndexStorage().getIndex(r.getPostId());
+                PostIndex postIndex = tieBaFileSystem.getIndexStorage().getIndex(r.getPostId());
                 postIndex.setStatus(PostIndex.STATUS_HAS_CONTENT);
                 postIndex.setContentSlaves(r.getHosts());
                 postIndex.setModifyTime(System.currentTimeMillis());
-                tieBaFileSystem.getPostIndexStorage().modifyIndex(postIndex);
+                tieBaFileSystem.getIndexStorage().modifyIndex(postIndex);
                 System.out.println("finish detail task:" + r.getKey());
             }
             taskManager.receiveResult(r, getSender());

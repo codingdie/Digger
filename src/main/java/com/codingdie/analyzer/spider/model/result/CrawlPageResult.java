@@ -1,7 +1,7 @@
 package com.codingdie.analyzer.spider.model.result;
 
-import com.codingdie.analyzer.spider.model.PostSimpleInfo;
-import com.codingdie.analyzer.spider.model.task.TaskResult;
+import com.codingdie.analyzer.spider.model.tieba.PostSimpleInfo;
+import com.codingdie.analyzer.task.model.TaskResult;
 
 import java.util.List;
 

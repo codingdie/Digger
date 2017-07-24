@@ -1,6 +1,6 @@
-package com.codingdie.analyzer.spider.model;
+package com.codingdie.analyzer.spider.model.tieba;
 
-import com.codingdie.analyzer.spider.model.task.Task;
+import com.codingdie.analyzer.task.model.Task;
 
 /**
  * Created by xupeng on 2017/4/19.

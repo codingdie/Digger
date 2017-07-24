@@ -1,12 +1,16 @@
-package com.codingdie.analyzer.spider.model;
+package com.codingdie.analyzer.spider.model.tieba;
 
+import com.codingdie.analyzer.storage.model.Content;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by xupeng on 17-7-18.
  */
-public class PostDetail {
+public class PostDetail extends Content {
     private long postId;
     private String title;
     private PostAuthor author;
@@ -60,5 +64,16 @@ public class PostDetail {
 
     public void setPostId(long postId) {
         this.postId = postId;
+    }
+
+    @Override
+    public String getIndexId() {
+        return String.valueOf(postId);
+    }
+
+    @Override
+    public LocalDate getDate() {
+        if (StringUtils.isBlank(time)) return LocalDate.now();
+        return LocalDate.parse(time.substring(0, 10));
     }
 }

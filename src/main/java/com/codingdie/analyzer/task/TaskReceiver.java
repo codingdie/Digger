@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master;
+package com.codingdie.analyzer.task;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -6,12 +6,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.util.Timeout;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.model.task.Task;
-import com.codingdie.analyzer.spider.model.task.TaskResult;
+import com.codingdie.analyzer.spider.model.tieba.PageTask;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
-import com.codingdie.analyzer.storage.spider.TaskStorage;
+import com.codingdie.analyzer.storage.TaskStorage;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
+import com.codingdie.analyzer.task.model.Task;
+import com.codingdie.analyzer.task.model.TaskResult;
 import com.codingdie.analyzer.util.MailUtil;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Created by xupeng on 2017/6/12.
  */
-public  class TaskManager<T extends Task> {
+public class TaskReceiver<T extends Task> {
     private Logger logger = Logger.getLogger("index-task");
 
     private int totalTaskSize = 0;
@@ -54,7 +54,7 @@ public  class TaskManager<T extends Task> {
     private ActorSystem actorSystem;
     private ActorRef receiverActor;
 
-    public TaskManager(Class<T> tClass,TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
+    public TaskReceiver(Class<T> tClass, TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
         this.actorSystem = actorSystem;
         this.taskStorage = tieBaFileSystem.getTaskStorage(tClass);
         List<T> list = taskStorage.parseAndRebuild();
@@ -97,11 +97,13 @@ public  class TaskManager<T extends Task> {
             slavesFailedTaskMapData.put(key, 0);
         });
     }
+
     public void putTasks(List<T> ts) {
-        ts.forEach(i->{
+        ts.forEach(i -> {
             putTask(i);
         });
     }
+
     public void putTask(T t) {
         todoTasks.remove(t.getKey());
         excutingTasks.remove(t.getKey());
@@ -122,7 +124,7 @@ public  class TaskManager<T extends Task> {
 
     public void receiveResult(TaskResult result, ActorRef sender) {
         T task = excutingTasks.get(result.getKey());
-        if(task==null){
+        if (task == null) {
             return;
         }
         String senderPath = getHostFromActorPath(sender.path().toString());
@@ -175,7 +177,7 @@ public  class TaskManager<T extends Task> {
 
     public void startAlloc(ActorRef actorRef) {
         receiverActor = actorRef;
-        System.out.println("total task:"+todoTasks.size());
+        System.out.println("total task:" + todoTasks.size());
         cancellables.add(actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
@@ -183,14 +185,14 @@ public  class TaskManager<T extends Task> {
                 if (excutingTasks.size() > maxRunningTask || todoTasks.size() == 0) {
                     return;
                 }
-                if(todoTasks.isEmpty()){
+                if (todoTasks.isEmpty()) {
                     putTasks(getTaskWhenTaskPoolEmpty());
                 }
                 int taskCount = maxRunningTask - excutingTasks.size();
                 todoTasks.keySet().stream().sorted((o1, o2) -> {
                     return Long.valueOf(o1).compareTo(Long.valueOf(o2));
-                }).limit(taskCount).collect(Collectors.toList()).forEach(i->{
-                    assignTaskToSlave(todoTasks.get(i),receiverActor);
+                }).limit(taskCount).collect(Collectors.toList()).forEach(i -> {
+                    assignTaskToSlave(todoTasks.get(i), receiverActor);
                     todoTasks.remove(i);
                 });
 
@@ -201,7 +203,7 @@ public  class TaskManager<T extends Task> {
     }
 
     private void assignTaskToSlave(T task, ActorRef resultReceiver) {
-        if(task==null){
+        if (task == null) {
             return;
         }
         ActorRef actorRef = null;
@@ -292,7 +294,7 @@ public  class TaskManager<T extends Task> {
         cancellables.add(cancellable);
     }
 
-    public   List<T> getTaskWhenTaskPoolEmpty(){
-        return new ArrayList<>() ;
+    public List<T> getTaskWhenTaskPoolEmpty() {
+        return new ArrayList<>();
     }
 }

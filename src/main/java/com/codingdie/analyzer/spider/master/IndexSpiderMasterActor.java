@@ -2,12 +2,13 @@ package com.codingdie.analyzer.spider.master;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.PageTask;
-import com.codingdie.analyzer.spider.model.PostIndex;
-import com.codingdie.analyzer.spider.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
+import com.codingdie.analyzer.spider.model.tieba.PageTask;
+import com.codingdie.analyzer.spider.model.tieba.PostIndex;
+import com.codingdie.analyzer.spider.model.tieba.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
+import com.codingdie.analyzer.task.TaskManager;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,7 +48,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
         System.out.println("开始初始化存储");
         long tm = System.currentTimeMillis();
         tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        taskManager = new TaskManager<>(PageTask.class, tieBaFileSystem,getContext().getSystem(),"/user/IndexSpiderSlaveActor");
+        taskManager = new TaskManager<>(PageTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawIndexSlaveActor");
         if (taskManager.getTotalTaskSize() == 0) {
             initPageCountFromNetwork();
             Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count).intValue();
@@ -59,7 +60,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
             TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count =taskManager.getTotalTaskSize();
         }
         System.out.println("初始化存储完毕用时:" + (System.currentTimeMillis() - tm));
-        System.out.println("当前Index数量:" + tieBaFileSystem.getPostIndexStorage().countAllIndex());
+        System.out.println("当前Index数量:" + tieBaFileSystem.getIndexStorage().countAllIndex());
 
         taskManager.startAlloc(getSelf());
     }
@@ -85,7 +86,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
                         postIndex.setTitle(i.getTitle());
                         postIndex.setPn(r.pn);
                         postIndex.setCreateUser(i.getCreateUser());
-                        tieBaFileSystem.getPostIndexStorage().putIndex(postIndex);
+                        tieBaFileSystem.getIndexStorage().putIndex(postIndex);
                     }
 
                 });

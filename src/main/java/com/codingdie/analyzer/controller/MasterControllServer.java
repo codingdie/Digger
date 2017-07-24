@@ -16,7 +16,7 @@ import akka.stream.javadsl.Flow;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.master.CrawlContentMasterActor;
 import com.codingdie.analyzer.spider.master.IndexSpiderMasterActor;
-import com.codingdie.analyzer.storage.TieBaFileSystem;
+import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
@@ -61,7 +61,7 @@ public class MasterControllServer extends AllDirectives {
         Route route7 = path(PathMatchers.segment("index")
                 .slash("count"), () ->
                 get(() ->parameter("tiebaName",tiebaName -> {
-                    return complete(String.valueOf(TieBaFileSystem.getInstance(tiebaName,TieBaFileSystem.ROLE_MASTER).getPostIndexStorage().countAllIndex()));
+                    return complete(String.valueOf(TieBaFileSystem.getInstance(tiebaName, TieBaFileSystem.ROLE_MASTER).getIndexStorage().countAllIndex()));
                 }))
         );
         final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = app.route(route0, route1, route2, route3, route4,route5,route6,route7).flow(actorSystem, materializer);
