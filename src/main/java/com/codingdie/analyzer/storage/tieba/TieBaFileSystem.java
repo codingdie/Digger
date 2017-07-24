@@ -1,5 +1,7 @@
 package com.codingdie.analyzer.storage.tieba;
 
+import com.codingdie.analyzer.spider.model.tieba.PostDetail;
+import com.codingdie.analyzer.spider.model.tieba.PostIndex;
 import com.codingdie.analyzer.storage.ContentStorage;
 import com.codingdie.analyzer.storage.IndexStorage;
 import com.codingdie.analyzer.storage.TaskStorage;
@@ -18,8 +20,8 @@ public class TieBaFileSystem {
     private static Object  slaveInstanceLock= new Object();
     private static Object  masterInstanceLock= new Object();
 
-    private IndexStorage indexStorage;
-    private ContentStorage contentStorage;
+    private IndexStorage<PostIndex> indexStorage;
+    private ContentStorage<PostDetail> contentStorage;
 
     private File root;
 
@@ -74,7 +76,7 @@ public class TieBaFileSystem {
         return new TaskStorage<T>(spiderTaskRootPath, tClass);
     }
 
-    public IndexStorage getIndexStorage() {
+    public IndexStorage<PostIndex> getIndexStorage() {
         return indexStorage;
     }
 

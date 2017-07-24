@@ -54,7 +54,7 @@ public class CrawlContentMasterActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(CrawlPostDetailResult.class, r -> {
             if (r.success) {
-                PostIndex postIndex = tieBaFileSystem.getIndexStorage().getIndex(r.getPostId());
+                PostIndex postIndex = tieBaFileSystem.getIndexStorage().getIndex(r.getKey());
                 postIndex.setStatus(PostIndex.STATUS_HAS_CONTENT);
                 postIndex.setContentSlaves(r.getHosts());
                 postIndex.setModifyTime(System.currentTimeMillis());
