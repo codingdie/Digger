@@ -1,5 +1,7 @@
 package com.codingdie.analyzer.spider.model.tieba;
 
+import com.codingdie.analyzer.spider.slave.CrawlPostDetailActor;
+
 /**
  * Created by xupeng on 2017/4/19.
  */
@@ -18,7 +20,7 @@ public class PostDetailTask extends TieBaTask {
 
     @Override
     public String excutorName() {
-        return CrawlContentSlaveActor.class.getTypeName();
+        return CrawlPostDetailActor.class.getTypeName();
     }
 
 

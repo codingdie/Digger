@@ -14,7 +14,8 @@ public class CrawlPageResult extends TaskResult {
 
 
     @Override
-    public String getKey() {
+    public String taskId() {
         return String.valueOf(pn);
     }
+
 }

@@ -6,6 +6,7 @@ import akka.actor.Props;
 import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.slave.CrawIndexSlaveActor;
+import com.codingdie.analyzer.spider.slave.TaskReceiverActor;
 
 import java.util.Arrays;
 
@@ -17,7 +18,7 @@ public class SlaveStarter {
         final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("slave")).build());
         TieBaAnalyserConfigFactory.getInstance();
         ActorRef indexSpiderSlaveActor = system.actorOf(Props.create(CrawIndexSlaveActor.class), "CrawIndexSlaveActor");
-        ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(CrawlContentSlaveActor.class), CrawlContentSlaveActor.class.getSimpleName());
+        ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(TaskReceiverActor.class), TaskReceiverActor.class.getSimpleName());
         System.out.println(detailSpiderSlaveActor.path().toString());
         System.out.println(indexSpiderSlaveActor.path().toString());
     }

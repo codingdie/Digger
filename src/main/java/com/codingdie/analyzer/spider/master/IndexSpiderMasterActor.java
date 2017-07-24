@@ -92,7 +92,7 @@ public class IndexSpiderMasterActor extends AbstractActor {
                 });
 
             }
-            System.out.println("finish task:"+r.getKey());
+            System.out.println("finish task:" + r.taskId());
             taskManager.receiveResult(r,getSender());
 
         }).build();
