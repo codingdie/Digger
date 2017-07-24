@@ -1,5 +1,6 @@
-package com.codingdie.analyzer.spider.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.tieba;
 
+import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
 import com.codingdie.analyzer.storage.model.Index;
 
 import java.io.Serializable;
@@ -51,5 +52,16 @@ public class PostIndex extends Index implements Serializable {
     @Override
     public String getIndexId() {
         return String.valueOf(postId);
+    }
+
+    public static PostIndex from(PostSimpleInfo i,CrawlTiebaIndexResult result) {
+        PostIndex postIndex = new PostIndex();
+        postIndex.setSpiderHost(result.getTaskExcuteSlave());
+        postIndex.setPostId(i.getPostId());
+        postIndex.setModifyTime(System.currentTimeMillis());
+        postIndex.setTitle(i.getTitle());
+        postIndex.setPn(result.pn);
+        postIndex.setCreateUser(i.getCreateUser());
+        return postIndex;
     }
 }

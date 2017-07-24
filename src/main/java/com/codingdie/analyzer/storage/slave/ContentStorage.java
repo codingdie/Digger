@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.storage;
+package com.codingdie.analyzer.storage.slave;
 
 import com.codingdie.analyzer.storage.model.Content;
 import com.codingdie.analyzer.storage.model.Index;

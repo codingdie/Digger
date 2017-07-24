@@ -1,9 +1,9 @@
-package com.codingdie.analyzer.spider.slave;
+package com.codingdie.analyzer.spider.slave.tieba;
 
 import akka.actor.AbstractActor;
-import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
-import com.codingdie.analyzer.spider.model.tieba.PageTask;
-import com.codingdie.analyzer.spider.model.tieba.PostSimpleInfo;
+import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.apache.log4j.Logger;
@@ -25,26 +25,26 @@ public class QueryPageActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(PageTask.class, m -> {
+        return receiveBuilder().match(CrawlTiebaIndexTask.class, m -> {
             String html = HttpService.getInstance().excute(new Request.Builder().url(buildUrl(m)).build(), m.cookie);
-            CrawlPageResult crawlPageResult = new CrawlPageResult();
-            crawlPageResult.pn = m.pn;
+            CrawlTiebaIndexResult crawlTiebaIndexResult = new CrawlTiebaIndexResult();
+            crawlTiebaIndexResult.pn = m.pn;
             if (StringUtil.isBlank(html)) {
                 logger.info(m.pn + ":html null");
-                crawlPageResult.success = false;
+                crawlTiebaIndexResult.success = false;
             } else {
                 List<PostSimpleInfo> postSimpleInfos = parseList(html);
-                crawlPageResult.postSimpleInfos = postSimpleInfos;
-                crawlPageResult.success = true;
-                long normalCount = crawlPageResult.postSimpleInfos.stream().filter(i -> {
+                crawlTiebaIndexResult.postSimpleInfos = postSimpleInfos;
+                crawlTiebaIndexResult.success = true;
+                long normalCount = crawlTiebaIndexResult.postSimpleInfos.stream().filter(i -> {
                     return i.getType().equals(PostSimpleInfo.TYPE_NORMAL);
                 }).count();
                 if (normalCount == 0) {
-                    crawlPageResult.success = false;
+                    crawlTiebaIndexResult.success = false;
                 }
                 logger.info(m.pn + ":" + normalCount);
             }
-            getSender().tell(crawlPageResult, getSelf());
+            getSender().tell(crawlTiebaIndexResult, getSelf());
         }).build();
     }
 
@@ -76,7 +76,7 @@ public class QueryPageActor extends AbstractActor {
         return postSimpleInfos;
     }
 
-    private String buildUrl(PageTask task) {
+    private String buildUrl(CrawlTiebaIndexTask task) {
         return "https://tieba.baidu.com/f?kw=" + task.getTiebaName() + "&ie=utf-8&pn=" + task.pn;
     }
 

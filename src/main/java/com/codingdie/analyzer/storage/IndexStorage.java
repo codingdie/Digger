@@ -1,6 +1,6 @@
 package com.codingdie.analyzer.storage;
 
-import com.codingdie.analyzer.spider.model.tieba.PostIndex;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
 import com.codingdie.analyzer.storage.model.Index;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

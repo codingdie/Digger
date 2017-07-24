@@ -7,7 +7,7 @@ import akka.actor.Cancellable;
 import akka.util.Timeout;
 import com.codingdie.analyzer.cluster.ClusterManager;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.tieba.PageTask;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.TaskStorage;
 import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
@@ -179,7 +179,7 @@ public class TaskManager<T extends Task> {
         }
         ActorRef actorRef = getSlaveToRun();
         actorRef.tell(task, resultReceiver);
-        task.status = PageTask.STATUS_EXCUTING;
+        task.status = CrawlTiebaIndexTask.STATUS_EXCUTING;
         putTask(task);
 
     }

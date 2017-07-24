@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.tieba;
 
 import com.codingdie.analyzer.task.model.Task;
 

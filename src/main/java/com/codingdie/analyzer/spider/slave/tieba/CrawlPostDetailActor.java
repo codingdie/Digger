@@ -1,9 +1,9 @@
-package com.codingdie.analyzer.spider.slave;
+package com.codingdie.analyzer.spider.slave.tieba;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.AkkaConfigBuilder;
-import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
-import com.codingdie.analyzer.spider.model.tieba.*;
+import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlPostDetailResult;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.*;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.google.gson.JsonObject;
@@ -30,7 +30,7 @@ public class CrawlPostDetailActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(PostDetailTask.class, m -> {
+        return receiveBuilder().match(CrawlPostContentTask.class, m -> {
             TieBaFileSystem tieBaFileSystem = TieBaFileSystem.getInstance(m.getTiebaName(), TieBaFileSystem.ROLE_SLAVE);
             PostDetail postDetail = crawlPostDetail(m);
             CrawlPostDetailResult result = new CrawlPostDetailResult();
@@ -48,7 +48,7 @@ public class CrawlPostDetailActor extends AbstractActor {
         }).build();
     }
 
-    public static PostDetail crawlPostDetail(PostDetailTask task) {
+    public static PostDetail crawlPostDetail(CrawlPostContentTask task) {
         String result = HttpService.getInstance().excute(new Request.Builder().url("https://tieba.baidu.com/p/" + task.postId).build(), task.cookie);
         if (StringUtil.isBlank(result)) {
             return null;
@@ -121,7 +121,7 @@ public class CrawlPostDetailActor extends AbstractActor {
         return post;
     }
 
-    public static List<PostRemark> crawlRemarks(PostFloor postFloor, PostDetailTask task) {
+    public static List<PostRemark> crawlRemarks(PostFloor postFloor, CrawlPostContentTask task) {
         List<PostRemark> resultList = new ArrayList<>();
         int i = 0;
         while (resultList.size() < postFloor.getCommentNum()) {

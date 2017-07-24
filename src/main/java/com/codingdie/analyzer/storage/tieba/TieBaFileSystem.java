@@ -1,8 +1,8 @@
 package com.codingdie.analyzer.storage.tieba;
 
-import com.codingdie.analyzer.spider.model.tieba.PostDetail;
-import com.codingdie.analyzer.spider.model.tieba.PostIndex;
-import com.codingdie.analyzer.storage.ContentStorage;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostDetail;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
+import com.codingdie.analyzer.storage.slave.ContentStorage;
 import com.codingdie.analyzer.storage.IndexStorage;
 import com.codingdie.analyzer.storage.TaskStorage;
 import com.codingdie.analyzer.task.model.Task;

@@ -1,13 +1,13 @@
-package com.codingdie.analyzer.spider.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.tieba;
 
-import com.codingdie.analyzer.spider.slave.CrawlPostDetailActor;
+import com.codingdie.analyzer.spider.slave.tieba.CrawlPostDetailActor;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class PostDetailTask extends TieBaTask {
+public class CrawlPostContentTask extends TieBaTask {
 
-    public PostDetailTask(long postId) {
+    public CrawlPostContentTask(long postId) {
         this.postId=postId;
     }
     public long postId=50;

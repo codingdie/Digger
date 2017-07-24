@@ -1,10 +1,10 @@
-package com.codingdie.analyzer.spider.master;
+package com.codingdie.analyzer.spider.master.tieba;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.result.CrawlPostDetailResult;
-import com.codingdie.analyzer.spider.model.tieba.PostDetailTask;
-import com.codingdie.analyzer.spider.model.tieba.PostIndex;
+import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlPostDetailResult;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlPostContentTask;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.codingdie.analyzer.task.TaskManager;
@@ -13,10 +13,10 @@ import com.codingdie.analyzer.task.model.TaskResult;
 /**
  * Created by xupeng on 2017/4/26.
  */
-public class CrawlContentMasterActor extends AbstractActor {
+public class CrawlTiebaContentMasterActor extends AbstractActor {
 
 
-    private TaskManager<PostDetailTask> taskManager;
+    private TaskManager<CrawlPostContentTask> taskManager;
 
     private TieBaFileSystem tieBaFileSystem;
 
@@ -24,10 +24,10 @@ public class CrawlContentMasterActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        System.out.println("stop CrawlContentMasterActor");
+        System.out.println("stop CrawlTiebaContentMasterActor");
     }
 
-    public CrawlContentMasterActor() {
+    public CrawlTiebaContentMasterActor() {
         super();
     }
 
@@ -43,9 +43,9 @@ public class CrawlContentMasterActor extends AbstractActor {
     private void startTaskManager() {
         long tm = System.currentTimeMillis();
         tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        taskManager = new TaskManager<PostDetailTask>(PostDetailTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawlContentSlaveActor");
+        taskManager = new TaskManager<CrawlPostContentTask>(CrawlPostContentTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawlContentSlaveActor");
         tieBaFileSystem.getIndexStorage().iterateNoContentIndex(postIndex -> {
-            taskManager.putTask(new PostDetailTask(postIndex.getPostId()));
+            taskManager.putTask(new CrawlPostContentTask(postIndex.getPostId()));
         });
         taskManager.startAlloc(getSelf());
     }

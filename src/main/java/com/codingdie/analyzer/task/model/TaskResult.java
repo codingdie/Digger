@@ -11,6 +11,7 @@ public abstract class TaskResult implements Serializable {
 
     public boolean success = false;
     public String error = "未知原因";
+    private String taskExcuteSlave = null;
 
     public TaskResult() {
     }
@@ -28,6 +29,14 @@ public abstract class TaskResult implements Serializable {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public String getTaskExcuteSlave() {
+        return taskExcuteSlave;
+    }
+
+    public void setTaskExcuteSlave(String taskExcuteSlave) {
+        this.taskExcuteSlave = taskExcuteSlave;
     }
 
     public abstract String taskId();

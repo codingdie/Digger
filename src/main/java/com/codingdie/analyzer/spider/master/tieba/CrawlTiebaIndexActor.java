@@ -1,11 +1,9 @@
-package com.codingdie.analyzer.spider.master;
+package com.codingdie.analyzer.spider.master.tieba;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.model.result.CrawlPageResult;
-import com.codingdie.analyzer.spider.model.tieba.PageTask;
-import com.codingdie.analyzer.spider.model.tieba.PostIndex;
-import com.codingdie.analyzer.spider.model.tieba.PostSimpleInfo;
+import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
+import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.codingdie.analyzer.task.TaskManager;
@@ -16,10 +14,10 @@ import org.jsoup.nodes.Document;
 /**
  * Created by xupeng on 2017/4/26.
  */
-public class IndexSpiderMasterActor extends AbstractActor {
+public class CrawlTiebaIndexActor extends AbstractActor {
 
 
-    private TaskManager<PageTask> taskManager;
+    private TaskManager<CrawlTiebaIndexTask> taskManager;
 
 
     private TieBaFileSystem tieBaFileSystem;
@@ -28,10 +26,10 @@ public class IndexSpiderMasterActor extends AbstractActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
-        System.out.println("stop IndexSpiderMasterActor");
+        System.out.println("stop CrawlTiebaIndexActor");
     }
 
-    public IndexSpiderMasterActor() {
+    public CrawlTiebaIndexActor() {
         super();
     }
 
@@ -48,13 +46,13 @@ public class IndexSpiderMasterActor extends AbstractActor {
         System.out.println("开始初始化存储");
         long tm = System.currentTimeMillis();
         tieBaFileSystem =  TieBaFileSystem.getInstance(TieBaAnalyserConfigFactory.getInstance().spiderConfig.tieba_name, TieBaFileSystem.ROLE_MASTER);
-        taskManager = new TaskManager<>(PageTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawIndexSlaveActor");
+        taskManager = new TaskManager<>(CrawlTiebaIndexTask.class, tieBaFileSystem, getContext().getSystem(), "/user/CrawIndexSlaveActor");
         if (taskManager.getTotalTaskSize() == 0) {
             initPageCountFromNetwork();
             Integer totalCount = Integer.valueOf(TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count).intValue();
             int totalPage = (totalCount - 1) / 50 + 1;
             for (int i = 0; i < totalPage; i++) {
-                taskManager.putTask(new PageTask(i * 50));
+                taskManager.putTask(new CrawlTiebaIndexTask(i * 50));
             }
         }else{
             TieBaAnalyserConfigFactory.getInstance().spiderConfig.total_count =taskManager.getTotalTaskSize();
@@ -75,29 +73,15 @@ public class IndexSpiderMasterActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(CrawlPageResult.class, r -> {
-            if (r.success && r.postSimpleInfos != null) {
-                r.postSimpleInfos.iterator().forEachRemaining(i -> {
-                    if (i.getType().equals(PostSimpleInfo.TYPE_NORMAL)) {
-                        PostIndex postIndex = new PostIndex();
-                        postIndex.setSpiderHost(getHostFromActorPath(getSender().path().toString()));
-                        postIndex.setPostId(i.getPostId());
-                        postIndex.setModifyTime(System.currentTimeMillis());
-                        postIndex.setTitle(i.getTitle());
-                        postIndex.setPn(r.pn);
-                        postIndex.setCreateUser(i.getCreateUser());
-                        tieBaFileSystem.getIndexStorage().putIndex(postIndex);
-                    }
-
+        return receiveBuilder().match(CrawlTiebaIndexResult.class, r -> {
+            if (r.success ) {
+                r.getIndexes().forEach(postIndex->{
+                    tieBaFileSystem.getIndexStorage().putIndex(postIndex);
                 });
-
             }
-            System.out.println("finish task:" + r.taskId());
             taskManager.receiveResult(r,getSender());
-
         }).build();
     }
-
 
     private String getHostFromActorPath(String key) {
         return key.split("@")[1].split(":")[0];

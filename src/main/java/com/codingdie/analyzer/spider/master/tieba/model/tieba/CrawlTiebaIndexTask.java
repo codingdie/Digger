@@ -1,13 +1,13 @@
-package com.codingdie.analyzer.spider.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.tieba;
 
 import com.codingdie.analyzer.task.model.Task;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class PageTask extends TieBaTask {
+public class CrawlTiebaIndexTask extends TieBaTask {
 
-    public PageTask(int pn){
+    public CrawlTiebaIndexTask(int pn){
         super();
         this.pn=pn;
     }
@@ -26,9 +26,9 @@ public class PageTask extends TieBaTask {
 
     @Override
     public <T extends Task> int compareTo(T t) {
-        PageTask o1=this;
-        if (t instanceof PageTask) {
-            PageTask o2 = (PageTask) t;
+        CrawlTiebaIndexTask o1=this;
+        if (t instanceof CrawlTiebaIndexTask) {
+            CrawlTiebaIndexTask o2 = (CrawlTiebaIndexTask) t;
             if (o1.pn > o2.pn) {
                 return 1;
             } else {
