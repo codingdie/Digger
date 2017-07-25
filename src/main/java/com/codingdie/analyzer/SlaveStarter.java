@@ -16,7 +16,7 @@ public class SlaveStarter {
     public static void main(String[] args) throws Exception {
         final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("slave")).build());
         TieBaAnalyserConfigFactory.getInstance();
-        ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(TaskReceiverActor.class), TaskReceiverActor.class.getSimpleName());
+        ActorRef detailSpiderSlaveActor = system.actorOf(Props.create(TaskReceiverActor::new), TaskReceiverActor.class.getSimpleName());
         System.out.println(detailSpiderSlaveActor.path().toString());
     }
 

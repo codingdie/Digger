@@ -5,7 +5,7 @@ import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlPostDetailResult;
 import com.codingdie.analyzer.spider.master.tieba.model.tieba.*;
 import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
+import com.codingdie.analyzer.storage.slave.ContentStorage;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Request;
@@ -23,6 +23,8 @@ import java.util.List;
  */
 public class CrawlPostDetailActor extends AbstractActor {
 
+    private ContentStorage contentStorage;
+
     @Override
     public void postStop() throws Exception {
         super.postStop();
@@ -31,12 +33,11 @@ public class CrawlPostDetailActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(CrawlPostContentTask.class, m -> {
-            TieBaFileSystem tieBaFileSystem = TieBaFileSystem.getInstance(m.getTiebaName(), TieBaFileSystem.ROLE_SLAVE);
             PostDetail postDetail = crawlPostDetail(m);
             CrawlPostDetailResult result = new CrawlPostDetailResult();
             result.setPostId(m.postId);
             if (postDetail != null) {
-                tieBaFileSystem.getContentStorage().saveContent(postDetail);
+                contentStorage.saveContent(postDetail);
                 result.success = true;
                 result.getHosts().add(AkkaConfigBuilder.getCurHost());
             } else {

@@ -14,6 +14,7 @@ public class CrawlTiebaIndexTask extends IndexTask {
     }
     public long pn=50;
 
+    public String tiebaName;
 
     @Override
     public String taskId() {
@@ -45,5 +46,19 @@ public class CrawlTiebaIndexTask extends IndexTask {
         }
     }
 
+    public long getPn() {
+        return pn;
+    }
 
+    public void setPn(long pn) {
+        this.pn = pn;
+    }
+
+    public String getTiebaName() {
+        return tiebaName;
+    }
+
+    public void setTiebaName(String tiebaName) {
+        this.tiebaName = tiebaName;
+    }
 }

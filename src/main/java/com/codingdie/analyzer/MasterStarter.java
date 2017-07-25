@@ -8,7 +8,7 @@ import com.codingdie.analyzer.cluster.ClusterListenerActor;
 import com.codingdie.analyzer.cluster.ClusterManager;
 import com.codingdie.analyzer.config.AkkaConfigBuilder;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.master.controller.MasterControllServer;
+import com.codingdie.analyzer.spider.master.MasterControllServer;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public class MasterStarter {
         TieBaAnalyserConfigFactory.getInstance();
         final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("master")).build());
         ClusterManager.init(system);
-        system.actorOf(Props.create(ClusterListenerActor.class), "testActor");
+        system.actorOf(Props.create(ClusterListenerActor::new), "testActor");
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {

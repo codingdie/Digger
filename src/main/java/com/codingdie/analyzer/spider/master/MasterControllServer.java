@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master.controller;
+package com.codingdie.analyzer.spider.master;
 
 import akka.NotUsed;
 import akka.actor.ActorSystem;
@@ -16,7 +16,6 @@ import akka.stream.javadsl.Flow;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.master.tieba.CrawlTiebaContentMasterActor;
 import com.codingdie.analyzer.spider.master.tieba.CrawlTiebaIndexMasterActor;
-import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
@@ -34,6 +33,14 @@ public class MasterControllServer extends AllDirectives {
         MasterControllServer app = new MasterControllServer();
         Route route0 = path("", () ->
                 get(() -> getFromResource("web/index.html"))
+        );
+
+        Route route1 = path(PathMatchers.segment("analyser")
+                .slash("create"), () ->
+                get(() -> {
+                    actorSystem.actorOf(Props.create(CrawlTiebaIndexMasterActor.class), "CrawlIndexMasterActor");
+                    return complete("start indexspider");
+                })
         );
         Route route1 = path(PathMatchers.segment("indexspider")
                 .slash("start"), () ->
@@ -61,7 +68,8 @@ public class MasterControllServer extends AllDirectives {
         Route route7 = path(PathMatchers.segment("index")
                 .slash("count"), () ->
                 get(() ->parameter("tiebaName",tiebaName -> {
-                    return complete(String.valueOf(TieBaFileSystem.getInstance(tiebaName, TieBaFileSystem.ROLE_MASTER).getIndexStorage().countAllIndex()));
+                    return complete("");
+                    //complete(String.valueOf(TieBaFileSystem.getInstance(tiebaName, TieBaFileSystem.ROLE_MASTER).getIndexStorage().countAllIndex()));
                 }))
         );
         final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = app.route(route0, route1, route2, route3, route4,route5,route6,route7).flow(actorSystem, materializer);

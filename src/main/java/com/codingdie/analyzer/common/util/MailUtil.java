@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.util;
+package com.codingdie.analyzer.common.util;
 
 import javax.mail.Address;
 import javax.mail.Message;

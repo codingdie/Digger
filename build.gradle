@@ -49,6 +49,9 @@ dependencies {
     compile group: "org.yaml", name: "snakeyaml", version: "1.18"
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+    compile group: 'org.mybatis', name: 'mybatis', version: '3.4.4'
+
 }
 
 
