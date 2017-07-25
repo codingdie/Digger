@@ -15,7 +15,7 @@ import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Flow;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.master.tieba.CrawlTiebaContentMasterActor;
-import com.codingdie.analyzer.spider.master.tieba.CrawlTiebaIndexActor;
+import com.codingdie.analyzer.spider.master.tieba.CrawlTiebaIndexMasterActor;
 import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 
 import java.util.concurrent.CompletionStage;
@@ -38,7 +38,7 @@ public class MasterControllServer extends AllDirectives {
         Route route1 = path(PathMatchers.segment("indexspider")
                 .slash("start"), () ->
                 get(() -> {
-                    actorSystem.actorOf(Props.create(CrawlTiebaIndexActor::new), "CrawlTiebaIndexActor");
+                    actorSystem.actorOf(Props.create(CrawlTiebaIndexMasterActor.class), "CrawlIndexMasterActor");
                     return complete("start indexspider");
                 })
         );

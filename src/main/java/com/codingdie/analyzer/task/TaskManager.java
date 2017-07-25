@@ -10,7 +10,6 @@ import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.TaskStorage;
-import com.codingdie.analyzer.storage.tieba.TieBaFileSystem;
 import com.codingdie.analyzer.task.model.Task;
 import com.codingdie.analyzer.task.model.TaskResult;
 import com.codingdie.analyzer.util.MailUtil;
@@ -55,9 +54,9 @@ public class TaskManager<T extends Task> {
 
     private ActorRef receiverActor;
 
-    public TaskManager(Class<T> tClass, TieBaFileSystem tieBaFileSystem, ActorSystem actorSystem, String salveActorUri) {
+    public TaskManager(Class<T> tClass, TaskStorage<T> taskStorage, ActorSystem actorSystem) {
         this.actorSystem = actorSystem;
-        this.taskStorage = tieBaFileSystem.getTaskStorage(tClass);
+        this.taskStorage = taskStorage;
         List<T> list = taskStorage.parseAndRebuild();
         totalTaskSize = list.size();
         list.iterator().forEachRemaining(i -> {
@@ -122,7 +121,7 @@ public class TaskManager<T extends Task> {
         }
     }
 
-    private void stopManager() {
+    public void stopManager() {
         cancellables.forEach(i -> {
             i.cancel();
         });
@@ -294,4 +293,5 @@ public class TaskManager<T extends Task> {
     public List<T> getTaskWhenTaskPoolEmpty() {
         return new ArrayList<>();
     }
+
 }

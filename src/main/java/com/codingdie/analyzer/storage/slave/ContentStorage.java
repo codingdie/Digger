@@ -16,8 +16,16 @@ public class ContentStorage<T extends Content> {
 
     private File root;
 
-    public ContentStorage(File rootPath) {
-        this.root = rootPath;
+    public ContentStorage(File rootPath, Class<T> tClass) {
+        File file = new File(rootPath + File.separator + tClass.getSimpleName().toLowerCase());
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.root = file;
     }
 
     public boolean saveContent(T content) {

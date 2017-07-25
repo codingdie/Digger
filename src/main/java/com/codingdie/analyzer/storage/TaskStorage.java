@@ -25,7 +25,6 @@ public class TaskStorage<T extends Task> {
         this.tClass = tClass;
         this.root = rootPath;
         this.taskFile = new File(root.getAbsolutePath() + File.separator + tClass.getSimpleName().toLowerCase() + ".task");
-
         if (!this.taskFile.exists()) {
             try {
                 this.taskFile.createNewFile();
@@ -33,12 +32,10 @@ public class TaskStorage<T extends Task> {
                 e.printStackTrace();
             }
         }
-
     }
 
     public List<T> parseAndRebuild() {
         List<T> pageTs = parse();
-
         try {
             this.taskFile.delete();
             this.taskFile.createNewFile();
@@ -121,4 +118,5 @@ public class TaskStorage<T extends Task> {
             e.printStackTrace();
         }
     }
+
 }

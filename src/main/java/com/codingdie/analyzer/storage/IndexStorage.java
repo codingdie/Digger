@@ -25,14 +25,18 @@ public class IndexStorage<T extends Index> {
     private List<File> indexFiles = new ArrayList<>(FILE_SIZE);
     private ConcurrentHashMap<String, T> longIndexHashMap = new ConcurrentHashMap<>(200000);
 
-    public IndexStorage(File rootPath) {
+    public IndexStorage(File rootPath, Class<T> tClass) {
         try {
-            this.root = rootPath;
+            File file = new File(rootPath + File.separator + tClass.getSimpleName().toLowerCase());
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            this.root = file;
             for (int i = 0; i < FILE_SIZE; i++) {
                 NumberFormat format = NumberFormat.getInstance();
                 format.setMaximumIntegerDigits(2);
                 format.setMinimumIntegerDigits(2);
-                File indexFile = new File(root.getAbsolutePath() + File.separator + (format.format(i) + "_post.index"));
+                File indexFile = new File(root.getAbsolutePath() + File.separator + (format.format(i) + ".index"));
                 if (!indexFile.exists()) {
                     indexFile.createNewFile();
                 }
@@ -162,5 +166,7 @@ public class IndexStorage<T extends Index> {
         }
     }
 
-
+    public void destroy() {
+        longIndexHashMap.clear();
+    }
 }

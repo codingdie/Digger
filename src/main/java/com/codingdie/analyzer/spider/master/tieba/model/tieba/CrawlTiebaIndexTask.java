@@ -1,11 +1,12 @@
 package com.codingdie.analyzer.spider.master.tieba.model.tieba;
 
+import com.codingdie.analyzer.task.model.IndexTask;
 import com.codingdie.analyzer.task.model.Task;
 
 /**
  * Created by xupeng on 2017/4/19.
  */
-public class CrawlTiebaIndexTask extends TieBaTask {
+public class CrawlTiebaIndexTask extends IndexTask {
 
     public CrawlTiebaIndexTask(int pn){
         super();
