@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master.tieba.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.model;
 
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
 import com.codingdie.analyzer.storage.model.Index;
@@ -14,6 +14,14 @@ public class PostIndex extends Index implements Serializable {
     private long pn;
     private String title;
     private String createUser;
+
+    public PostIndex() {
+
+    }
+
+    public PostIndex(long postId) {
+        this.postId = postId;
+    }
 
     public long getPostId() {
         return postId;

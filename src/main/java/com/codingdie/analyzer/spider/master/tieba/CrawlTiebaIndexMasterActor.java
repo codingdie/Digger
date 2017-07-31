@@ -2,9 +2,9 @@ package com.codingdie.analyzer.spider.master.tieba;
 
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
 import com.codingdie.analyzer.spider.master.CrawlIndexMasterActor;
+import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlTiebaIndexTask;
+import com.codingdie.analyzer.spider.master.tieba.model.model.PostIndex;
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.jsoup.Jsoup;
@@ -62,7 +62,9 @@ public class CrawlTiebaIndexMasterActor extends CrawlIndexMasterActor<PostIndex,
         Integer totalCount = queryPageCount();
         int totalPage = (totalCount - 1) / 50 + 1;
         for (int i = 0; i < totalPage; i++) {
-            list.add(new CrawlTiebaIndexTask(i * 50));
+            CrawlTiebaIndexTask indexTask = new CrawlTiebaIndexTask(i * 50);
+            indexTask.setTiebaName(tieBaName);
+            list.add(indexTask);
         }
         return list;
     }

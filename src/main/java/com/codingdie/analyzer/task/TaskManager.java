@@ -8,8 +8,9 @@ import akka.util.Timeout;
 import com.codingdie.analyzer.cluster.ClusterManager;
 import com.codingdie.analyzer.common.util.MailUtil;
 import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
+import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlTiebaIndexTask;
 import com.codingdie.analyzer.spider.network.HttpService;
+import com.codingdie.analyzer.spider.slave.TaskReceiverActor;
 import com.codingdie.analyzer.storage.TaskStorage;
 import com.codingdie.analyzer.task.model.Task;
 import com.codingdie.analyzer.task.model.TaskResult;
@@ -22,6 +23,8 @@ import scala.concurrent.duration.FiniteDuration;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -103,7 +106,7 @@ public class TaskManager<T extends Task> {
         if (task == null) {
             return;
         }
-        String senderPath = getHostFromActorPath(sender.path().toString());
+        String senderPath = getSenderSlave(sender);
         if (result.success) {
             task.status = Task.STATUS_FINISHED;
             slavesFinishedTaskMapData.put(senderPath, slavesFinishedTaskMapData.get(senderPath) + 1);
@@ -121,6 +124,10 @@ public class TaskManager<T extends Task> {
         }
     }
 
+    private String getSenderSlave(ActorRef sender) {
+        return sender.path().toString().split("/user/")[0];
+    }
+
     public void stopManager() {
         cancellables.forEach(i -> {
             i.cancel();
@@ -132,8 +139,6 @@ public class TaskManager<T extends Task> {
         slavesRunningTaskMapData.clear();
         slavesFinishedTaskMapData.clear();
         slavesFailedTaskMapData.clear();
-
-
         HttpService.getInstance().destroy();
         System.out.println("stop indexspider,total  excuting time:" + (System.currentTimeMillis() - beginTime));
         actorSystem.stop(receiverActor);
@@ -194,14 +199,22 @@ public class TaskManager<T extends Task> {
     }
 
     private ActorRef getSlaveToRun() {
+        if (ClusterManager.Instance().getActiveSlaves().size() == 0) {
+            stopManager();
+            return null;
+        }
         ActorRef actorRef = null;
         while (actorRef == null) {
             initMapData();
-            String host = slavesRunningTaskMapData.entrySet().stream().min((o1, o2) -> {
+            Optional<Map.Entry<String, Integer>> optional = slavesRunningTaskMapData.entrySet().stream().filter(stringIntegerEntry -> {
+                return ClusterManager.Instance().getActiveSlaves().contains(stringIntegerEntry.getKey());
+            }).min((o1, o2) -> {
                 return o1.getValue() - o2.getValue();
-            }).get().getKey();
+            });
+            if (!optional.isPresent()) continue;
+            String host = optional.get().getKey();
             if (StringUtils.isNoneBlank(host)) {
-                ActorSelection actorSelection = actorSystem.actorSelection(host + "/TaskReceiver");
+                ActorSelection actorSelection = actorSystem.actorSelection(host + "/user/" + TaskReceiverActor.class.getSimpleName());
                 Future<ActorRef> future = actorSelection.resolveOne(new Timeout(10, TimeUnit.SECONDS));
                 try {
                     actorRef = Await.result(future, new FiniteDuration(10, TimeUnit.SECONDS));
@@ -234,13 +247,6 @@ public class TaskManager<T extends Task> {
                 slavesFailedTaskMapData.put(slavePath, 0);
             }
         }
-        slavesFailedTaskMapData.keySet().stream().filter(s -> {
-            return activeSlaves.contains(s);
-        }).collect(Collectors.toSet()).forEach(s -> {
-            slavesFailedTaskMapData.remove(s);
-            slavesFinishedTaskMapData.remove(s);
-            slavesFailedTaskMapData.remove(s);
-        });
     }
 
     public void printProcess() {
@@ -249,9 +255,8 @@ public class TaskManager<T extends Task> {
 
     private String buildSlaveProcessLogStr() {
         StringBuilder stringBuilder = new StringBuilder();
-        slavesRunningTaskMapData.keySet().iterator().forEachRemaining(slave -> {
+        slavesRunningTaskMapData.keySet().iterator().forEachRemaining(host -> {
             DecimalFormat df = new DecimalFormat("######0.00");
-            String host = getHostFromActorPath(slave);
             int totalTask = slavesFinishedTaskMapData.get(host) + slavesFailedTaskMapData.get(host) + slavesRunningTaskMapData.get(host);
             double speed = slavesFinishedTaskMapData.get(host) * 1.0 / ((System.currentTimeMillis() - beginTime) / 1000);
 
@@ -261,9 +266,6 @@ public class TaskManager<T extends Task> {
         return stringBuilder.toString();
     }
 
-    private String getHostFromActorPath(String key) {
-        return key.split("@")[1].split(":")[0];
-    }
 
     private String buildTotalProcessLogStr() {
         DecimalFormat df = new DecimalFormat("######0.00");

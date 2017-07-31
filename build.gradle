@@ -112,14 +112,17 @@ task copyRunJar(type: Copy ){
 task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,copyRunJar]){
 
 }
-
 def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
 
-task startMaster(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.MasterStarter" , developConfFolder,"127.0.0.1",2552
+task startMaster(type: JavaExec,dependsOn:"build") {
+    classpath sourceSets.main.runtimeClasspath.asPath
+    main "com.codingdie.analyzer.MasterStarter"
+    args  developConfFolder,"127.0.0.1",2552
 }
 
 
-task startSlave(type: Exec,dependsOn:"build") {
-    commandLine "java",  "-Dproject.root="+project.rootDir.toString(),"-classpath", sourceSets.main.runtimeClasspath.asPath, "com.codingdie.analyzer.SlaveStarter" , developConfFolder ,"127.0.0.1",2550
+task startSlave(type: JavaExec,dependsOn:"build") {
+    classpath sourceSets.main.runtimeClasspath.asPath
+    main "com.codingdie.analyzer.SlaveStarter"
+    args  developConfFolder,"127.0.0.1",2550
 }

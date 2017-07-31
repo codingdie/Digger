@@ -1,35 +1,42 @@
 package com.codingdie.analyzer.storage;
 
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
+import com.codingdie.analyzer.common.util.FileUtil;
 import com.codingdie.analyzer.storage.model.Index;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.jsoup.helper.StringUtil;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * Created by xupeng on 2017/5/10.
  */
 public class IndexStorage<T extends Index> {
-    Logger logger = Logger.getLogger("index");
     public static int FILE_SIZE = 10;
+    private static ConcurrentHashMap<String, Object> indexCachePool = new ConcurrentHashMap<>(200000);
+    Logger logger = Logger.getLogger("index");
     private File root;
+    private Class<T> tclass;
     private List<File> indexFiles = new ArrayList<>(FILE_SIZE);
-    private ConcurrentHashMap<String, T> longIndexHashMap = new ConcurrentHashMap<>(200000);
 
     public IndexStorage(File rootPath, Class<T> tClass) {
         try {
+            tclass = tClass;
             File file = new File(rootPath + File.separator + tClass.getSimpleName().toLowerCase());
             if (!file.exists()) {
-                file.createNewFile();
+                file.mkdirs();
             }
             this.root = file;
             for (int i = 0; i < FILE_SIZE; i++) {
@@ -61,48 +68,17 @@ public class IndexStorage<T extends Index> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                rebuildFileList.add(indexFile);
             }
+            rebuildFileList.add(indexFile);
         }
         for (int i = 0; i < indexFiles.size(); i++) {
             try {
                 File indexFile = indexFiles.get(i);
                 File indexFileRebuld = rebuildFileList.get(i);
+                long begin = System.currentTimeMillis();
+                rebuildFile(indexFile, indexFileRebuld);
+                System.out.println("total:" + (System.currentTimeMillis() - begin));
 
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(indexFile));
-                String line = null;
-
-                HashMap<String, T> tmpMap = new HashMap<>(2000);
-
-                while ((line = bufferedReader.readLine()) != null) {
-                    if (!StringUtil.isBlank(line)) {
-                        T index = new Gson().fromJson(line, new TypeToken<T>() {
-                        }.getType());
-
-                        longIndexHashMap.put(index.getIndexId(), index);
-                        tmpMap.put(index.getIndexId(), index);
-
-                    }
-                }
-                final BufferedWriter todoWriter = new BufferedWriter(new FileWriter(indexFileRebuld, true));
-
-                tmpMap.entrySet().stream().forEach(item -> {
-                    try {
-                        todoWriter.write(new Gson().toJson(item.getValue()));
-                        todoWriter.write("\n");
-
-                        todoWriter.flush();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-
-                });
-                todoWriter.close();
-
-
-                indexFile.delete();
-                indexFileRebuld.renameTo(indexFile);
-                indexFileRebuld.delete();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -110,52 +86,80 @@ public class IndexStorage<T extends Index> {
 
     }
 
+    private void rebuildFile(File indexFile, File indexFileRebuld) throws IOException {
+        Gson gson = new Gson();
+        final BufferedWriter todoWriter = new BufferedWriter(new FileWriter(indexFileRebuld, true));
+        AtomicInteger i = new AtomicInteger();
 
-    public void putIndex(T index) {
-        if (longIndexHashMap.containsKey(index.getIndexId())) {
-            logger.info("duplicate:" + new Gson().toJson(index));
-        } else {
-            longIndexHashMap.put(index.getIndexId(), index);
-            saveIndex(index);
-        }
+        FileUtil.backwardRead(indexFile, line -> {
+            T index = gson.fromJson(line, tclass);
+            try {
+                String str = gson.toJson(index);
+                todoWriter.write(str);
+                todoWriter.write("\n");
+                i.incrementAndGet();
+                if (i.get() % 100 == 0) {
+                    todoWriter.flush();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return true;
+        });
+        todoWriter.flush();
+        todoWriter.close();
+        indexFile.delete();
+        indexFileRebuld.renameTo(indexFile);
+        indexFileRebuld.delete();
+
     }
 
-    public void modifyIndex(T index) {
-        if (!longIndexHashMap.containsKey(index.getIndexId())) {
-            logger.info("index not exit");
-        } else {
-            longIndexHashMap.put(index.getIndexId(), index);
-            saveIndex(index);
-        }
+
+    public void putIndex(T index) {
+        saveIndex(index);
     }
 
     public int countAllIndex() {
-        return longIndexHashMap.size();
+        Set<String> indexIdList = new HashSet<>();
+        indexFiles.stream().forEach(file -> {
+            FileUtil.backwardRead(file, s -> {
+                T t = new Gson().fromJson(s, tclass);
+                indexIdList.add(t.getIndexId());
+                return true;
+            });
+        });
+        return indexIdList.size();
     }
 
     public T getIndex(String index) {
-        return longIndexHashMap.get(index);
+        Object obj = null;
+        if (obj != null) {
+            return (T) obj;
+        } else {
+            return getIndexFromFile(index);
+        }
     }
 
-    public void iterateNoContentIndex(Consumer<T> function) {
-
-        longIndexHashMap.forEachEntry(1, longPostIndexEntry -> {
-            T value = longPostIndexEntry.getValue();
-            if (value.getStatus() == PostIndex.STATUS_NO_CONTENT) {
-                function.accept(value);
+    private T getIndexFromFile(String index) {
+        File file = getFile(index);
+        AtomicReference<T> reference = new AtomicReference<>();
+        FileUtil.backwardRead(file, new Function<String, Boolean>() {
+            @Override
+            public Boolean apply(String s) {
+                T t = new Gson().fromJson(s, tclass);
+                if (t.getIndexId().equals(index)) {
+                    reference.getAndSet(t);
+                    return false;
+                }
+                return true;
             }
         });
+        return reference.get();
     }
 
     private void saveIndex(T index) {
         try {
-            int pos = 0;
-            if (StringUtil.isNumeric(index.getIndexId())) {
-                pos = (int) (Long.valueOf(index.getIndexId()) % FILE_SIZE);
-            } else {
-                pos = (int) (index.getIndexId().hashCode() % FILE_SIZE);
-            }
-            File file = indexFiles.get(pos);
+            File file = getFile(index.getIndexId());
             BufferedWriter todoWriter = new BufferedWriter(new FileWriter(file, true));
             todoWriter.write(new Gson().toJson(index));
             todoWriter.write("\n");
@@ -166,7 +170,14 @@ public class IndexStorage<T extends Index> {
         }
     }
 
-    public void destroy() {
-        longIndexHashMap.clear();
+    private File getFile(String indexId) {
+        int pos = 0;
+        if (StringUtil.isNumeric(indexId)) {
+            pos = (int) (Long.valueOf(indexId) % FILE_SIZE);
+        } else {
+            pos = (int) (indexId.hashCode() % FILE_SIZE);
+        }
+        return indexFiles.get(pos);
     }
+
 }

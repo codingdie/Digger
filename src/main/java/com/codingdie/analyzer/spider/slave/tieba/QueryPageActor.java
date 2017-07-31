@@ -1,9 +1,9 @@
 package com.codingdie.analyzer.spider.slave.tieba;
 
 import akka.actor.AbstractActor;
+import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlTiebaIndexTask;
+import com.codingdie.analyzer.spider.master.tieba.model.model.PostSimpleInfo;
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlTiebaIndexTask;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostSimpleInfo;
 import com.codingdie.analyzer.spider.network.HttpService;
 import okhttp3.Request;
 import org.apache.log4j.Logger;

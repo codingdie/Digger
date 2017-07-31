@@ -1,5 +1,6 @@
-package com.codingdie.analyzer.spider.master.tieba.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.model;
 
+import com.codingdie.analyzer.spider.slave.tieba.QueryPageActor;
 import com.codingdie.analyzer.task.model.IndexTask;
 import com.codingdie.analyzer.task.model.Task;
 
@@ -14,7 +15,7 @@ public class CrawlTiebaIndexTask extends IndexTask {
     }
     public long pn=50;
 
-    public String tiebaName;
+    private String tiebaName;
 
     @Override
     public String taskId() {
@@ -23,8 +24,9 @@ public class CrawlTiebaIndexTask extends IndexTask {
 
     @Override
     public String excutorName() {
-        return null;
+        return QueryPageActor.class.getName();
     }
+
 
     @Override
     public <T extends Task> int compareTo(T t) {

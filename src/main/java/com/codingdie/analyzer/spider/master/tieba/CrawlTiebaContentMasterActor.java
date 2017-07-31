@@ -1,7 +1,7 @@
 package com.codingdie.analyzer.spider.master.tieba;
 
 import akka.actor.AbstractActor;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlPostContentTask;
+import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlPostContentTask;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.task.TaskManager;
 import com.codingdie.analyzer.task.model.TaskResult;

@@ -1,7 +1,7 @@
 package com.codingdie.analyzer.spider.master.tieba.model.result;
 
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostIndex;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.PostSimpleInfo;
+import com.codingdie.analyzer.spider.master.tieba.model.model.PostIndex;
+import com.codingdie.analyzer.spider.master.tieba.model.model.PostSimpleInfo;
 import com.codingdie.analyzer.task.model.IndexTaskResult;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master.tieba.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.model;
 
 import com.codingdie.analyzer.storage.model.Content;
 import org.apache.commons.lang3.StringUtils;

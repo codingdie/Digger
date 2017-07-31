@@ -20,7 +20,7 @@ import java.util.TimerTask;
  * Created by xupeng on 2017/4/24.
  */
 public class MasterStarter {
-    static  Logger logger=Logger.getLogger("master-control");
+    static Logger logger = Logger.getLogger("master-control");
 
     public static void main(String[] args) throws Exception {
         if (args.length > 0) {
@@ -29,21 +29,20 @@ public class MasterStarter {
         TieBaAnalyserConfigFactory.getInstance();
         final ActorSystem system = ActorSystem.create("cluster", new AkkaConfigBuilder().consoleParam(args).roles(Arrays.asList("master")).build());
         ClusterManager.init(system);
-        system.actorOf(Props.create(ClusterListenerActor::new), "testActor");
+        system.actorOf(Props.create(ClusterListenerActor.class), "testActor");
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 Set<Member> unreachable = Cluster.get(system).state().getUnreachable();
                 Cluster.get(system).state().getMembers().forEach(member -> {
                     if (!unreachable.contains(member)) {
-                        System.out.println(member.address().toString() + "\t" + member.getRoles().toArray()[0]);
+                        logger.info(member.address().toString() + "\t" + member.getRoles().toArray()[0]);
                     }
                 });
             }
         }, 0, 3000l);
         new MasterControllServer().start(system);
     }
-
 
 
 }

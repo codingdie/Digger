@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master.tieba.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.model;
 
 import com.codingdie.analyzer.spider.slave.tieba.CrawlPostDetailActor;
 import com.codingdie.analyzer.task.model.Task;

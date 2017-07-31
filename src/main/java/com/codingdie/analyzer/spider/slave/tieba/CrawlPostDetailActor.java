@@ -2,8 +2,8 @@ package com.codingdie.analyzer.spider.slave.tieba;
 
 import akka.actor.AbstractActor;
 import com.codingdie.analyzer.config.AkkaConfigBuilder;
+import com.codingdie.analyzer.spider.master.tieba.model.model.*;
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlPostDetailResult;
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.*;
 import com.codingdie.analyzer.spider.network.HttpService;
 import com.codingdie.analyzer.storage.slave.ContentStorage;
 import com.google.gson.JsonObject;

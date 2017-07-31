@@ -1,9 +1,7 @@
 package storage;
 
 
-import com.codingdie.analyzer.spider.master.tieba.model.tieba.CrawlPostContentTask;
-import com.codingdie.analyzer.spider.slave.tieba.CrawlPostDetailActor;
-import com.google.gson.GsonBuilder;
+import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlPostContentTask;
 import junit.framework.TestCase;
 
 /**
@@ -13,7 +11,6 @@ public class CrawlPostDetailActorTest extends TestCase {
     public void testA() {
         CrawlPostContentTask crawlPostContentTask = new CrawlPostContentTask(5234422711L);
 
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(CrawlPostDetailActor.crawlPostDetail(crawlPostContentTask)));
     }
 
 }

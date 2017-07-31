@@ -9,13 +9,25 @@
     <script src="http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
-
+    <script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+    <script src="/js/router.js"></script>
 </head>
 <style>
 
 </style>
 <body>
+
 <div id="app" class="container">
+    <p>
+        <!-- 使用 router-link 组件来导航. -->
+        <!-- 通过传入 `to` 属性指定链接. -->
+        <!-- <router-link> 默认会被渲染成一个 `<a>` 标签 -->
+        <router-link to="/foo">Go to Foo</router-link>
+        <router-link to="/bar">Go to Bar</router-link>
+    </p>
+    <!-- 路由出口 -->
+    <!-- 路由匹配到的组件将渲染在这里 -->
+    <router-view></router-view>
 
     <div class="row">
         <div class="col-xs-12">
@@ -101,7 +113,6 @@
     }
     function startIndexSpider(btn) {
         $.get("/indexspider/start?tiebaName="+ $("#tiebaName").val(),function(data,status){
-
             $(btn).attr("data-content",data)
             $(btn).popover("show")
             showConfig()

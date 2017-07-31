@@ -60,7 +60,10 @@ public class TaskStorage<T extends Task> {
             ex.printStackTrace();
         }
         return pageTs;
+    }
 
+    public void rebuild() {
+        parseAndRebuild();
     }
 
     private List<T> parse() {

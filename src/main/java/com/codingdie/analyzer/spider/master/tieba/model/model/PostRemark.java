@@ -1,4 +1,4 @@
-package com.codingdie.analyzer.spider.master.tieba.model.tieba;
+package com.codingdie.analyzer.spider.master.tieba.model.model;
 
 /**
  * Created by xupeng on 17-7-18.
