@@ -71,9 +71,9 @@ public class AkkaConfigBuilder {
     }
 
     public Config build() {
-        config.entrySet().forEach(kv -> {
-            System.out.println(kv.getKey() + "\t" + kv.getValue().render());
-        });
+//        config.entrySet().forEach(kv -> {
+//            System.out.println(kv.getKey() + "\t" + kv.getValue().render());
+//        });
         return config;
     }
 }

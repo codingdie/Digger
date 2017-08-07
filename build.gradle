@@ -109,19 +109,32 @@ task copyRunJar(type: Copy ){
     into ("build"+fs+"release")
 }
 
+task startRedis(type:Exec,dependsOn: [build]){
+    workingDir "build"+fs+"resources"+fs+"main"+fs+"redis"
+    commandLine "./start-redis.sh"
+    //store the output instead of printing to the console:
+    standardOutput = new ByteArrayOutputStream()
+
+    //extension method stopTomcat.output() can be used to obtain the output:
+    ext.output = {
+        return standardOutput.toString()
+    }
+
+}
+
 task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,copyRunJar]){
 
 }
 def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
 
-task startMaster(type: JavaExec,dependsOn:"build") {
+task startMaster(type: JavaExec,dependsOn:[build,startRedis]) {
     classpath sourceSets.main.runtimeClasspath.asPath
     main "com.codingdie.analyzer.MasterStarter"
     args  developConfFolder,"127.0.0.1",2552
 }
 
 
-task startSlave(type: JavaExec,dependsOn:"build") {
+task startSlave(type: JavaExec,dependsOn:[build,startRedis]) {
     classpath sourceSets.main.runtimeClasspath.asPath
     main "com.codingdie.analyzer.SlaveStarter"
     args  developConfFolder,"127.0.0.1",2550
