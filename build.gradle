@@ -5,7 +5,7 @@ apply plugin: "java"
 
 sourceCompatibility = 1.8
 
-def fs=java.io.File.separator
+def fs = java.io.File.separator
 repositories {
     mavenCentral()
     mavenLocal()
@@ -14,10 +14,10 @@ repositories {
 
 dependencies {
     //akka
-    compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version:'2.5.3'
+    compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version: '2.5.3'
 
     compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.3'
-    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version:'10.0.9'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.9'
 
     compile group: 'com.typesafe.akka', name: 'akka-cluster_2.11', version: '2.5.3'
 
@@ -56,61 +56,61 @@ dependencies {
 
 
 
-task slaveJar(type: Jar,dependsOn: [classes]){
+task slaveJar(type: Jar, dependsOn: [classes]) {
     baseName "slavenode"
-    from("build"+ fs+"classes"+fs+"java"+fs+"main","build"+fs+"resources"+fs+"main")
-    destinationDir new File("build"+fs+"release"+fs+"libs")
+    from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
+    destinationDir new File("build" + fs + "release" + fs + "libs")
 
-    manifest{
+    manifest {
         attributes "Main-Class": "com.codingdie.analyzer.SlaveStarter"
         String someString = ""
-        configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
         attributes "Class-Path": someString
     }
 }
 
-task serverJar(type: Jar,dependsOn: [classes]){
+task serverJar(type: Jar, dependsOn: [classes]) {
     baseName "masternode"
-    from("build"+fs+"classes"+fs+"java"+fs+"main","build"+fs+"resources"+fs+"main")
-    destinationDir new File("build"+fs+"release"+fs+"libs")
-    manifest{
+    from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
+    destinationDir new File("build" + fs + "release" + fs + "libs")
+    manifest {
         attributes "Main-Class": "com.codingdie.analyzer.MasterStarter"
         String someString = ""
-        configurations.runtime.each {someString = someString + " "+it.name} //遍历项目的所有依赖的jar包赋值给变量someString
+        configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
         attributes "Class-Path": someString
     }
 }
 
-task copylibs(type: Copy){
+task copylibs(type: Copy) {
     from configurations.runtime
-    into ("build"+fs+"release"+fs+"libs")
+    into("build" + fs + "release" + fs + "libs")
 }
-task copyconf(type: Copy){
-    from(project.rootDir.toString()+""+fs+"conf") {
+task copyconf(type: Copy) {
+    from(project.rootDir.toString() + "" + fs + "conf") {
         include "*.conf"
     }
-    into ("build"+fs+"release"+fs+"conf")
+    into("build" + fs + "release" + fs + "conf")
 }
-task copyscript(type: Copy){
-    from(project.rootDir.toString()+""+fs+"script") {
+task copyscript(type: Copy) {
+    from(project.rootDir.toString() + "" + fs + "script") {
         include "*.sh"
     }
-    into ("build"+fs+"release")
+    into("build" + fs + "release")
 }
 
-jar{
-    new File("build"+fs+"release"+fs+"logs").mkdirs()
+jar {
+    new File("build" + fs + "release" + fs + "logs").mkdirs()
 }
-task copyRunJar(type: Copy ){
+task copyRunJar(type: Copy) {
 
-    from("build"+fs+"libs") {
+    from("build" + fs + "libs") {
         include "*node*.jar"
     }
-    into ("build"+fs+"release")
+    into("build" + fs + "release")
 }
 
-task startRedis(type:Exec,dependsOn: [build]){
-    workingDir "build"+fs+"resources"+fs+"main"+fs+"redis"
+task startRedis(type: Exec, dependsOn: [build]) {
+    workingDir "redis"
     commandLine "./start-redis.sh"
     //store the output instead of printing to the console:
     standardOutput = new ByteArrayOutputStream()
@@ -122,20 +122,21 @@ task startRedis(type:Exec,dependsOn: [build]){
 
 }
 
-task release(dependsOn:[classes,serverJar,slaveJar,copyconf,copyscript,copylibs,copyRunJar]){
+task release(dependsOn: [classes, serverJar, slaveJar, copyconf, copyscript, copylibs, copyRunJar]) {
 
 }
+
 def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
 
-task startMaster(type: JavaExec,dependsOn:[build,startRedis]) {
+task startMaster(type: JavaExec, dependsOn: [build, startRedis]) {
     classpath sourceSets.main.runtimeClasspath.asPath
     main "com.codingdie.analyzer.MasterStarter"
-    args  developConfFolder,"127.0.0.1",2552
+    args developConfFolder, "127.0.0.1", 2552
 }
 
 
-task startSlave(type: JavaExec,dependsOn:[build,startRedis]) {
+task startSlave(type: JavaExec, dependsOn: [build, startRedis]) {
     classpath sourceSets.main.runtimeClasspath.asPath
     main "com.codingdie.analyzer.SlaveStarter"
-    args  developConfFolder,"127.0.0.1",2550
+    args developConfFolder, "127.0.0.1", 2550
 }
