@@ -48,9 +48,9 @@ dependencies {
     compile group: "com.sun.mail", name: "javax.mail", version: "1.5.6"
     compile group: "org.yaml", name: "snakeyaml", version: "1.18"
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
     compile group: 'org.mybatis', name: 'mybatis', version: '3.4.4'
+    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
 }
 
@@ -101,6 +101,13 @@ task copyscript(type: Copy) {
 jar {
     new File("build" + fs + "release" + fs + "logs").mkdirs()
 }
+build{
+    copy {
+        from("redis")
+        into("build" + fs + "redis")
+    }
+
+}
 task copyRunJar(type: Copy) {
 
     from("build" + fs + "libs") {
@@ -110,6 +117,7 @@ task copyRunJar(type: Copy) {
 }
 
 task startRedis(type: Exec, dependsOn: [build]) {
+
     workingDir "redis"
     commandLine "./start-redis.sh"
     //store the output instead of printing to the console:

@@ -1,5 +1,7 @@
 package com.codingdie.analyzer.storage.model;
 
+import com.codingdie.analyzer.storage.anomation.Field;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ public abstract class Index {
     public final static int STATUS_HAS_CONTENT = 1;
     public final static int STATUS_DELETE = 2;
 
+    @Field(length = 1)
     private String spiderHost;
     private List<String> contentSlaves = new ArrayList<>();
     private int status = STATUS_NO_CONTENT;

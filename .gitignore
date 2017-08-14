@@ -10,3 +10,4 @@
 /out/
 /tieba-analyzer.iml
 /.gradle/
+/redis/redis-4.0.1/

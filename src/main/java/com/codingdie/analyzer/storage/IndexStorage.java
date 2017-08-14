@@ -6,10 +6,7 @@ import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.jsoup.helper.StringUtil;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,11 +119,17 @@ public class IndexStorage<T extends Index> {
     public int countAllIndex() {
         Set<String> indexIdList = new HashSet<>();
         indexFiles.stream().forEach(file -> {
-            FileUtil.backwardRead(file, s -> {
-                T t = new Gson().fromJson(s, tclass);
-                indexIdList.add(t.getIndexId());
-                return true;
-            });
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null) {
+                    line.isEmpty();
+                    indexIdList.add("!23");
+                }
+                bufferedReader.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
         return indexIdList.size();
     }

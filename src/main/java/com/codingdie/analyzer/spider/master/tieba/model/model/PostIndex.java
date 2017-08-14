@@ -1,6 +1,7 @@
 package com.codingdie.analyzer.spider.master.tieba.model.model;
 
 import com.codingdie.analyzer.spider.master.tieba.model.result.CrawlTiebaIndexResult;
+import com.codingdie.analyzer.storage.anomation.Field;
 import com.codingdie.analyzer.storage.model.Index;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.io.Serializable;
  */
 public class PostIndex extends Index implements Serializable {
 
+    @Field(length = 4)
     private long postId;
     private long pn;
     private String title;

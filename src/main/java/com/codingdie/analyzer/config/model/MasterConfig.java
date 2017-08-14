@@ -7,5 +7,6 @@ public class MasterConfig {
     public int max_running_task = 5;
     public int admin_port=8080;
     public String host=null;
+    public String redisFolder = "";
 
 }
