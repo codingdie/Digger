@@ -1,150 +1,112 @@
-group "com.codingdie"
-version "1.0"
+subprojects {
+    group "com.codingdie"
+    version "1.0"
+    apply plugin: "java"
+    sourceCompatibility = 1.8
+    ext{
+        fs = java.io.File.separator
 
-apply plugin: "java"
-
-sourceCompatibility = 1.8
-
-def fs = java.io.File.separator
-repositories {
-    mavenCentral()
-    mavenLocal()
-    jcenter()
-}
-
-dependencies {
-    //akka
-    compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version: '2.5.3'
-
-    compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.3'
-    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.9'
-
-    compile group: 'com.typesafe.akka', name: 'akka-cluster_2.11', version: '2.5.3'
-
-//    compile "com.typesafe.akka:akka-agent_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-camel_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-cluster_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-cluster-metrics_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-cluster-sharding_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-cluster-tools_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-distributed-data_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-multi-node-testkit_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-osgi_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-persistence_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-persistence-query_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-persistence-tck_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-stream_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-stream-testkit_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-testkit_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-typed_2.11:2.5.0"
-//    compile "com.typesafe.akka:akka-contrib_2.11:2.5.0"
-
-    compile group: "com.squareup.okhttp3", name: "okhttp", version: "3.6.0"
-    compile group: "org.jsoup", name: "jsoup", version: "1.9.2"
-    compile group: "com.google.code.gson", name: "gson", version: "2.8.0"
-    compile group: "log4j", name: "log4j", version: "1.2.17"
-    compile group: "junit", name: "junit", version: "4.12"
-    compile group: "javax.mail", name: "javax.mail-api", version: "1.5.6"
-    compile group: "com.sun.mail", name: "javax.mail", version: "1.5.6"
-    compile group: "org.yaml", name: "snakeyaml", version: "1.18"
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-    compile group: 'org.mybatis', name: 'mybatis', version: '3.4.4'
-    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
-
-}
-
-
-
-task slaveJar(type: Jar, dependsOn: [classes]) {
-    baseName "slavenode"
-    from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
-    destinationDir new File("build" + fs + "release" + fs + "libs")
-
-    manifest {
-        attributes "Main-Class": "com.codingdie.analyzer.SlaveStarter"
-        String someString = ""
-        configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
-        attributes "Class-Path": someString
     }
-}
-
-task serverJar(type: Jar, dependsOn: [classes]) {
-    baseName "masternode"
-    from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
-    destinationDir new File("build" + fs + "release" + fs + "libs")
-    manifest {
-        attributes "Main-Class": "com.codingdie.analyzer.MasterStarter"
-        String someString = ""
-        configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
-        attributes "Class-Path": someString
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
     }
-}
+    dependencies {
+        //akka
+        compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version: '2.5.3'
+        compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.5.3'
+        compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.9'
+        compile group: 'com.typesafe.akka', name: 'akka-cluster_2.11', version: '2.5.3'
+        compile group: "com.squareup.okhttp3", name: "okhttp", version: "3.6.0"
+        compile group: "org.jsoup", name: "jsoup", version: "1.9.2"
+        compile group: "com.google.code.gson", name: "gson", version: "2.8.0"
+        compile group: "log4j", name: "log4j", version: "1.2.17"
+        compile group: "junit", name: "junit", version: "4.12"
+        compile group: "javax.mail", name: "javax.mail-api", version: "1.5.6"
+        compile group: "com.sun.mail", name: "javax.mail", version: "1.5.6"
+        compile group: "org.yaml", name: "snakeyaml", version: "1.18"
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+        compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+        compile group: 'org.mybatis', name: 'mybatis', version: '3.4.4'
+        compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
-task copylibs(type: Copy) {
-    from configurations.runtime
-    into("build" + fs + "release" + fs + "libs")
-}
-task copyconf(type: Copy) {
-    from(project.rootDir.toString() + "" + fs + "conf") {
-        include "*.conf"
-    }
-    into("build" + fs + "release" + fs + "conf")
-}
-task copyscript(type: Copy) {
-    from(project.rootDir.toString() + "" + fs + "script") {
-        include "*.sh"
-    }
-    into("build" + fs + "release")
-}
-
-jar {
-    new File("build" + fs + "release" + fs + "logs").mkdirs()
-}
-build{
-    copy {
-        from("redis")
-        into("build" + fs + "redis")
     }
 
-}
-task copyRunJar(type: Copy) {
+    task slaveJar(type: Jar, dependsOn: [classes]) {
+        baseName "slavenode"
+        from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
+        destinationDir new File("build" + fs + "release" + fs + "libs")
 
-    from("build" + fs + "libs") {
-        include "*node*.jar"
-    }
-    into("build" + fs + "release")
-}
-
-task startRedis(type: Exec, dependsOn: [build]) {
-
-    workingDir "redis"
-    commandLine "./start-redis.sh"
-    //store the output instead of printing to the console:
-    standardOutput = new ByteArrayOutputStream()
-
-    //extension method stopTomcat.output() can be used to obtain the output:
-    ext.output = {
-        return standardOutput.toString()
+        manifest {
+            attributes "Main-Class": "com.codingdie.analyzer.SlaveStarter"
+            String someString = ""
+            configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
+            attributes "Class-Path": someString
+        }
     }
 
-}
-
-task release(dependsOn: [classes, serverJar, slaveJar, copyconf, copyscript, copylibs, copyRunJar]) {
-
-}
-
-def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
-
-task startMaster(type: JavaExec, dependsOn: [build, startRedis]) {
-    classpath sourceSets.main.runtimeClasspath.asPath
-    main "com.codingdie.analyzer.MasterStarter"
-    args developConfFolder, "127.0.0.1", 2552
-}
 
 
-task startSlave(type: JavaExec, dependsOn: [build, startRedis]) {
-    classpath sourceSets.main.runtimeClasspath.asPath
-    main "com.codingdie.analyzer.SlaveStarter"
-    args developConfFolder, "127.0.0.1", 2550
+    task copylibs(type: Copy) {
+        from configurations.runtime
+        into("build" + fs + "release" + fs + "libs")
+    }
+    task copyconf(type: Copy) {
+        from(project.rootDir.toString() + "" + fs + "conf") {
+            include "*.conf"
+        }
+        into("build" + fs + "release" + fs + "conf")
+    }
+    task copyscript(type: Copy) {
+        from(project.rootDir.toString() + "" + fs + "script") {
+            include "*.sh"
+        }
+        into("build" + fs + "release")
+    }
+
+    jar {
+        new File("build" + fs + "release" + fs + "logs").mkdirs()
+    }
+    build{
+        copy {
+            from(rootDir.toString()+fs+"redis")
+            into("build" + fs + "redis")
+        }
+
+    }
+    task copyRunJar(type: Copy) {
+
+        from("build" + fs + "libs") {
+            include "*node*.jar"
+        }
+        into("build" + fs + "release")
+    }
+
+    task startRedis(type: Exec, dependsOn: [build]) {
+        workingDir "build"+fs+"redis"
+        commandLine "./start-redis.sh"
+        //store the output instead of printing to the console:
+        standardOutput = new ByteArrayOutputStream()
+
+        //extension method stopTomcat.output() can be used to obtain the output:
+        ext.output = {
+            return standardOutput.toString()
+        }
+
+    }
+
+//    task release(dependsOn: [classes, serverJar, slaveJar, copyconf, copyscript, copylibs, copyRunJar]) {
+//
+//    }
+
+    def developConfFolder = project.rootDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
+
+
+
+    task startSlave(type: JavaExec, dependsOn: [build, startRedis]) {
+        classpath sourceSets.main.runtimeClasspath.asPath
+        main "com.codingdie.analyzer.SlaveStarter"
+        args developConfFolder, "127.0.0.1", 2550
+    }
 }

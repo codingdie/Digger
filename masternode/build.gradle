@@ -1,0 +1,20 @@
+archivesBaseName = 'masternode'
+def developConfFolder = this.projectDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
+task startMaster(type: JavaExec, dependsOn: [build, startRedis]) {
+    classpath sourceSets.main.runtimeClasspath.asPath
+    main "com.codingdie.analyzer.MasterStarter"
+    args developConfFolder, "127.0.0.1", 2552
+}
+
+task serverJar(type: Jar, dependsOn: [classes]) {
+    baseName "masternode"
+    from("build" + fs + "classes" + fs + "java" + fs + "main", "build" + fs + "resources" + fs + "main")
+    destinationDir new File("build" + fs + "release" + fs + "libs")
+    manifest {
+        attributes "Main-Class": "com.codingdie.analyzer.MasterStarter"
+        String someString = ""
+        configurations.runtime.each { someString = someString + " " + it.name } //遍历项目的所有依赖的jar包赋值给变量someString
+        attributes "Class-Path": someString
+    }
+}
+
