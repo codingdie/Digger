@@ -1,5 +1,5 @@
 allprojects {
-    group "com.codingdie"
+    group "com.digger"
     version "1.0"
     apply plugin: "java"
     sourceCompatibility = 1.8
