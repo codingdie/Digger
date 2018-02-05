@@ -11,3 +11,7 @@
 /tieba-analyzer.iml
 /.gradle/
 /redis/redis-4.0.1/
+computing/build/
+slave-server/build/
+spider/build/
+task-manager/build/

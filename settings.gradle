@@ -1,7 +1,8 @@
-include 'masternode'
+include 'master-node'
+include 'slave-node'
+
 include 'task-manager'
 include 'spider'
 include 'storage'
 include 'computing'
-include 'slave-server'
 

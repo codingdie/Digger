@@ -18,3 +18,7 @@ task serverJar(type: Jar, dependsOn: [classes]) {
     }
 }
 
+
+dependencies{
+    compile project(':task-manager')
+}
