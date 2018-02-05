@@ -5,7 +5,7 @@ import com.codingdie.digger.config.AkkaConfigBuilder;
 import com.codingdie.digger.spider.master.tieba.model.model.*;
 import com.codingdie.digger.spider.master.tieba.model.result.CrawlPostDetailResult;
 import com.codingdie.digger.spider.network.HttpService;
-import com.codingdie.digger.storage.slave.ContentStorage;
+import com.codingdie.digger.storage.ContentStorage;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Request;
