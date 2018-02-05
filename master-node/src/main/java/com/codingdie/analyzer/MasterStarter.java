@@ -4,12 +4,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.cluster.Cluster;
 import akka.cluster.Member;
-import com.codingdie.analyzer.cluster.ClusterListenerActor;
-import com.codingdie.analyzer.cluster.ClusterManager;
-import com.codingdie.analyzer.common.redis.LocalRedisManager;
-import com.codingdie.analyzer.config.AkkaConfigBuilder;
-import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.master.MasterControllServer;
+import com.codingdie.digger.config.AkkaConfigBuilder;
+import com.codingdie.digger.config.TieBaAnalyserConfigFactory;
+import com.codingdie.digger.cluster.ClusterListenerActor;
+import com.codingdie.digger.cluster.ClusterManager;
+import com.codingdie.digger.redis.LocalRedisManager;
+import com.codingdie.digger.spider.master.MasterControllServer;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;

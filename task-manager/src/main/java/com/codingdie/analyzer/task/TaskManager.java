@@ -5,15 +5,11 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.util.Timeout;
-import com.codingdie.analyzer.cluster.ClusterManager;
-import com.codingdie.analyzer.common.util.MailUtil;
-import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.master.tieba.model.model.CrawlTiebaIndexTask;
-import com.codingdie.analyzer.spider.network.HttpService;
-import com.codingdie.analyzer.spider.slave.TaskReceiverActor;
-import com.codingdie.analyzer.storage.TaskStorage;
-import com.codingdie.analyzer.task.model.Task;
-import com.codingdie.analyzer.task.model.TaskResult;
+import com.codingdie.digger.cluster.ClusterManager;
+import com.codingdie.digger.storage.TaskStorage;
+import com.codingdie.digger.util.MailUtil;
+import com.codingdie.digger.storage.model.Task;
+import com.codingdie.digger.storage.model.TaskResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import scala.concurrent.Await;
@@ -139,8 +135,7 @@ public class TaskManager<T extends Task> {
         slavesRunningTaskMapData.clear();
         slavesFinishedTaskMapData.clear();
         slavesFailedTaskMapData.clear();
-        HttpService.getInstance().destroy();
-        System.out.println("stop indexspider,total  excuting time:" + (System.currentTimeMillis() - beginTime));
+         System.out.println("stop indexspider,total  excuting time:" + (System.currentTimeMillis() - beginTime));
         actorSystem.stop(receiverActor);
 
     }
@@ -148,7 +143,7 @@ public class TaskManager<T extends Task> {
     public int getTotalTaskSize() {
         return totalTaskSize;
     }
-/**/
+    /**/
 
 
     public void startAlloc(ActorRef actorRef) {
@@ -156,7 +151,7 @@ public class TaskManager<T extends Task> {
         cancellables.add(actorSystem.scheduler().schedule(FiniteDuration.apply(1, TimeUnit.SECONDS), FiniteDuration.apply(3, TimeUnit.SECONDS), new Runnable() {
             @Override
             public void run() {
-                int maxRunningTask = TieBaAnalyserConfigFactory.getInstance().masterConfig.max_running_task;
+                int maxRunningTask = 200;
                 if (excutingTasks.size() > maxRunningTask || todoTasks.size() == 0) {
                     return;
                 }
@@ -183,7 +178,7 @@ public class TaskManager<T extends Task> {
         }
         ActorRef actorRef = getSlaveToRun();
         actorRef.tell(task, resultReceiver);
-        task.status = CrawlTiebaIndexTask.STATUS_EXCUTING;
+        task.status = Task.STATUS_EXCUTING;
         putTask(task);
 
     }

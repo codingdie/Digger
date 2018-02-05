@@ -3,5 +3,7 @@ archivesBaseName = 'task-manager'
 dependencies{
     compile project(":common")
     compile project(":storage")
+            compile project(":task-manager")
+
 
 }

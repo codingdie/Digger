@@ -3,9 +3,9 @@ package com.codingdie.analyzer;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.codingdie.analyzer.config.AkkaConfigBuilder;
-import com.codingdie.analyzer.config.TieBaAnalyserConfigFactory;
-import com.codingdie.analyzer.spider.slave.TaskReceiverActor;
+import com.codingdie.digger.config.AkkaConfigBuilder;
+import com.codingdie.digger.config.TieBaAnalyserConfigFactory;
+import com.codingdie.analyzer.task.TaskReceiverActor;
 
 import java.util.Arrays;
 

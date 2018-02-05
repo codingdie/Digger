@@ -1,3 +1,10 @@
+
+dependencies {
+    compile project(":task-manager")
+    compile project(":spider")
+
+}
+
 archivesBaseName = 'masternode'
 def developConfFolder = this.projectDir.toString() + fs + "src" + fs + "test" + fs + "resources" + fs + "conf"
 task startMaster(type: JavaExec, dependsOn: [build, startRedis]) {
@@ -18,7 +25,3 @@ task serverJar(type: Jar, dependsOn: [classes]) {
     }
 }
 
-
-dependencies{
-    compile project(':task-manager')
-}
