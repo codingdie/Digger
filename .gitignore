@@ -6,7 +6,6 @@
 /slavenode/build/
 /build/
 /logs/
-/storage/
 /out/
 /tieba-analyzer.iml
 /.gradle/

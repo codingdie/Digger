@@ -1,0 +1,5 @@
+archivesBaseName = 'storage'
+
+dependencies{
+    compile project(":common")
+}
